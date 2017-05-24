@@ -1,0 +1,378 @@
+/*
+	Theme Name: AATA
+	Theme URI: http://alfredo.xyz
+	Description: Wordpress Theme for Abogados a tu Alcance
+	Version: 0.1.0
+	Author: Alfredo J. Bermudez
+	Author URI: http://alfredo.xyz
+	Tags: AATA, HTML5, CSS3
+
+	License: MIT
+	License URI: http://opensource.org/licenses/mit-license.php
+*/
+
+@import 'partials/vars';
+
+/*------------------------------------*\
+    MAIN
+\*------------------------------------*/
+
+/* global box-sizing */
+*,
+*:after,
+*:before {
+	-moz-box-sizing:border-box;
+	box-sizing:border-box;
+	-webkit-font-smoothing:antialiased;
+	font-smoothing:antialiased;
+	text-rendering:optimizeLegibility;
+}
+
+html {
+	font-size: $min-font;
+    line-height: $base-line;
+    font-weight: $weight;
+    font-family: $family;
+	color: $text-color;
+    
+    @media only screen and (min-width: 1060px) {
+        font-size: $base-font;
+    }
+    @media only screen and (min-width: 1920px) {
+        font-size: $max-font;
+    }
+}
+body {
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    
+    @include bg;
+    
+    &.modal-active {
+        overflow: hidden;
+    }
+}
+/* clear */
+.clear:before,
+.clear:after {
+    content:' ';
+    display:table;
+}
+
+.clear:after {
+    clear:both;
+}
+.clear {
+    *zoom:1;
+}
+img {
+	max-width:100%;
+	vertical-align:bottom;
+}
+a {
+	color: $text-color;
+    text-decoration: none;
+        border-bottom: 1px dotted lighten($text-color, 33.33);
+//    text-decoration-style: dotted;
+//    text-decoration-color: lighten($text-color, 33.33);
+}
+a:hover {
+	//color: #fff;
+    background: $grey-light;
+}
+a:focus {
+	outline:0;
+}
+a:hover,
+a:active {
+	outline:0;
+}
+input:focus {
+	outline:0;
+	border:1px solid #04A4CC;
+}
+
+/*------------------------------------*\
+    STRUCTURE
+\*------------------------------------*/
+
+/* wrapper */
+.wrapper {
+    display: flex;
+    flex-wrap: wrap;
+	position: relative;
+	width:100%;
+	//padding: 0 $spacing;
+    @media only screen and (orientation: landscape) {
+        padding: 0 0 0 $side;
+    }
+}
+/* header */
+.header {
+    position: relative;
+    height: $header-h;
+    width: 100%;
+    flex: 1 0 auto;
+    @media only screen and (orientation: landscape) {
+        position: fixed;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: $side;
+        height: 100vh;
+        overflow: auto;
+        border-right: 1px solid $grey-base;
+    }
+}
+/* logo */
+.logo {
+    height: 100%;
+    width: 100%;
+    
+    @media only screen and (orientation: landscape) {
+        position: sticky;
+        top: 0;
+        height: auto;
+    }
+    
+    &__link {
+        display: block;
+        height: 100%;
+        width: 100%;
+        padding: ($spacing / 2);
+        background: #fff;
+        border-bottom: 1px solid $grey-base;
+        
+        &:hover {
+            background: $grey-light;
+        }
+        @media only screen and (orientation: landscape) {
+            display: block;
+            display: flex;
+            align-items: center;
+        }
+    }
+    &__image {
+        height: auto;
+        width: auto;
+        max-height: 100%;
+        max-width: 100%;
+        flex: 1 1 auto;
+    }
+}
+/* nav */
+.nav {
+    font-size: .9rem;
+    padding: 0;
+    width: 100%;
+    background: #fff;
+    ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    a {
+        display: block;
+        //border: 0;
+        padding: ($spacing / 4) ($spacing / 2);
+    }
+}
+/* sidebar */
+.sidebar {
+    position: relative;
+    flex: 0 1 auto;
+    &__content {
+        padding: ($spacing / 2);
+        background: $white-t;
+        @media only screen and (orientation: landscape) {
+            $f: 2rem;
+            $b: $base-line * $f;
+            $m: $f * .67;
+            position: sticky;
+            top: ($spacing / 2);
+            width: $side;
+            margin-top: ($b + ($m * 2));   //5.43rem;
+        }
+    }
+}
+
+.main {
+    padding: 0 $spacing;
+    min-height: 100vh;
+    @media only screen and (orientation: landscape) {
+        flex: 1 0 50vw;
+        padding: 0 ($spacing / 2);
+        transition: height .5s ease-out;
+    }
+    &__title {
+        //border-bottom: 1px solid $grey-base;
+    }
+}
+.grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-column-gap: ($spacing / 2);
+    grid-row-gap: ($spacing / 2);
+    > *:nth-child(5n + 1) {
+        grid-column-start: 1;
+        grid-column-end: span 2;
+    }
+    
+    &__article {
+        @media only screen and (orientation: landscape) {
+            display: flex;
+            flex-direction: column;
+        }
+    }
+}
+.article {
+    &__title {
+         
+    }
+    &__content {
+        background: rgba(255, 255, 255, 0.66);
+        padding: ($spacing /2);
+    }
+    &__excerpt {
+        background: rgba(255, 255, 255, 0.66);
+        padding: ($spacing /2);
+        flex: 1 1 auto;
+        //overflow: hidden;
+    }
+}
+.date {
+    //text-transform:;
+}
+
+/* footer */
+.footer {
+    @media only screen and (orientation: landscape) {
+        flex: 0 0 100%;
+    }
+}
+@keyframes rotateLoader {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+.loader {
+    $s: 40px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: $s;
+    height: $s;
+    margin-top: ($s / -2);
+    margin-left: ($s / -2);
+    border-radius: 50%;
+    border: 5px dotted $blue;
+    border-right-width: 0;
+    animation-name: rotateLoader;
+    animation-duration: .75s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+
+}
+.screen {
+    position: fixed;
+    top: $header-h;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    
+    transition: all .5s ease-out;
+    opacity: 0;
+    visibility: hidden;
+    
+    @include bg;
+    &.show {
+        opacity: 1;
+        visibility: visible;
+    }
+    @media only screen and (orientation: landscape) {
+        top: 0;
+        left: $side;
+    }
+}
+/*------------------------------------*\
+    PAGES
+\*------------------------------------*/
+
+/*------------------------------------*\
+    RESPONSIVE
+\*------------------------------------*/
+
+@media only screen and (min-width:320px) {
+
+}
+@media only screen and (min-width:480px) {
+
+}
+@media only screen and (min-width:768px) {
+
+}
+@media only screen and (min-width:1024px) {
+
+}
+@media only screen and (min-width:1140px) {
+
+}
+@media only screen and (min-width:1280px) {
+
+}
+@media only screen and (-webkit-min-device-pixel-ratio:1.5),
+	   only screen and (min-resolution:144dpi) {
+
+}
+
+/*------------------------------------*\
+    MISC
+\*------------------------------------*/
+
+::selection {
+	background:#04A4CC;
+	color:#FFF;
+	text-shadow:none;
+}
+::-webkit-selection {
+	background:#04A4CC;
+	color:#FFF;
+	text-shadow:none;
+}
+::-moz-selection {
+	background:#04A4CC;
+	color:#FFF;
+	text-shadow:none;
+}
+
+//Angular CSP
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak],
+.ng-cloak, .x-ng-cloak,
+.ng-hide:not(.ng-hide-animate) {
+  display: none !important;
+}
+
+ng\:form {
+  display: block;
+}
+
+.ng-animate-shim {
+  visibility:hidden;
+}
+
+.ng-anchor {
+  position:absolute;
+}
+
+.hidden {
+    display: none;
+}
+
+@import 
+    //'partials/modal',
+    'partials/wordpress',
+    'partials/print';

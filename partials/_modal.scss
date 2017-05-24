@@ -1,0 +1,31 @@
+#modal {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    //background: rgba(255,255,255,.25);
+    @media only screen and (orientation: landscape) {
+        width: 66.6666%;
+        width: calc(100% - #{$side});
+        right: 0;
+        left: auto;
+    }
+    
+    &__content {
+        position: absolute;
+        bottom: 0;
+        background: #fff;
+        overflow: auto;
+        padding: $spacing;
+        //box-shadow: 0 -10px 20px rgba(0,0,0,.25);
+        
+        width: 100%;
+        height: 90%;
+        height: calc(100% - #{$header-h});
+        left: 0;
+        @media only screen and (orientation: landscape) {
+            height: 100%;
+        }
+    }
+}
