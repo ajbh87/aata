@@ -1,34 +1,33 @@
 angular.module('components', ['ngResource'])
     .directive('aataResources', [ '$compile', '$q', '$resource', '$templateCache', '$timeout', '$document', ($compile, $q, $resource, $templateCache, $timeout, $document) => {
-        function stateConstructor(obj = {}) {
-            debugger;
-            const def = Immutable.Map(obj);
-            let s = def;
+        class stateConstructor {
+            constructor(def = {}) {
+                let s = Immutable.Map(def),
+                    dispatcher = (s) => {};
+                const options = s,
+                    keyDispatchers = {};
 
-            let dispatcher = function (s) {};
-            const methods = { get, set, setMultiple, setDispatch, dispatch, getAll };
-            function set(key, value) {
-                s = s.set(key, value);
+                this.set = (key, value) => {
+                    s = s.set(key, value);
+                    if (keyDispatchers[key] != null) {
+                        keyDispatchers[key](value, s.toObject());
+                    }
+                };
+                this.setMultiple = (obj) => s = s.merge(obj);
+                this.get = (key) => s.get(key);
+                this.setDispatch = (fn) => dispatcher = fn;
+                this.dispatch = () => dispatcher(s.toObject());
+                this.setKeyDispatch = (key1, fn) => {
+                    s.forEach((val, key2) => {
+                        if (key1 === key2) {
+                            keyDispatchers[key1] = fn; 
+                            return false; 
+                        }
+                    };
+                };
             }
-            function setMultiple(obj) {
-                s = s.concat(obj);
-            }
-            function get(key) {
-                return s.get(key);
-            }
-            function getAll() {
-                return s;
-            }
-            function setDispatch(fn) {
-                dispatcher = fn;
-            }
-            function dispatch() {
-                debugger;
-                dispatcher(s.toObject());
-            }           
-             
-            return methods;
-        }
+
+        };
         
         const main = $document[0].querySelector('.main'),
               lang = getLang(),
@@ -278,6 +277,8 @@ angular.module('components', ['ngResource'])
                                 bindLinks();
                                 if (s.requestType === 'loop') {
                                     bindLoop();
+                                } else {
+                                    //unbindLoop(); ToDo !!!
                                 }
                             });
                         }, (val) => {
