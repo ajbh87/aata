@@ -13,15 +13,12 @@
 		<meta name="description" content="<?php bloginfo('description'); ?>">
         
         <!--        Typekit       -->
-        <script src="https://use.typekit.net/vpx2pcr.js"></script>
-        <script>try{Typekit.load({ async: true });}catch(e){}</script>
+<!--         <script src="https://use.typekit.net/vpx2pcr.js"></script>
+        <script>try{Typekit.load({ async: true });}catch(e){}</script> -->
         
         <!--        Will Bundle      -->
-        <script type="application/javascript" src="<?php echo get_template_directory_uri(); ?>/node_modules/moment/min/moment.min.js"></script>
-        <script type="application/javascript" src="<?php echo get_template_directory_uri(); ?>/node_modules/moment/locale/es.js"></script>
-        <script type="application/javascript" src="<?php echo get_template_directory_uri(); ?>/node_modules/angular/angular.js"></script>
-        <script type="application/javascript" src="<?php echo get_template_directory_uri(); ?>/node_modules/angular-sanitize/angular-sanitize.js"></script>
-        <script type="application/javascript" src="<?php echo get_template_directory_uri(); ?>/node_modules/angular-resource/angular-resource.js"></script>
+        <script type="application/javascript" src="<?php echo get_template_directory_uri(); ?>/lib-bundle.js"></script>
+        <!-- <script type="application/javascript" src="<?php echo get_template_directory_uri(); ?>/bundle.js"></script> -->
         <script type="application/javascript" src="<?php echo get_template_directory_uri(); ?>/js/app.js"></script>
         <script type="application/javascript" src="<?php echo get_template_directory_uri(); ?>/js/components.js"></script>
 

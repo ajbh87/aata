@@ -4,7 +4,10 @@
   "description": "Abogados a tu alcance - webpage",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "uglifyjs-libs": "uglifyjs ./node_modules/immutable/dist/immutable.js ./node_modules/moment/min/moment.min.js ./node_modules/moment/locale/es.js ./node_modules/angular/angular.js ./node_modules/angular-sanitize/angular-sanitize.js ./node_modules/angular-resource/angular-resource.js --compress -o lib-bundle.js",
+    "uglifyjs": "uglifyjs ./js/*.js -b -o bundle.js",
+    "uglifyjs-min": "uglifyjs ./js/*.js --compress -o bundle.js",
+    "uglifyjs-all": "npm run uglifyjs-libs && npm run uglifyjs-min"
   },
   "author": "",
   "license": "ISC",
@@ -16,5 +19,8 @@
     "angular-route": "^1.6.4",
     "angular-sanitize": "^1.6.4",
     "moment": "^2.18.1"
+  },
+  "devDependencies": {
+    "immutable": "^3.8.1"
   }
 }
