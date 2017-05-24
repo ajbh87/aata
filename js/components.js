@@ -1,26 +1,30 @@
 angular.module('components', ['ngResource'])
     .directive('aataResources', [ '$compile', '$q', '$resource', '$templateCache', '$timeout', '$document', ($compile, $q, $resource, $templateCache, $timeout, $document) => {
         function stateConstructor(obj = {}) {
-            let s = obj;
+            debugger;
+            const def = Immutable.Map(obj);
+            let s = def;
+
             let dispatcher = function (s) {};
             const methods = { get, set, setMultiple, setDispatch, dispatch, getAll };
             function set(key, value) {
-                s[key] = value;
+                s = s.set(key, value);
             }
             function setMultiple(obj) {
-                s = Object.assign({}, s, obj);
+                s = s.concat(obj);
             }
             function get(key) {
-                return s[key];
+                return s.get(key);
             }
             function getAll() {
-                return Object.assign({}, s);
+                return s;
             }
             function setDispatch(fn) {
                 dispatcher = fn;
             }
             function dispatch() {
-                dispatcher(Object.assign({}, s));
+                debugger;
+                dispatcher(s.toObject());
             }           
              
             return methods;
@@ -63,10 +67,13 @@ angular.module('components', ['ngResource'])
               youShallNotPass = [ 'php', 'feed', 'wp-admin' ], // strings
               allTagsDef = get.all('tags', 100),
               state = new stateConstructor({
-                animated: null, 
-                requestType: null,
-                url: null,
-                val: null
+                  animated: null, 
+                  loopType: null,
+                  meta: null,
+                  replace: null,
+                  requestType: null,
+                  url: null,
+                  val: null
             });
         
         return {
@@ -138,19 +145,27 @@ angular.module('components', ['ngResource'])
                     }
                 }
                 
-                function fetchAllByTag($event, id) {
-                    let def = get.byFilter(id, 'posts','tags');
+                function fetchAllByTag($event, data) {
                     $event.preventDefault();
-                    def.then((val) => {
-                       debugger; 
+                    const promise = get.byFilter(data.id, 'posts','tags'),
+                        animated = prepareWindow();
+                    promise.then((val) => {
+                        changeState({
+                            animated: animated,
+                            loopType: 'tags',
+                            requestType: 'loop',
+                            url: data.link,
+                            val,
+                            meta: data
+                        });
                     });
                 }
                 function fetchById($event, type, id) {
-                    let promise = get.byId(type, id),
-                        animated = prepareWindow();
                     $event.preventDefault();
+                    const promise = get.byId(type, id),
+                        animated = prepareWindow();
                     
-                    $q.when(promise).then((val) => {
+                    promise.then((val) => {
                         changeState({
                             animated: animated,
                             requestType: type,
@@ -208,10 +223,10 @@ angular.module('components', ['ngResource'])
                         get.postsPage(1).then((val) => {
                             changeState({
                                 animated: animated,
+                                replace: replace,
                                 requestType: 'loop',
                                 url: base + slug,
-                                val: val,
-                                replace: replace
+                                val: val
                             });
                         });
                     }
@@ -250,9 +265,11 @@ angular.module('components', ['ngResource'])
                             let el;
 
                             screen.removeClass('show');
-
+                            scope.loopType = s.loopType;
+                            scope.meta = s.meta;
                             scope.data = s.val;
                             scope.tags = tags;
+
                             el = $compile(template)(scope);
                             mainJQ.empty().append(el);
                             $timeout(() => {
@@ -260,7 +277,7 @@ angular.module('components', ['ngResource'])
                                 def.resolve();
                                 bindLinks();
                                 if (s.requestType === 'loop') {
-                                    bindLoop()
+                                    bindLoop();
                                 }
                             });
                         }, (val) => {

@@ -7,15 +7,12 @@
 					<a href="//wordpress.org" title="WordPress">WordPress</a> &amp; <a href="//html5blank.com" title="HTML5 Blank">HTML5 Blank</a>.
 				</p>
 				<!-- /copyright -->
-
 			</footer>
 			<!-- /footer -->
-
 		</div>
 		<!-- /wrapper -->
-
 		<?php wp_footer(); ?>
-    <div class="screen">
+    <div class="screen" aria-hidden="true">
         <div class="loader screen__loader"></div>
     </div>
     <script type="application/json" id="section-titles">
@@ -25,6 +22,7 @@
             "categories": "<?php _e( 'Categories for ', 'html5blank' ); ?>",
             "posts": "<?php _e( 'Latest Posts', 'html5blank' ); ?>",
             "tags": "<?php _e( 'Tags: ', 'html5blank' ); ?>",
+            "tagArchive": "<?php _e( 'Tag Archive: ', 'html5blank' ); ?>",
             "categoriesIn": "<?php _e( 'Categorised in: ', 'html5blank' ); ?>"
         }
     </script>
@@ -33,29 +31,6 @@
             <article class="article page">
                 <h1 class="article__title main-title" ng-bind-html="data.title.rendered"></h1>
                 <div class="article__content" ng-bind-html="data.content.rendered"></div>
-            </article>
-        </section>
-    </script>
-    <script type="text/ng-template" id="loop-template.html">
-        <section class="grid grid--cards">
-            <h1 class="main__title" ng-bind="lang.posts"></h1>
-            <article ng-repeat="item in data" 
-                id="post-{{item.id}}"
-                class="article grid__article">
-                <!-- post title -->
-                <h2 class="article__title">
-                    <a title="{{item.title.rendered}}"
-                        href="{{item.link}}"
-                        ng-bind-html="item.title.rendered"
-                        ng-click="fetchById($event, 'posts', item.id)"></a>
-                </h2>
-                <!-- /post title -->
-                <!-- post details -->
-                <span class="date" ng-bind="formatDate(item.date)"></span>
-                <!-- /post details -->
-                <div class="article__excerpt">
-                    <p ng-bind-html="item.excerpt.rendered"></p>
-                </div>
             </article>
         </section>
     </script>
@@ -76,12 +51,36 @@
                     <span ng-bind="lang.tags"></span>
                     <span ng-repeat="tag in data.tags" ng-init="tagInfo = findTagById(tag, tags)">
                         <a href="{{tagInfo.link}}"
-                            ng-click="fetchAllByTag($event, tagInfo.id)"
+                            ng-click="fetchAllByTag($event, tagInfo)"
                             ng-bind="tagInfo.name"></a>&nbsp;
                     </span>
                 </p>
             </div>
         </article>
+    </script>
+    <script type="text/ng-template" id="loop-template.html">
+        <section class="grid grid--cards">
+            <h1 class="main__title" 
+                ng-bind="(loopType == 'tags') ? lang.tagArchive + ' ' + meta.name : lang.posts"></h1>
+            <article ng-repeat="item in data" 
+                id="post-{{item.id}}"
+                class="article grid__article">
+                <!-- post title -->
+                <h2 class="article__title">
+                    <a title="{{item.title.rendered}}"
+                        href="{{item.link}}"
+                        ng-bind-html="item.title.rendered"
+                        ng-click="fetchById($event, 'posts', item.id)"></a>
+                </h2>
+                <!-- /post title -->
+                <!-- post details -->
+                <span class="date" ng-bind="formatDate(item.date)"></span>
+                <!-- /post details -->
+                <div class="article__excerpt">
+                    <p ng-bind-html="item.excerpt.rendered"></p>
+                </div>
+            </article>
+        </section>
     </script>
 
 		<!-- analytics -->
