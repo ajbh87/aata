@@ -4,23 +4,19 @@
   "description": "Abogados a tu alcance - webpage",
   "main": "index.js",
   "scripts": {
-    "uglifyjs-libs": "uglifyjs ./node_modules/immutable/dist/immutable.js ./node_modules/moment/min/moment.min.js ./node_modules/moment/locale/es.js ./node_modules/angular/angular.js ./node_modules/angular-sanitize/angular-sanitize.js ./node_modules/angular-resource/angular-resource.js --compress -o lib-bundle.js",
-    "uglifyjs": "uglifyjs ./js/*.js -b -o bundle.js",
-    "uglifyjs-min": "uglifyjs ./js/*.js --compress -o bundle.js",
-    "uglifyjs-all": "npm run uglifyjs-libs && npm run uglifyjs-min"
+    "uglifyjs": "uglifyjs ./js/*.js -b -o ./js-bundles/scripts.js",
+    "uglifyjs-min": "uglifyjs ./js/*.js --compress -o ./js-bundles/scripts.js",
+    "webpack": "webpack --config ./webpack.config.js"
   },
-  "author": "",
+  "author": "Alfredo J. Bermudez",
   "license": "ISC",
   "dependencies": {
     "angular": "^1.6.4",
     "angular-animate": "^1.6.4",
-    "angular-modal-service": "^0.11.1",
     "angular-resource": "^1.6.4",
-    "angular-route": "^1.6.4",
     "angular-sanitize": "^1.6.4",
-    "moment": "^2.18.1"
-  },
-  "devDependencies": {
-    "immutable": "^3.8.1"
+    "immutable": "^3.8.1",
+    "moment": "^2.18.1",
+    "webpack": "^2.6.1"
   }
 }

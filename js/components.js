@@ -13,86 +13,97 @@ angular.module('components', ['ngResource'])
                         keyDispatchers[key](value, s.toObject());
                     }
                 };
-                this.setMultiple = (obj) => s = s.merge(obj);
+                this.setMultiple = (obj) => s = s.concat(obj);
                 this.get = (key) => s.get(key);
                 this.setDispatch = (fn) => dispatcher = fn;
                 this.dispatch = () => dispatcher(s.toObject());
-                this.setKeyDispatch = (key1, fn) => {
+                this.setKeyDispatcher = (key1, fn) => {
                     s.forEach((val, key2) => {
                         if (key1 === key2) {
                             keyDispatchers[key1] = fn; 
                             return false; 
                         }
-                    };
+                    });
                 };
+                this.getObj = () => s.toObject();
             }
-
         };
         
         const main = $document[0].querySelector('.main'),
-              lang = getLang(),
-              mainJQ = jqLite(main),
-              screen = jqLite($document[0].querySelector('.screen')),
-              base = lang.url,
-              restUrl = base + '/wp-json/wp/v2',
-              rest = {
-                  allPosts: $resource(restUrl + '/:type?page=:page', {
-                      type: 'posts',
-                      page: '@pageNum'
-                  }),
-                  byFilter: $resource(restUrl + '/:type?:filter=:slug', { 
-                      type: '@type',
-                      filter: '@filter',
-                      slug: '@slug'
-                  }),
-                  byId: $resource(restUrl + '/:type/:id', { 
-                      type: '@type',
-                      id: '@id'
-                  }),
-                  all: $resource(restUrl + '/:type?per_page=:perPage', { 
-                      type: '@type',
-                      perPage: 10
-                  })
-              },
-              get = {
-                    postsPage: (page) => rest.allPosts.query({ page }).$promise,
-                    byFilter: (slug, type, filter) => rest.byFilter.query({ 
-                        type, filter, slug 
-                    }).$promise, 
-                    byId: (type, id) => rest.byId.get({ type, id }).$promise,
-                    all: (type, perPage) => rest.all.query({ type, perPage }).$promise
-              },
-              comeOnDude = [ base ], // strings
-              youShallNotPass = [ 'php', 'feed', 'wp-admin' ], // strings
-              allTagsDef = get.all('tags', 100),
-              state = new stateConstructor({
-                  animated: null, 
-                  loopType: null,
-                  meta: null,
-                  replace: null,
-                  requestType: null,
-                  url: null,
-                  val: null
+            lang = getLang(),
+            jqWindow = jqLite(window),
+            mainJQ = jqLite(main),
+            screen = jqLite($document[0].querySelector('.screen')),
+            screenSM = jqLite($document[0].querySelector('.screen-sm')),
+            base = lang.url,
+            restUrl = base + '/wp-json/wp/v2',
+            defaultResourceOptions = {
+                get: { method:'GET', cache: true},
+                query: { method:'GET', cache: true, isArray:true }
+            },
+            rest = {
+              allPosts: $resource(restUrl + '/:type?page=:page', {
+                  type: 'posts',
+                  page: '@pageNum'
+              }, defaultResourceOptions),
+              byFilter: $resource(restUrl + '/:type?:filter=:slug&page=:page', { 
+                  type: '@type',
+                  filter: '@filter',
+                  slug: '@slug',
+                  page: 1
+              }, defaultResourceOptions),
+              byId: $resource(restUrl + '/:type/:id', { 
+                  type: '@type',
+                  id: '@id'
+              }, defaultResourceOptions),
+              all: $resource(restUrl + '/:type?per_page=:perPage', { 
+                  type: '@type',
+                  perPage: 10
+              }, defaultResourceOptions)
+            },
+            get = {
+                postsPage: (page) => rest.allPosts.query({ page }).$promise,
+                byFilter: (slug, type, filter, page = 1) => rest.byFilter.query({ 
+                    type, filter, slug, page
+                }).$promise, 
+                byId: (type, id) => rest.byId.get({ type, id }).$promise,
+                all: (type, perPage) => rest.all.query({ type, perPage }).$promise
+            },
+            comeOnDude = [ base ], // strings
+            youShallNotPass = [ 'php', 'feed', 'wp-admin' ], // strings
+            allTagsDef = get.all('tags', 100),
+            state = new stateConstructor({
+                animated: null, // promise
+                loopType: null, // posts | tags
+                meta: null, // tag archive meta - obj
+                replace: null, // replace history - bool
+                requestType: null, // posts | pages | loop
+                url: null,
+                val: null, 
+                pastBottom: false,
+                currentPage: 1,
+                lastPage: false
             });
-        
+        checkIfLoop();
+
         return {
             link: (scope, element, attrs) => {
                 state.setDispatch(dispatcher);
-                
+                state.setKeyDispatcher('pastBottom', loopDispatcher);
+                scope.hidePagination = true;
                 scope.lang = lang;
                 // Scope functions
                 scope.findTagById = findTagById;
-                scope.fetchById  = fetchById;
-                scope.fetchAllByTag  = fetchAllByTag;
-                
-                scope.formatDate = (date) => moment(date).format('MMM D, YYYY h:mm a');
-                
+                scope.fetchById = fetchById;
+                scope.fetchAllByTag = fetchAllByTag;
+                scope.formatDate = (date) => moment(date).format('MMMM D, YYYY h:mm a');
+
                 $timeout(() => {
                     bindLinks();
                     // Bind AjaxLink to popstate (Back/Forward) event 
-                    jqLite(window).on('popstate', bindPopState);    
+                    jqLite(window).on('popstate', onPopState);    
                 });
-                function bindPopState(event) {
+                function onPopState(event) {
                         const eventState = event.state;
                         
                         event.preventDefault();
@@ -224,6 +235,7 @@ angular.module('components', ['ngResource'])
                                 animated: animated,
                                 replace: replace,
                                 requestType: 'loop',
+                                loopType: 'posts',
                                 url: base + slug,
                                 val: val
                             });
@@ -232,6 +244,13 @@ angular.module('components', ['ngResource'])
                 }
                 
                 function changeState(obj) {
+                    if (obj.requestType === 'loop') {
+                        obj.currentPage = 1;
+                        obj.lastPage = false;
+                    } else {
+                        obj.loopType = null;
+                        obj.meta = null;
+                    }
                     state.setMultiple(obj);
                     state.dispatch();
                 }
@@ -245,32 +264,40 @@ angular.module('components', ['ngResource'])
                     history[action](s, '', s.url);
                 }
 
-                function prepareWindow() {
+                function prepareWindow(append, small) {
                     const def = $q.defer();
-                    screen.addClass('show');
+                    if (small === true) screenSM.addClass('show');
+                    else screen.addClass('show');
+
                     $timeout(() => {
-                        if (window.scrollTo != null) {
+                        if (window.scrollTo != null && append == null) {
                             window.scrollTo(0, 0);
                         }
                         def.resolve();
                     }, 500);
                     return def.promise;
                 }
-                function setContent(s) {
+                function setContent(s, append) {
                     const def = $q.defer();
                     $q.when(allTagsDef, s.animated)
                         .then((tags) => {
                             const template = $templateCache.get(s.requestType + '-template.html');
-                            let el;
-
+                            let el, 
+                                subScope = scope.$new();
+                            subScope = Object.assign(subScope, {
+                                loopType: s.loopType,
+                                meta: s.meta,
+                                data: s.val,
+                                tags: tags,
+                                currentPage: s.currentPage
+                            });
                             screen.removeClass('show');
-                            scope.loopType = s.loopType;
-                            scope.meta = s.meta;
-                            scope.data = s.val;
-                            scope.tags = tags;
+                            screenSM.removeClass('show');
 
-                            el = $compile(template)(scope);
-                            mainJQ.empty().append(el);
+                            el = $compile(template)(subScope);
+                            if (append !== true) mainJQ.empty();
+
+                            mainJQ.append(el);
                             $timeout(() => {
                                 scope.$digest();
                                 def.resolve();
@@ -284,29 +311,43 @@ angular.module('components', ['ngResource'])
                         }, (val) => {
                             def.reject();
                         });
-
-                    
                     return def.promise;
-                    function bindLoop() {
-                        const jqWindow = jqLite(window),
-                              padding = 200;
-                        let mainEnd = checkMainEnd();
-                        jqWindow
-                            .off('resize', checkMainEnd)
-                            .on('resize', checkMainEnd)
-                            .on('scroll', scrollBind);
+                }
+                function loopDispatcher(val) {
+                    const currentPage = state.get('currentPage'),
+                        nextPage = currentPage + 1,
+                        requestType = state.get('requestType'),
+                        loopType = state.get('loopType'),
+                        lastPage = state.get('lastPage'),
+                        meta = state.get('meta');
+                    let promise, animated;
 
-                        function checkMainEnd() {
-                            return saKnife.offset(main).top + main.offsetHeight - saKnife.winSize().height;
+                    if (val === true && requestType === 'loop' && lastPage !== true) {
+                        if (loopType === 'tags') {
+                            promise = get.byFilter(meta.id, 'posts','tags', nextPage);
+                        } else {
+                            promise = get.postsPage(nextPage);
                         }
-                        function scrollBind(event) {
-                            if ((window.scrollY + padding) >= mainEnd) {
-                                console.log('fetch more');
+                        animated = prepareWindow(true, true);
+                        promise.then((val) => {
+                            if (val.length > 0) {
+                                state.setMultiple({
+                                    animated,
+                                    currentPage: nextPage,
+                                    val
+                                });
+                                setContent(state.getObj(), true);
                             }
-                        }
+                            else {
+                                state.setMultiple({
+                                    lastPage: true
+                                });
+                                screen.removeClass('show');
+                                screenSM.removeClass('show');
+                            }
+                        });
                     }
                 }
-                
                 function findTagById(id, tags) {
                     let found = [];
                     tags.forEach((tag) => {
@@ -320,6 +361,55 @@ angular.module('components', ['ngResource'])
                 }
             }
         };
+        function checkIfLoop() {
+            const slug = window.location.href.replace(base, ''),
+                isTag = slug.includes('tag');
+            if (isTag === true || slug === '/') {
+                if (isTag === true) {
+                    $q.when(allTagsDef).then((tags) => {
+                        let found = [];
+                        tags.forEach((tag) => {
+                            if (tag.link === window.location.href) found.push(tag);
+                            return false;
+                        });
+                        if (found.length > 0) state.set('meta', found[0]);
+                    });
+                    state.setMultiple({
+                        requestType: 'loop',
+                        loopType: 'tags'
+                    });
+                } else {
+                    state.setMultiple({
+                        requestType: 'loop',
+                        loopType: 'posts'
+                    });
+                }
+                bindLoop();
+            }
+        }
+        function bindLoop() {
+            const padding = 200;
+            let mainEnd, 
+                pastBottom = false;
+            state.set('pastBottom', pastBottom);
+            jqWindow.off('resize', checkMainEnd)
+                .on('resize', checkMainEnd)
+                .on('scroll', scrollBind);
+            mainJQ.off('resize', checkMainEnd)
+                .on('resize', checkMainEnd);
+            checkMainEnd();
+            function checkMainEnd() {
+                mainEnd = saKnife.offset(main).top + main.offsetHeight - saKnife.winSize().height;
+            }
+            function scrollBind(event) {
+                if ((window.scrollY + padding) >= mainEnd) {
+                    if (pastBottom === false) {
+                        pastBottom = true;
+                        state.set('pastBottom', pastBottom);
+                    }
+                }
+            }
+        }
         function getLang() {
             const titlesEl = jqLite($document[0].querySelector('#section-titles'));
             let titles = 'titles = ';
@@ -327,13 +417,31 @@ angular.module('components', ['ngResource'])
             return eval(titles + titlesEl.html());
         }
     }])
-    .directive('aataMenu', ['$document', ($document) => {
+    .directive('aataMenu', ['$document', '$compile', ($document, $compile) => {
         return {
             link: (scope, element, attrs) => {
-                const menuItems = element.find('li');
-                menuItems.forEach((item) => {
-                    
+                const selector = attrs.aataMenu,
+                    menu = element.find('div');
+                let items;
+
+                //menu.detach();
+                items = element[0].querySelectorAll(selector);
+                element.addClass('js');
+                items.forEach((item) => {
+                    let subScope = scope.$new(),
+                        compiled = '';
+                    const expand =  '<button class="expand"' + 
+                                        'ng-click="showChildren = !showChildren"' + 
+                                        'aria-expanded="{{showChildren}}">' + 
+                                        '<span class="hidden">Expandir</span>+' + 
+                                    '</button>';
+                    const ulChildren = jqLite(item).find('ul');
+                    subScope.showChildren = false;
+                    ulChildren.attr('ng-show', 'showChildren');
+                    jqLite(item).prepend(expand);
+                    item = $compile(item)(subScope);
                 });
+
             }
         };
     }]);

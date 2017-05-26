@@ -4,19 +4,17 @@
     <!-- section -->
     <section>
 
-        <h1><?php the_title(); ?></h1>
-
     <?php if (have_posts()): while (have_posts()) : the_post(); ?>
 
         <!-- article -->
         <article id="post-<?php the_ID(); ?>" class="article page">
 
-            <?php the_content(); ?>
+            <h1 class="main__title"><?php the_title(); ?></h1>
 
-            <br class="clear">
-
+            <div class="article__content">
+                <?php the_content(); ?>
+            </div>
             <?php edit_post_link(); ?>
-
         </article>
         <!-- /article -->
 

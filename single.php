@@ -18,29 +18,26 @@
 			<!-- /post thumbnail -->
 
 			<!-- post title -->
-			<h1 class="article__title main__title">
-				<a href="<?php the_permalink(); ?>" 
-                   title="<?php the_title(); ?>"><?php the_title(); ?></a>
-			</h1>
+			<h1 class="main__title"><?php the_title(); ?></h1>
 			<!-- /post title -->
 
             <!-- post details -->
-            <span class="date"><?php the_time('F j, Y'); ?> <?php the_time('g:i a'); ?></span>
-            <span class="author hidden"><?php _e( 'Published by', 'html5blank' ); ?> <?php the_author_posts_link(); ?></span>
+            <time class="article__date"><?php the_time('F j, Y'); ?> <?php the_time('g:i a'); ?></time>
+            <span class="article__author hidden"><?php _e( 'Published by', 'html5blank' ); ?> <?php the_author_posts_link(); ?></span>
             <!-- /post details -->
 			<div class="article__content">
 
                 <?php the_content(); // Dynamic Content ?>
-                <p>
-                    <?php the_tags( __( 'Tags: ', 'html5blank' ), ', '); // Separated by commas with a line break at the end ?>
-                </p>
-
-                <p class="hidden"><?php _e( 'Categorised in: ', 'html5blank' ); the_category(', '); // Separated by commas ?></p>
-
-                <p class="hidden"><?php _e( 'This post was written by ', 'html5blank' ); the_author(); ?></p>
 
                 <?php edit_post_link(); // Always handy to have Edit Post Links available ?>
             </div>
+            <p>
+                <?php the_tags( __( 'Tags: ', 'html5blank' ), ', '); // Separated by commas with a line break at the end ?>
+            </p>
+
+            <p class="hidden"><?php _e( 'Categorised in: ', 'html5blank' ); the_category(', '); // Separated by commas ?></p>
+
+            <p class="hidden"><?php _e( 'This post was written by ', 'html5blank' ); the_author(); ?></p>
 		</article>
 		<!-- /article -->
 

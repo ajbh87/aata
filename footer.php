@@ -15,6 +15,9 @@
     <div class="screen" aria-hidden="true">
         <div class="loader screen__loader"></div>
     </div>
+    <div class="screen-sm" aria-hidden="true">
+        <div class="loader screen-sm__loader"></div>
+    </div>
     <script type="application/json" id="section-titles">
         {
             "url": "<?php echo home_url(); ?>",
@@ -28,39 +31,39 @@
     </script>
     <script type="text/ng-template" id="pages-template.html">
         <section>
-            <article class="article page">
-                <h1 class="article__title main-title" ng-bind-html="data.title.rendered"></h1>
+            <article class="article article--page page">
+                <h1 class="main__title" ng-bind-html="data.title.rendered"></h1>
                 <div class="article__content" ng-bind-html="data.content.rendered"></div>
             </article>
         </section>
     </script>
     <script type="text/ng-template" id="posts-template.html">
-        <article id="post-{{data.id}}">
-
+        <article id="post-{{data.id}}" class="article article--post post">
             <!-- post title -->
-            <h2 ng-bind-html="data.title.rendered"></h2>
+            <h1 class="main__title"
+                ng-bind-html="data.title.rendered"></h1>
             <!-- /post title -->
             <!-- post details -->
-            <span class="date" ng-bind="formatDate(data.date)"></span>
-            <span class="author"></span>
+            <span class="article__date" ng-bind="formatDate(data.date)"></span>
+            <span class="article__author"></span>
             <!-- /post details -->
 
-            <div class="article__content">
-                <div ng-bind-html="data.content.rendered"></div>
-                <p ng-if="data.tags.length > 0">
-                    <span ng-bind="lang.tags"></span>
-                    <span ng-repeat="tag in data.tags" ng-init="tagInfo = findTagById(tag, tags)">
-                        <a href="{{tagInfo.link}}"
-                            ng-click="fetchAllByTag($event, tagInfo)"
-                            ng-bind="tagInfo.name"></a>&nbsp;
-                    </span>
-                </p>
-            </div>
+            <div class="article__content" ng-bind-html="data.content.rendered"></div>
+            <p ng-if="data.tags.length > 0">
+                <span ng-bind="lang.tags"></span>
+                <span ng-repeat="tag in data.tags" ng-init="tagInfo = findTagById(tag, tags)">
+                    <a href="{{tagInfo.link}}"
+                        ng-click="fetchAllByTag($event, tagInfo)"
+                        ng-bind="tagInfo.name"></a>&nbsp;
+                </span>
+            </p>
         </article>
     </script>
     <script type="text/ng-template" id="loop-template.html">
-        <section class="grid grid--cards">
-            <h1 class="main__title" 
+        <section class="grid grid--cards" 
+            data-current-page="{{currentPage}}">
+            <h1 class="main__title"
+                ng-if="currentPage <= 1"
                 ng-bind="(loopType == 'tags') ? lang.tagArchive + ' ' + meta.name : lang.posts"></h1>
             <article ng-repeat="item in data" 
                 id="post-{{item.id}}"
@@ -74,7 +77,7 @@
                 </h2>
                 <!-- /post title -->
                 <!-- post details -->
-                <span class="date" ng-bind="formatDate(item.date)"></span>
+                <time class="article__date" datetime="{{item.date}}" ng-bind="formatDate(item.date)"></time>
                 <!-- /post details -->
                 <div class="article__excerpt">
                     <p ng-bind-html="item.excerpt.rendered"></p>

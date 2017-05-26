@@ -1,13 +1,16 @@
-var path = require('path');
+const webpack = require('webpack');
+const path = require('path');
 
 module.exports = {
-  entry: './js/script.js',
+  entry: './init.js',
   output: {
-    filename: 'script-bundle.js',
+    filename: './js-bundles/lib.js',
     path: path.resolve(__dirname)
   },
-  module: {
-    
-  },
-  watch: true
+  // module: {
+  //   noParse: /moment/
+  // },
+  plugins: [ 
+	  new webpack.ContextReplacementPlugin(/moment[\\\/]locale$/, /^\.\/(es)$/)
+  ]
 };

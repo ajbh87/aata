@@ -1,90 +1,71 @@
-const jqLite = angular.element, saKnife = {
-    offset: el => {
-        const rect = el.getBoundingClientRect(), body = document.body.getBoundingClientRect();
-        return {
-            top: Math.abs(body.top) + rect.top,
-            left: Math.abs(body.left) + rect.left
-        };
-    },
-    winSize: () => {
-        const e = document.documentElement, g = document.querySelector("body"), width = e.clientWidth || g.clientWidth, height = e.clientHeight || g.clientHeight;
-        return {
-            width: width,
-            height: height,
-            vCenter: height / 2,
-            hCenter: width / 2,
-            documentHeight: g.offsetHeight,
-            documentWidth: g.offsetWidth
-        };
-    },
-    hasClass: (el, className) => {
-        let response = false;
-        if (el.classList) response = el.classList.contains(className); else response = new RegExp("(^| )" + className + "( |$)", "gi").test(el.className);
-        return response;
-    },
-    round: (value, decimals) => Number(Math.round(value + "e" + decimals) + "e-" + decimals)
-};
+const jqLite = angular.element;
 
 angular.module("aata", [ "components", "ngResource", "ngSanitize" ]).controller("MainController", function($document, $scope) {});
 
 angular.module("components", [ "ngResource" ]).directive("aataResources", [ "$compile", "$q", "$resource", "$templateCache", "$timeout", "$document", ($compile, $q, $resource, $templateCache, $timeout, $document) => {
-    function stateConstructor(obj = {}) {
-        let s = obj;
-        let dispatcher = function(s) {};
-        const methods = {
-            get: get,
-            set: set,
-            setMultiple: setMultiple,
-            setDispatch: setDispatch,
-            dispatch: dispatch,
-            getAll: getAll
-        };
-        function set(key, value) {
-            s[key] = value;
+    class stateConstructor {
+        constructor(def = {}) {
+            let s = Immutable.Map(def), dispatcher = s => {};
+            const options = s, keyDispatchers = {};
+            this.set = ((key, value) => {
+                s = s.set(key, value);
+                if (keyDispatchers[key] != null) {
+                    keyDispatchers[key](value, s.toObject());
+                }
+            });
+            this.setMultiple = (obj => s = s.concat(obj));
+            this.get = (key => s.get(key));
+            this.setDispatch = (fn => dispatcher = fn);
+            this.dispatch = (() => dispatcher(s.toObject()));
+            this.setKeyDispatcher = ((key1, fn) => {
+                s.forEach((val, key2) => {
+                    if (key1 === key2) {
+                        keyDispatchers[key1] = fn;
+                        return false;
+                    }
+                });
+            });
+            this.getObj = (() => s.toObject());
         }
-        function setMultiple(obj) {
-            s = Object.assign({}, s, obj);
-        }
-        function get(key) {
-            return s[key];
-        }
-        function getAll() {
-            return Object.assign({}, s);
-        }
-        function setDispatch(fn) {
-            dispatcher = fn;
-        }
-        function dispatch() {
-            dispatcher(Object.assign({}, s));
-        }
-        return methods;
     }
-    const main = $document[0].querySelector(".main"), lang = getLang(), mainJQ = jqLite(main), screen = jqLite($document[0].querySelector(".screen")), base = lang.url, restUrl = base + "/wp-json/wp/v2", rest = {
+    const main = $document[0].querySelector(".main"), lang = getLang(), jqWindow = jqLite(window), mainJQ = jqLite(main), screen = jqLite($document[0].querySelector(".screen")), screenSM = jqLite($document[0].querySelector(".screen-sm")), base = lang.url, restUrl = base + "/wp-json/wp/v2", defaultResourceOptions = {
+        get: {
+            method: "GET",
+            cache: true
+        },
+        query: {
+            method: "GET",
+            cache: true,
+            isArray: true
+        }
+    }, rest = {
         allPosts: $resource(restUrl + "/:type?page=:page", {
             type: "posts",
             page: "@pageNum"
-        }),
-        byFilter: $resource(restUrl + "/:type?:filter=:slug", {
+        }, defaultResourceOptions),
+        byFilter: $resource(restUrl + "/:type?:filter=:slug&page=:page", {
             type: "@type",
             filter: "@filter",
-            slug: "@slug"
-        }),
+            slug: "@slug",
+            page: 1
+        }, defaultResourceOptions),
         byId: $resource(restUrl + "/:type/:id", {
             type: "@type",
             id: "@id"
-        }),
+        }, defaultResourceOptions),
         all: $resource(restUrl + "/:type?per_page=:perPage", {
             type: "@type",
             perPage: 10
-        })
+        }, defaultResourceOptions)
     }, get = {
         postsPage: page => rest.allPosts.query({
             page: page
         }).$promise,
-        byFilter: (slug, type, filter) => rest.byFilter.query({
+        byFilter: (slug, type, filter, page = 1) => rest.byFilter.query({
             type: type,
             filter: filter,
-            slug: slug
+            slug: slug,
+            page: page
         }).$promise,
         byId: (type, id) => rest.byId.get({
             type: type,
@@ -96,25 +77,32 @@ angular.module("components", [ "ngResource" ]).directive("aataResources", [ "$co
         }).$promise
     }, comeOnDude = [ base ], youShallNotPass = [ "php", "feed", "wp-admin" ], allTagsDef = get.all("tags", 100), state = new stateConstructor({
         animated: null,
+        loopType: null,
+        meta: null,
         replace: null,
         requestType: null,
         url: null,
         val: null,
-        loopType: null
+        pastBottom: false,
+        currentPage: 1,
+        lastPage: false
     });
+    checkIfLoop();
     return {
         link: (scope, element, attrs) => {
             state.setDispatch(dispatcher);
+            state.setKeyDispatcher("pastBottom", loopDispatcher);
+            scope.hidePagination = true;
             scope.lang = lang;
             scope.findTagById = findTagById;
             scope.fetchById = fetchById;
             scope.fetchAllByTag = fetchAllByTag;
-            scope.formatDate = (date => moment(date).format("MMM D, YYYY h:mm a"));
+            scope.formatDate = (date => moment(date).format("MMMM D, YYYY h:mm a"));
             $timeout(() => {
                 bindLinks();
-                jqLite(window).on("popstate", bindPopState);
+                jqLite(window).on("popstate", onPopState);
             });
-            function bindPopState(event) {
+            function onPopState(event) {
                 const eventState = event.state;
                 event.preventDefault();
                 ajaxLink(eventState);
@@ -157,27 +145,28 @@ angular.module("components", [ "ngResource" ]).directive("aataResources", [ "$co
                 }
             }
             function fetchAllByTag($event, data) {
-                const promise = get.byFilter(data.id, "posts", "tags");
                 $event.preventDefault();
+                const promise = get.byFilter(data.id, "posts", "tags"), animated = prepareWindow();
+                promise.then(val => {
+                    changeState({
+                        animated: animated,
+                        loopType: "tags",
+                        requestType: "loop",
+                        url: data.link,
+                        val: val,
+                        meta: data
+                    });
+                });
+            }
+            function fetchById($event, type, id) {
+                $event.preventDefault();
+                const promise = get.byId(type, id), animated = prepareWindow();
                 promise.then(val => {
                     changeState({
                         animated: animated,
                         requestType: type,
                         url: val.link,
                         val: val
-                    });
-                });
-            }
-            function fetchById($event, type, id) {
-                const promise = get.byId(type, id), animated = prepareWindow();
-                $event.preventDefault();
-                promise.then(val => {
-                    changeState({
-                        animated: animated,
-                        requestType: "loop",
-                        url: data.link,
-                        val: val,
-                        loopType: "tags"
                     });
                 });
             }
@@ -221,6 +210,7 @@ angular.module("components", [ "ngResource" ]).directive("aataResources", [ "$co
                             animated: animated,
                             replace: replace,
                             requestType: "loop",
+                            loopType: "posts",
                             url: base + slug,
                             val: val
                         });
@@ -228,6 +218,13 @@ angular.module("components", [ "ngResource" ]).directive("aataResources", [ "$co
                 }
             }
             function changeState(obj) {
+                if (obj.requestType === "loop") {
+                    obj.currentPage = 1;
+                    obj.lastPage = false;
+                } else {
+                    obj.loopType = null;
+                    obj.meta = null;
+                }
                 state.setMultiple(obj);
                 state.dispatch();
             }
@@ -239,51 +236,73 @@ angular.module("components", [ "ngResource" ]).directive("aataResources", [ "$co
                 }
                 history[action](s, "", s.url);
             }
-            function prepareWindow() {
+            function prepareWindow(append, small) {
                 const def = $q.defer();
-                screen.addClass("show");
+                if (small === true) screenSM.addClass("show"); else screen.addClass("show");
                 $timeout(() => {
-                    if (window.scrollTo != null) {
+                    if (window.scrollTo != null && append == null) {
                         window.scrollTo(0, 0);
                     }
                     def.resolve();
                 }, 500);
                 return def.promise;
             }
-            function setContent(s) {
+            function setContent(s, append) {
                 const def = $q.defer();
                 $q.when(allTagsDef, s.animated).then(tags => {
                     const template = $templateCache.get(s.requestType + "-template.html");
-                    let el;
+                    let el, subScope = scope.$new();
+                    subScope = Object.assign(subScope, {
+                        loopType: s.loopType,
+                        meta: s.meta,
+                        data: s.val,
+                        tags: tags,
+                        currentPage: s.currentPage
+                    });
                     screen.removeClass("show");
-                    scope.data = s.val;
-                    scope.tags = tags;
-                    el = $compile(template)(scope);
-                    mainJQ.empty().append(el);
+                    screenSM.removeClass("show");
+                    el = $compile(template)(subScope);
+                    if (append !== true) mainJQ.empty();
+                    mainJQ.append(el);
                     $timeout(() => {
                         scope.$digest();
                         def.resolve();
                         bindLinks();
                         if (s.requestType === "loop") {
                             bindLoop();
-                        }
+                        } else {}
                     });
                 }, val => {
                     def.reject();
                 });
                 return def.promise;
-                function bindLoop() {
-                    const jqWindow = jqLite(window), padding = 200;
-                    let mainEnd = checkMainEnd();
-                    jqWindow.off("resize", checkMainEnd).on("resize", checkMainEnd).on("scroll", scrollBind);
-                    function checkMainEnd() {
-                        return saKnife.offset(main).top + main.offsetHeight - saKnife.winSize().height;
+            }
+            function loopDispatcher(val) {
+                const currentPage = state.get("currentPage"), nextPage = currentPage + 1, requestType = state.get("requestType"), loopType = state.get("loopType"), lastPage = state.get("lastPage"), meta = state.get("meta");
+                let promise, animated;
+                if (val === true && requestType === "loop" && lastPage !== true) {
+                    if (loopType === "tags") {
+                        promise = get.byFilter(meta.id, "posts", "tags", nextPage);
+                    } else {
+                        promise = get.postsPage(nextPage);
                     }
-                    function scrollBind(event) {
-                        if (window.scrollY + padding >= mainEnd) {
-                            console.log("fetch more");
+                    animated = prepareWindow(true, true);
+                    promise.then(val => {
+                        if (val.length > 0) {
+                            state.setMultiple({
+                                animated: animated,
+                                currentPage: nextPage,
+                                val: val
+                            });
+                            setContent(state.getObj(), true);
+                        } else {
+                            state.setMultiple({
+                                lastPage: true
+                            });
+                            screen.removeClass("show");
+                            screenSM.removeClass("show");
                         }
-                    }
+                    });
                 }
             }
             function findTagById(id, tags) {
@@ -299,16 +318,72 @@ angular.module("components", [ "ngResource" ]).directive("aataResources", [ "$co
             }
         }
     };
+    function checkIfLoop() {
+        const slug = window.location.href.replace(base, ""), isTag = slug.includes("tag");
+        if (isTag === true || slug === "/") {
+            if (isTag === true) {
+                $q.when(allTagsDef).then(tags => {
+                    let found = [];
+                    tags.forEach(tag => {
+                        if (tag.link === window.location.href) found.push(tag);
+                        return false;
+                    });
+                    if (found.length > 0) state.set("meta", found[0]);
+                });
+                state.setMultiple({
+                    requestType: "loop",
+                    loopType: "tags"
+                });
+            } else {
+                state.setMultiple({
+                    requestType: "loop",
+                    loopType: "posts"
+                });
+            }
+            bindLoop();
+        }
+    }
+    function bindLoop() {
+        const padding = 200;
+        let mainEnd, pastBottom = false;
+        state.set("pastBottom", pastBottom);
+        jqWindow.off("resize", checkMainEnd).on("resize", checkMainEnd).on("scroll", scrollBind);
+        mainJQ.off("resize", checkMainEnd).on("resize", checkMainEnd);
+        checkMainEnd();
+        function checkMainEnd() {
+            mainEnd = saKnife.offset(main).top + main.offsetHeight - saKnife.winSize().height;
+        }
+        function scrollBind(event) {
+            if (window.scrollY + padding >= mainEnd) {
+                if (pastBottom === false) {
+                    pastBottom = true;
+                    state.set("pastBottom", pastBottom);
+                }
+            }
+        }
+    }
     function getLang() {
         const titlesEl = jqLite($document[0].querySelector("#section-titles"));
         let titles = "titles = ";
         return eval(titles + titlesEl.html());
     }
-} ]).directive("aataMenu", [ "$document", $document => {
+} ]).directive("aataMenu", [ "$document", "$compile", ($document, $compile) => {
     return {
         link: (scope, element, attrs) => {
-            const menuItems = element.find("li");
-            menuItems.forEach(item => {});
+            const selector = attrs.aataMenu, menu = element.find("div");
+            let items;
+            debugger;
+            items = element[0].querySelectorAll(selector);
+            element.addClass("js");
+            items.forEach(item => {
+                let subScope = scope.$new(), compiled = "";
+                const expand = '<button class="expand"' + 'ng-click="showChildren = !showChildren"' + 'ng-class="{active: showChildren}">' + '<span class="hidden">Expandir</span>+' + "</button>";
+                const ulChildren = jqLite(item).find("ul");
+                subScope.showChildren = false;
+                ulChildren.attr("ng-show", "showChildren");
+                jqLite(item).prepend(expand);
+                item = $compile(item)(subScope);
+            });
         }
     };
 } ]);
