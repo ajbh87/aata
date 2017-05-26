@@ -1,7 +1,7 @@
 <?php if (have_posts()): while (have_posts()) : the_post(); ?>
 
 	<!-- article -->
-	<article id="post-<?php the_ID(); ?>" class="article grid__article">
+	<article id="post-<?php the_ID(); ?>" class="article">
 
 		<!-- post thumbnail -->
 		<?php if ( has_post_thumbnail()) : // Check if thumbnail exists ?>
@@ -16,7 +16,7 @@
 		<!-- post title -->
 		<h2 class="article__title">
 			<a href="<?php the_permalink(); ?>" title="<?php the_title(); ?>">
-                <?php the_title(); ?>
+				<?php the_title(); ?>
             </a>
 		</h2>
 		<!-- /post title -->

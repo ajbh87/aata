@@ -35,6 +35,8 @@ html {
     font-weight: $weight;
     font-family: $family;
 	color: $text-color;
+    margin: 0;
+    padding: 0;
     
     @media only screen and (min-width: 1060px) {
         font-size: $base-font;
@@ -47,6 +49,8 @@ body {
     width: 100%;
     height: 100%;
     overflow: auto;
+    margin: 0;
+    padding: 0;
     
     @include bg;
     
@@ -104,12 +108,12 @@ input:focus {
 
 /* wrapper */
 .wrapper {
-    display: flex;
-    flex-wrap: wrap;
-	position: relative;
-	width:100%;
-	//padding: 0 $spacing;
+    position: relative;
+    width:100%;
+
     @media only screen and (orientation: landscape) {
+        display: flex;
+        justify-content: space-between;
         padding: 0 0 0 $side;
     }
 }
@@ -128,7 +132,7 @@ input:focus {
         width: $side;
         height: 100vh;
         overflow: auto;
-        border-right: 1px solid $grey-base;
+        //border-right: 1px solid $grey-base;
     }
 }
 /* logo */
@@ -214,6 +218,7 @@ input:focus {
         box-shadow: 0 0 0 rgba(0,0,0,.2);
     }
 }
+
 .expand {
     display: flex;
     justify-content: space-around;
@@ -231,7 +236,7 @@ input:focus {
     font-weight: 700;
     
     &:hover, &:focus {
-        @include button-raise();
+        //@include button-raise();
         @include button-style($grey-light, $blue);
     }
     &[aria-expanded="true"]{
@@ -243,11 +248,12 @@ input:focus {
 }
 /* sidebar */
 .sidebar {
+    background: $grey-light;
     position: relative;
     flex: 0 1 auto;
     &__content {
         padding: ($spacing / 2);
-        background: $white-t;
+        //background: #fff;
         @media only screen and (orientation: landscape) {
             $f: 2rem;
             $b: $base-line * $f;
@@ -258,13 +264,39 @@ input:focus {
         }
     }
 }
+input[type="search"] {
+    box-sizing: border-box;
+}
+.search {
+    position: relative;
+    display: flex;
+    width: 100%;
+    height: 1.5rem;
+    font-size: .8rem;
+    &__input, &__submit {
+        display: block;
+        flex: 1 1 auto;
+        height: 100%;
+    }
+    &__input {
+        width: 75%;
+        border: 0;
+    }
+    &__submit {
+        width: 25%;
+        @include button($blue, #fff);
+        &:hover, &:focus {
+            //@include button-raise();
+            @include button-style($blue-light, #fff);
+        }
+    }
+}
 .main {
     padding: 0 $spacing;
     min-height: 100vh;
     @media only screen and (orientation: landscape) {
-        flex: 1 0 50vw;
-        padding: 0 ($spacing / 2);
-        transition: height .5s ease-out;
+        flex: 0 1 40rem;
+        padding: 0 $spacing;
     }
     &__title {
         margin: 0;
@@ -272,25 +304,9 @@ input:focus {
         //border-bottom: 3px dotted $grey-base;
     }
 }
-.grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-column-gap: ($spacing / 2);
-    grid-row-gap: ($spacing / 2);
-    margin-bottom: $spacing / 2;
-    > *:nth-child(5n + 1) {
-        grid-column-start: 1;
-        grid-column-end: span 2;
-    }
-    
-    &__article {
-        @media only screen and (orientation: landscape) {
-            display: flex;
-            flex-direction: column;
-        }
-    }
-}
+
 .article {
+    margin-bottom: $spacing;
     &__title {
          margin-top: 0;
          margin-bottom: $spacing / 2;
@@ -300,7 +316,7 @@ input:focus {
         margin-bottom: $spacing / 2;
     }
     &__content {
-        background: rgba(255, 255, 255, 0.66);
+        background: #fff;
         padding: ($spacing /2);
         & > :first-child {
             margin-top: 0;
@@ -310,7 +326,7 @@ input:focus {
         }
     }
     &__excerpt {
-        background: rgba(255, 255, 255, 0.66);
+        background: #fff;
         padding: ($spacing /2);
         flex: 1 1 auto;
         & > :first-child {
@@ -323,9 +339,19 @@ input:focus {
 }
 /* footer */
 .footer {
-    padding: $spacing / 2;
+    font-size: .7rem;
+    color: #fff;
+    background: $grey-dark;
+    padding: 0 $spacing;
+    overflow: hidden;
+    a {
+        color: #fff;
+        &:hover {
+            color: $grey-dark;
+        }
+    }
     @media only screen and (orientation: landscape) {
-        flex: 0 0 100%;
+        margin-left: $side;
     }
 }
 @keyframes rotateLoader {
@@ -352,7 +378,6 @@ input:focus {
     animation-duration: .75s;
     animation-iteration-count: infinite;
     animation-timing-function: linear;
-
 }
 .screen {
     position: fixed;
@@ -386,13 +411,19 @@ input:focus {
     opacity: 0;
     visibility: hidden;
     
-    background: #fff;
+    background: $grey-dark;
     &.show {
         opacity: 1;
         visibility: visible;
     }
+
+    // .loader {
+    //     border-color: #fff;
+    // }
+
     @media only screen and (orientation: landscape) {
         left: $side;
+        right: $side;
     }
 }
 

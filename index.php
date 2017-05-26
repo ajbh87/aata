@@ -2,7 +2,7 @@
 
 <main role="main" class="main">
     <!-- section -->
-    <section class="grid grid--cards">
+    <section class="">
 
         <h1 class="main__title"><?php _e( 'Latest Posts', 'html5blank' ); ?></h1>
 

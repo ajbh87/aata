@@ -84,7 +84,7 @@ angular.module('components', ['ngResource'])
                 currentPage: 1,
                 lastPage: false
             });
-        checkIfLoop();
+        let unbindLoop = checkIfLoop();
 
         return {
             link: (scope, element, attrs) => {
@@ -104,17 +104,19 @@ angular.module('components', ['ngResource'])
                     jqLite(window).on('popstate', onPopState);    
                 });
                 function onPopState(event) {
+                        event.preventDefault();
                         const eventState = event.state;
                         
-                        event.preventDefault();
                         ajaxLink(eventState);
                         
                         function ajaxLink(eventState) {
                             // Verify if history item was loaded through ajax
                             if (eventState != null) {
                                 eventState.animated = prepareWindow();
+                                state.setMultiple(eventState);
                                 setContent(eventState);
-                            } else {
+                            }
+                            else {
                                 fetchPostOrPage(window.location.href.replace(base, ''), true);
                             }
                         }
@@ -161,6 +163,7 @@ angular.module('components', ['ngResource'])
                         animated = prepareWindow();
                     promise.then((val) => {
                         changeState({
+                            replace: false,
                             animated: animated,
                             loopType: 'tags',
                             requestType: 'loop',
@@ -177,6 +180,7 @@ angular.module('components', ['ngResource'])
                     
                     promise.then((val) => {
                         changeState({
+                            replace: false,
                             animated: animated,
                             requestType: type,
                             url: val.link,
@@ -255,13 +259,14 @@ angular.module('components', ['ngResource'])
                     state.dispatch();
                 }
                 function dispatcher(s) {
-                    setContent(s);
-
-                    let action = 'pushState'
-                    if (s.replace === true) {
-                        action = 'replaceState';
-                    } 
-                    history[action](s, '', s.url);
+                    let def = setContent(s);
+                    $q.when(def).then(() => {
+                        let action = 'pushState'
+                        if (s.replace === true) {
+                            action = 'replaceState';
+                        } 
+                        history[action](s, '', s.url);
+                    });
                 }
 
                 function prepareWindow(append, small) {
@@ -279,8 +284,8 @@ angular.module('components', ['ngResource'])
                 }
                 function setContent(s, append) {
                     const def = $q.defer();
-                    $q.when(allTagsDef, s.animated)
-                        .then((tags) => {
+                    $q.all([allTagsDef, s.animated])
+                        .then((values) => {
                             const template = $templateCache.get(s.requestType + '-template.html');
                             let el, 
                                 subScope = scope.$new();
@@ -288,7 +293,7 @@ angular.module('components', ['ngResource'])
                                 loopType: s.loopType,
                                 meta: s.meta,
                                 data: s.val,
-                                tags: tags,
+                                tags: values[0],
                                 currentPage: s.currentPage
                             });
                             screen.removeClass('show');
@@ -303,9 +308,9 @@ angular.module('components', ['ngResource'])
                                 def.resolve();
                                 bindLinks();
                                 if (s.requestType === 'loop') {
-                                    bindLoop();
+                                    unbindLoop = bindLoop();
                                 } else {
-                                    //unbindLoop(); ToDo !!!
+                                    unbindLoop();
                                 }
                             });
                         }, (val) => {
@@ -321,7 +326,6 @@ angular.module('components', ['ngResource'])
                         lastPage = state.get('lastPage'),
                         meta = state.get('meta');
                     let promise, animated;
-
                     if (val === true && requestType === 'loop' && lastPage !== true) {
                         if (loopType === 'tags') {
                             promise = get.byFilter(meta.id, 'posts','tags', nextPage);
@@ -384,7 +388,7 @@ angular.module('components', ['ngResource'])
                         loopType: 'posts'
                     });
                 }
-                bindLoop();
+                return bindLoop();
             }
         }
         function bindLoop() {
@@ -392,11 +396,10 @@ angular.module('components', ['ngResource'])
             let mainEnd, 
                 pastBottom = false;
             state.set('pastBottom', pastBottom);
-            jqWindow.off('resize', checkMainEnd)
-                .on('resize', checkMainEnd)
-                .on('scroll', scrollBind);
-            mainJQ.off('resize', checkMainEnd)
-                .on('resize', checkMainEnd);
+
+            jqWindow.on('resize', checkMainEnd).on('scroll', scrollBind);
+            mainJQ.on('resize', checkMainEnd);
+
             checkMainEnd();
             function checkMainEnd() {
                 mainEnd = saKnife.offset(main).top + main.offsetHeight - saKnife.winSize().height;
@@ -409,6 +412,10 @@ angular.module('components', ['ngResource'])
                     }
                 }
             }
+            return () => {
+                mainJQ.off('resize', checkMainEnd);
+                jqWindow.off('resize', checkMainEnd).off('scroll', scrollBind);;
+            };
         }
         function getLang() {
             const titlesEl = jqLite($document[0].querySelector('#section-titles'));

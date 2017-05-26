@@ -1,16 +1,16 @@
-			<!-- footer -->
-			<footer class="footer" role="contentinfo">
+        </div>
+        <!-- /wrapper -->
+		<!-- footer -->
+		<footer class="footer" role="contentinfo">
 
-				<!-- copyright -->
-				<p class="copyright">
-					&copy; <?php echo date('Y'); ?> Copyright <?php bloginfo('name'); ?>. <?php _e('Powered by', 'html5blank'); ?>
-					<a href="//wordpress.org" title="WordPress">WordPress</a> &amp; <a href="//html5blank.com" title="HTML5 Blank">HTML5 Blank</a>.
-				</p>
-				<!-- /copyright -->
-			</footer>
-			<!-- /footer -->
-		</div>
-		<!-- /wrapper -->
+			<!-- copyright -->
+			<p class="copyright">
+				&copy; <?php echo date('Y'); ?> Copyright <?php bloginfo('name'); ?>. <?php _e('Powered by', 'html5blank'); ?>
+				<a href="//wordpress.org" title="WordPress">WordPress</a> &amp; <a href="//html5blank.com" title="HTML5 Blank">HTML5 Blank</a>.
+			</p>
+			<!-- /copyright -->
+		</footer>
+		<!-- /footer -->
 		<?php wp_footer(); ?>
     <div class="screen" aria-hidden="true">
         <div class="loader screen__loader"></div>
@@ -60,14 +60,14 @@
         </article>
     </script>
     <script type="text/ng-template" id="loop-template.html">
-        <section class="grid grid--cards" 
+        <section class="" 
             data-current-page="{{currentPage}}">
             <h1 class="main__title"
                 ng-if="currentPage <= 1"
                 ng-bind="(loopType == 'tags') ? lang.tagArchive + ' ' + meta.name : lang.posts"></h1>
             <article ng-repeat="item in data" 
                 id="post-{{item.id}}"
-                class="article grid__article">
+                class="article">
                 <!-- post title -->
                 <h2 class="article__title">
                     <a title="{{item.title.rendered}}"
