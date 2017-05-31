@@ -22,8 +22,7 @@
 		<!-- /post title -->
 
         <!-- post details -->
-        <span class="article__date"><?php the_time('M j, Y'); ?> <?php the_time('g:i a'); ?></span>
-        <span class="article__author hidden" ><?php _e( 'Published by', 'html5blank' ); ?> <?php the_author_posts_link(); ?></span>
+        <div class="article__date"><?php the_time('j \d\e M \d\e Y'); ?></div>
         <!-- /post details -->
         <div class="article__excerpt">
 		  <?php html5wp_excerpt(); // Build your custom callback length in functions.php ?>

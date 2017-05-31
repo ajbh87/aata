@@ -4,7 +4,7 @@
     <!-- section -->
     <section class="grid grid--cards">
 
-        <h1><?php _e( 'Tag Archive: ', 'html5blank' ); echo single_tag_title('', false); ?></h1>
+        <h1 class="main__title main__title--margin"><?php _e( 'Tag Archive: ', 'html5blank' ); echo single_tag_title('', false); ?></h1>
 
         <?php get_template_part('loop'); ?>
 

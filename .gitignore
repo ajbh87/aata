@@ -1,5 +1,6 @@
 *.log
 
+*.sublime*
 .sass-cache/
 img/
 node_modules/

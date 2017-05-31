@@ -21,23 +21,27 @@
 			<h1 class="main__title"><?php the_title(); ?></h1>
 			<!-- /post title -->
 
-            <!-- post details -->
-            <time class="article__date"><?php the_time('F j, Y'); ?> <?php the_time('g:i a'); ?></time>
-            <span class="article__author hidden"><?php _e( 'Published by', 'html5blank' ); ?> <?php the_author_posts_link(); ?></span>
-            <!-- /post details -->
 			<div class="article__content">
-
-                <?php the_content(); // Dynamic Content ?>
-
+	            <!-- post details -->
+	            <time class="article__date"><?php the_time('j \d\e M \d\e Y'); ?></time>
+	            <span class="article__author">Escrito por: <?php the_author(); ?></span>
+	            <!-- the_author_posts_link(); /post details -->
+				<div>
+                	<?php the_content(); // Dynamic Content ?>
+				</div>
                 <?php edit_post_link(); // Always handy to have Edit Post Links available ?>
             </div>
-            <p>
-                <?php the_tags( __( 'Tags: ', 'html5blank' ), ', '); // Separated by commas with a line break at the end ?>
-            </p>
+            <div class="article__tags">
+                <span class="sr-only">Etiquetas </span>
+                <?php 
+	                if (has_tag()) {
+		                get_template_part('img/icons/tagicon');
+						the_tags( ' ', ', '); // Separated by commas with a line break at the end 
+	                }
+				?>
+            </div>
 
             <p class="hidden"><?php _e( 'Categorised in: ', 'html5blank' ); the_category(', '); // Separated by commas ?></p>
-
-            <p class="hidden"><?php _e( 'This post was written by ', 'html5blank' ); the_author(); ?></p>
 		</article>
 		<!-- /article -->
 

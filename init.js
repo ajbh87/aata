@@ -1,12 +1,9 @@
-import saKnife from './js/libs/saKnife.js';
-window.saKnife = saKnife;
-import Immutable from './node_modules/immutable/dist/immutable.js';
-window.Immutable = Immutable;
-import moment from './node_modules/moment/moment.js';
-window.moment = moment;
-window.moment.locale('es');
 import angular from './node_modules/angular/index.js';
-window.angular = angular;
-import ngSanitize from './node_modules/angular-sanitize/index.js';
 import ngResource from './node_modules/angular-resource/index.js';
-import ngAnimate from './node_modules/angular-animate/index.js';
+import initComponents from './js/components.js';
+
+initComponents(angular);
+angular.module('aata', [ 'components' ])
+    .controller('MainController', ['$document', '$scope', function($document, $scope) {
+
+    }]);
