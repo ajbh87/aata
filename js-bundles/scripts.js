@@ -93,6 +93,8 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
 var _saKnife = __webpack_require__(6);
 
 var _saKnife2 = _interopRequireDefault(_saKnife);
@@ -105,70 +107,92 @@ var _index = __webpack_require__(8);
 
 var _index2 = _interopRequireDefault(_index);
 
+var _index3 = __webpack_require__(11);
+
+var _index4 = _interopRequireDefault(_index3);
+
+var _index5 = __webpack_require__(12);
+
+var _index6 = _interopRequireDefault(_index5);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var _ = {
+    debounce: _index4.default,
+    defer: _index6.default,
     find: _index2.default
 };
 function initComponents(angular) {
     var jqLite = angular.element;
     angular.module('components', ['ngResource']).directive('aataResources', ['$compile', '$q', '$sce', '$resource', '$templateCache', '$cacheFactory', '$timeout', '$document', function ($compile, $q, $sce, $resource, $templateCache, $cacheFactory, $timeout, $document) {
-        var stateConstructor = function stateConstructor() {
-            var def = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+        var stateConstructor = function () {
+            function stateConstructor() {
+                var def = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-            _classCallCheck(this, stateConstructor);
+                _classCallCheck(this, stateConstructor);
 
-            var s = _immutable2.default.Map(def),
-                dispatcher = function dispatcher(s) {};
-            var options = s,
-                keyDispatchers = {};
+                this.s = _immutable2.default.Map(def);
+                this.pristine = this.s;
+                this.dispatcher = function (s) {};
+                this.keyDispatchers = {};
+            }
 
-            this.set = function (key, value) {
-                s = s.set(key, value);
-                if (keyDispatchers[key] != null) {
-                    keyDispatchers[key](value, s.toObject());
-                }
-            };
-            this.setMultiple = function (obj) {
-                return s = s.concat(obj);
-            };
-            this.new = function (obj) {
-                return s = options.concat(obj);
-            };
-            this.get = function (key) {
-                return s.get(key);
-            };
-            this.setDispatch = function (fn) {
-                return dispatcher = fn;
-            };
-            this.dispatch = function () {
-                return dispatcher(s.toObject());
-            };
-            this.setKeyDispatcher = function (key1, fn) {
-                s.forEach(function (val, key2) {
-                    if (key1 === key2) {
-                        keyDispatchers[key1] = fn;
-                        return false;
+            _createClass(stateConstructor, [{
+                key: 'set',
+                value: function set(key, value) {
+                    this.s = this.s.set(key, value);
+                    if (this.keyDispatchers[key] != null) {
+                        this.keyDispatchers[key](value, this.s.toObject());
                     }
-                });
-            };
-            this.getObj = function () {
-                return s.toObject();
-            };
-        };
+                }
+            }, {
+                key: 'setDispatch',
+                value: function setDispatch(fn) {
+                    this.dispatcher = fn;
+                }
+            }, {
+                key: 'dispatch',
+                value: function dispatch() {
+                    this.dispatcher(this.s.toObject());
+                }
+            }, {
+                key: 'setKeyDispatcher',
+                value: function setKeyDispatcher(key1, fn) {
+                    var _this = this;
+
+                    this.s.forEach(function (val, key2) {
+                        if (key1 === key2) {
+                            _this.keyDispatchers[key1] = fn;
+                            return false;
+                        }
+                    });
+                }
+            }, {
+                key: 'setMultiple',
+                value: function setMultiple(obj) {
+                    this.s = this.s.concat(obj);
+                }
+            }, {
+                key: 'new',
+                value: function _new(obj) {
+                    this.s = this.pristine.concat(obj);
+                }
+            }]);
+
+            return stateConstructor;
+        }();
 
         ;
 
         var main = $document[0].querySelector('.main'),
             lang = getLang(),
-            jqWindow = jqLite(window),
-            mainJQ = jqLite(main),
             base = lang.url,
             restUrl = base + '/wp-json/wp/v2',
             cache = {
-            posts: $cacheFactory('posts')
+            posts: [],
+            tags: []
         },
             defaultResourceOptions = {
             get: { method: 'GET', cache: true },
@@ -178,10 +202,7 @@ function initComponents(angular) {
             allPosts: $resource(restUrl + '/:type?page=:page', {
                 type: 'posts',
                 page: '@pageNum'
-            }, {
-                get: { method: 'GET', cache: cache.posts },
-                query: { method: 'GET', cache: cache.posts, isArray: true }
-            }),
+            }, defaultResourceOptions),
             byFilter: $resource(restUrl + '/:type?:filter=:slug&page=:page', {
                 type: '@type',
                 filter: '@filter',
@@ -199,13 +220,20 @@ function initComponents(angular) {
         },
             get = {
             postsPage: function postsPage(page) {
-                return rest.allPosts.query({ page: page }).$promise;
+                var request = rest.allPosts.query({ page: page }, function (val) {
+                    cache.posts = cache.posts.concat(val);
+                });
+                return request.$promise;
             },
             byFilter: function byFilter(slug, type, filter) {
                 var page = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 1;
-                return rest.byFilter.query({
-                    type: type, filter: filter, slug: slug, page: page
-                }).$promise;
+
+                var request = rest.byFilter.query({ type: type, filter: filter, slug: slug, page: page }, function (val) {
+                    if (type === 'posts' && filter === 'tags') {
+                        cache.tags = cache.tags.concat(val);
+                    }
+                });
+                return request.$promise;
             },
             byId: function byId(type, id) {
                 return rest.byId.get({ type: type, id: id }).$promise;
@@ -233,7 +261,12 @@ function initComponents(angular) {
         }),
             allUsersDef = reallyGetAll('users'),
             allTagsDef = reallyGetAll('tags');
-        var unbindLoop = checkIfLoop();
+        var unbindLoop = function unbindLoop() {};
+        jqLite(window).on('scroll', _.debounce(checkScrollPosition, 250));
+
+        checkIfLoop().then(function (fn) {
+            unbindLoop = fn;
+        });
         return {
             link: function link(scope, element, attrs) {
                 var fetch = {
@@ -364,14 +397,27 @@ function initComponents(angular) {
                     jqLite(window).on('popstate', function (event) {
                         event.preventDefault();
                         var eventState = event.state;
-                        var posts = cache.posts;
+
                         // Verify if history item was loaded through ajax
                         if (eventState != null) {
                             eventState.animated = prepareWindow();
                             state.new(eventState);
-                            setContent(eventState);
+                            if (eventState.requestType === 'loop' && eventState.currentPage > 1) {
+                                loopPosts(state.s.toObject());
+                            } else {
+                                setContent(eventState);
+                            }
                         } else {
                             fetch.postOrPage(window.location.href.replace(base, ''), true);
+                        }
+                        function loopPosts(subState) {
+                            subState.val = cache[subState.loopType];
+                            $q.when(setContent(subState)).then(function () {
+                                var y = state.s.get('scrolled');
+                                if (window.scrollTo != null) {
+                                    window.scrollTo(0, y);
+                                }
+                            });
                         }
                     });
                 });
@@ -416,7 +462,7 @@ function initComponents(angular) {
                     }
                 }
                 function changeState(obj) {
-                    var oldState = state.getObj();
+                    var oldState = state.s.toObject();
                     history.replaceState(oldState, '', oldState.url);
                     if (obj.requestType === 'loop') {
                         obj.currentPage = 1;
@@ -438,14 +484,17 @@ function initComponents(angular) {
                 function prepareWindow(append, small) {
                     var def = $q.defer();
                     state.set('scrolled', window.scrollY);
-
+                    debugger;
                     if (small === true) scope.showScreenSm = true;else scope.showScreen = true;
-                    $timeout(function () {
-                        if (window.scrollTo != null && append == null) {
-                            window.scrollTo(0, 0);
-                        }
-                        def.resolve();
-                    }, 200);
+                    _.defer(function () {
+                        scope.$digest();
+                        $timeout(function () {
+                            if (window.scrollTo != null && append == null) {
+                                window.scrollTo(0, 0);
+                            }
+                            def.resolve();
+                        }, 200);
+                    });
                     return def.promise;
                 }
                 function setContent(s, append) {
@@ -456,8 +505,8 @@ function initComponents(angular) {
                             subScope = scope.$new();
                         if (s.requestType === 'posts') {
                             s.meta = {
-                                author: _.find(values[1], function (o) {
-                                    return o.id === s.val.author;
+                                author: _.find(values[1], function (author) {
+                                    return author.id === s.val.author;
                                 })
                             };
                         }
@@ -474,9 +523,9 @@ function initComponents(angular) {
                         scope.showMenu = false;
 
                         el = $compile(template)(subScope);
-                        if (append !== true) mainJQ.empty();
 
-                        mainJQ.append(el);
+                        if (append !== true) jqLite(main).empty();
+                        jqLite(main).append(el);
                         $timeout(function () {
                             scope.$digest();
                             def.resolve();
@@ -493,7 +542,7 @@ function initComponents(angular) {
                     return def.promise;
                 }
                 function loopDispatcher(val) {
-                    var currentState = state.getObj(),
+                    var currentState = state.s.toObject(),
                         nextPage = currentState.currentPage + 1;
                     var promise = void 0,
                         animated = void 0;
@@ -511,7 +560,7 @@ function initComponents(angular) {
                                     currentPage: nextPage,
                                     val: val
                                 });
-                                setContent(state.getObj(), true);
+                                setContent(state.s.toObject(), true);
                             } else {
                                 state.setMultiple({
                                     lastPage: true
@@ -524,6 +573,9 @@ function initComponents(angular) {
                 }
             }
         };
+        function checkScrollPosition() {
+            state.s.set('scrolled', window.scrollY);
+        }
         function reallyGetAll(name) {
             var def = $q.defer();
             var page = 1,
@@ -546,37 +598,38 @@ function initComponents(angular) {
         }
         function checkIfLoop() {
             var slug = window.location.href.replace(base, ''),
-                isTag = slug.includes('tag');
+                isTag = slug.includes('tag'),
+                def = $q.defer();
             if (isTag === true || slug === '/') {
                 if (isTag === true) {
                     $q.when(allTagsDef).then(function (tags) {
-                        var found = [];
-                        tags.forEach(function (tag) {
-                            if (tag.link === window.location.href) found.push(tag);
-                            return false;
+                        var tagMeta = _.find(tags, function (tag) {
+                            return tag.link === window.location.href;
                         });
-                        if (found.length > 0) state.set('meta', found[0]);
-                    });
-                    state.setMultiple({
-                        url: window.location.href,
-                        requestType: 'loop',
-                        loopType: 'tags'
+                        state.new({
+                            loopType: 'tags',
+                            meta: tagMeta,
+                            requestType: 'loop',
+                            url: window.location.href
+                        });
+                        def.resolve(bindLoop());
                     });
                 } else {
                     // Post loop 
                     get.postsPage(1).then(function (val) {
                         state.set('val', val);
                     });
-                    state.setMultiple({
+                    state.new({
                         url: window.location.href,
                         requestType: 'loop',
                         loopType: 'posts'
                     });
+                    def.resolve(bindLoop());
                 }
-                return bindLoop();
             } else {
-                return function () {};
+                def.resolve(function () {});
             }
+            return def.promise;
         }
         function bindLoop() {
             var padding = 200;
@@ -584,8 +637,8 @@ function initComponents(angular) {
                 pastBottom = false;
             state.set('pastBottom', pastBottom);
 
-            jqWindow.on('resize', checkMainEnd).on('scroll', scrollBind);
-            mainJQ.on('resize', checkMainEnd);
+            jqLite(window).on('resize', checkMainEnd).on('scroll', scrollBind);
+            jqLite(main).on('resize', checkMainEnd);
 
             checkMainEnd();
             function checkMainEnd() {
@@ -600,8 +653,8 @@ function initComponents(angular) {
                 }
             }
             return function () {
-                mainJQ.off('resize', checkMainEnd);
-                jqWindow.off('resize', checkMainEnd).off('scroll', scrollBind);;
+                jqLite(main).off('resize', checkMainEnd);
+                jqLite(window).off('resize', checkMainEnd).off('scroll', scrollBind);;
             };
         }
         function getLang() {
@@ -42471,6 +42524,500 @@ module.exports = function(module) {
 	}
 	return module;
 };
+
+
+/***/ }),
+/* 11 */
+/***/ (function(module, exports, __webpack_require__) {
+
+/* WEBPACK VAR INJECTION */(function(global) {/**
+ * lodash (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright jQuery Foundation and other contributors <https://jquery.org/>
+ * Released under MIT license <https://lodash.com/license>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ */
+
+/** Used as the `TypeError` message for "Functions" methods. */
+var FUNC_ERROR_TEXT = 'Expected a function';
+
+/** Used as references for various `Number` constants. */
+var NAN = 0 / 0;
+
+/** `Object#toString` result references. */
+var symbolTag = '[object Symbol]';
+
+/** Used to match leading and trailing whitespace. */
+var reTrim = /^\s+|\s+$/g;
+
+/** Used to detect bad signed hexadecimal string values. */
+var reIsBadHex = /^[-+]0x[0-9a-f]+$/i;
+
+/** Used to detect binary string values. */
+var reIsBinary = /^0b[01]+$/i;
+
+/** Used to detect octal string values. */
+var reIsOctal = /^0o[0-7]+$/i;
+
+/** Built-in method references without a dependency on `root`. */
+var freeParseInt = parseInt;
+
+/** Detect free variable `global` from Node.js. */
+var freeGlobal = typeof global == 'object' && global && global.Object === Object && global;
+
+/** Detect free variable `self`. */
+var freeSelf = typeof self == 'object' && self && self.Object === Object && self;
+
+/** Used as a reference to the global object. */
+var root = freeGlobal || freeSelf || Function('return this')();
+
+/** Used for built-in method references. */
+var objectProto = Object.prototype;
+
+/**
+ * Used to resolve the
+ * [`toStringTag`](http://ecma-international.org/ecma-262/7.0/#sec-object.prototype.tostring)
+ * of values.
+ */
+var objectToString = objectProto.toString;
+
+/* Built-in method references for those with the same name as other `lodash` methods. */
+var nativeMax = Math.max,
+    nativeMin = Math.min;
+
+/**
+ * Gets the timestamp of the number of milliseconds that have elapsed since
+ * the Unix epoch (1 January 1970 00:00:00 UTC).
+ *
+ * @static
+ * @memberOf _
+ * @since 2.4.0
+ * @category Date
+ * @returns {number} Returns the timestamp.
+ * @example
+ *
+ * _.defer(function(stamp) {
+ *   console.log(_.now() - stamp);
+ * }, _.now());
+ * // => Logs the number of milliseconds it took for the deferred invocation.
+ */
+var now = function() {
+  return root.Date.now();
+};
+
+/**
+ * Creates a debounced function that delays invoking `func` until after `wait`
+ * milliseconds have elapsed since the last time the debounced function was
+ * invoked. The debounced function comes with a `cancel` method to cancel
+ * delayed `func` invocations and a `flush` method to immediately invoke them.
+ * Provide `options` to indicate whether `func` should be invoked on the
+ * leading and/or trailing edge of the `wait` timeout. The `func` is invoked
+ * with the last arguments provided to the debounced function. Subsequent
+ * calls to the debounced function return the result of the last `func`
+ * invocation.
+ *
+ * **Note:** If `leading` and `trailing` options are `true`, `func` is
+ * invoked on the trailing edge of the timeout only if the debounced function
+ * is invoked more than once during the `wait` timeout.
+ *
+ * If `wait` is `0` and `leading` is `false`, `func` invocation is deferred
+ * until to the next tick, similar to `setTimeout` with a timeout of `0`.
+ *
+ * See [David Corbacho's article](https://css-tricks.com/debouncing-throttling-explained-examples/)
+ * for details over the differences between `_.debounce` and `_.throttle`.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Function
+ * @param {Function} func The function to debounce.
+ * @param {number} [wait=0] The number of milliseconds to delay.
+ * @param {Object} [options={}] The options object.
+ * @param {boolean} [options.leading=false]
+ *  Specify invoking on the leading edge of the timeout.
+ * @param {number} [options.maxWait]
+ *  The maximum time `func` is allowed to be delayed before it's invoked.
+ * @param {boolean} [options.trailing=true]
+ *  Specify invoking on the trailing edge of the timeout.
+ * @returns {Function} Returns the new debounced function.
+ * @example
+ *
+ * // Avoid costly calculations while the window size is in flux.
+ * jQuery(window).on('resize', _.debounce(calculateLayout, 150));
+ *
+ * // Invoke `sendMail` when clicked, debouncing subsequent calls.
+ * jQuery(element).on('click', _.debounce(sendMail, 300, {
+ *   'leading': true,
+ *   'trailing': false
+ * }));
+ *
+ * // Ensure `batchLog` is invoked once after 1 second of debounced calls.
+ * var debounced = _.debounce(batchLog, 250, { 'maxWait': 1000 });
+ * var source = new EventSource('/stream');
+ * jQuery(source).on('message', debounced);
+ *
+ * // Cancel the trailing debounced invocation.
+ * jQuery(window).on('popstate', debounced.cancel);
+ */
+function debounce(func, wait, options) {
+  var lastArgs,
+      lastThis,
+      maxWait,
+      result,
+      timerId,
+      lastCallTime,
+      lastInvokeTime = 0,
+      leading = false,
+      maxing = false,
+      trailing = true;
+
+  if (typeof func != 'function') {
+    throw new TypeError(FUNC_ERROR_TEXT);
+  }
+  wait = toNumber(wait) || 0;
+  if (isObject(options)) {
+    leading = !!options.leading;
+    maxing = 'maxWait' in options;
+    maxWait = maxing ? nativeMax(toNumber(options.maxWait) || 0, wait) : maxWait;
+    trailing = 'trailing' in options ? !!options.trailing : trailing;
+  }
+
+  function invokeFunc(time) {
+    var args = lastArgs,
+        thisArg = lastThis;
+
+    lastArgs = lastThis = undefined;
+    lastInvokeTime = time;
+    result = func.apply(thisArg, args);
+    return result;
+  }
+
+  function leadingEdge(time) {
+    // Reset any `maxWait` timer.
+    lastInvokeTime = time;
+    // Start the timer for the trailing edge.
+    timerId = setTimeout(timerExpired, wait);
+    // Invoke the leading edge.
+    return leading ? invokeFunc(time) : result;
+  }
+
+  function remainingWait(time) {
+    var timeSinceLastCall = time - lastCallTime,
+        timeSinceLastInvoke = time - lastInvokeTime,
+        result = wait - timeSinceLastCall;
+
+    return maxing ? nativeMin(result, maxWait - timeSinceLastInvoke) : result;
+  }
+
+  function shouldInvoke(time) {
+    var timeSinceLastCall = time - lastCallTime,
+        timeSinceLastInvoke = time - lastInvokeTime;
+
+    // Either this is the first call, activity has stopped and we're at the
+    // trailing edge, the system time has gone backwards and we're treating
+    // it as the trailing edge, or we've hit the `maxWait` limit.
+    return (lastCallTime === undefined || (timeSinceLastCall >= wait) ||
+      (timeSinceLastCall < 0) || (maxing && timeSinceLastInvoke >= maxWait));
+  }
+
+  function timerExpired() {
+    var time = now();
+    if (shouldInvoke(time)) {
+      return trailingEdge(time);
+    }
+    // Restart the timer.
+    timerId = setTimeout(timerExpired, remainingWait(time));
+  }
+
+  function trailingEdge(time) {
+    timerId = undefined;
+
+    // Only invoke if we have `lastArgs` which means `func` has been
+    // debounced at least once.
+    if (trailing && lastArgs) {
+      return invokeFunc(time);
+    }
+    lastArgs = lastThis = undefined;
+    return result;
+  }
+
+  function cancel() {
+    if (timerId !== undefined) {
+      clearTimeout(timerId);
+    }
+    lastInvokeTime = 0;
+    lastArgs = lastCallTime = lastThis = timerId = undefined;
+  }
+
+  function flush() {
+    return timerId === undefined ? result : trailingEdge(now());
+  }
+
+  function debounced() {
+    var time = now(),
+        isInvoking = shouldInvoke(time);
+
+    lastArgs = arguments;
+    lastThis = this;
+    lastCallTime = time;
+
+    if (isInvoking) {
+      if (timerId === undefined) {
+        return leadingEdge(lastCallTime);
+      }
+      if (maxing) {
+        // Handle invocations in a tight loop.
+        timerId = setTimeout(timerExpired, wait);
+        return invokeFunc(lastCallTime);
+      }
+    }
+    if (timerId === undefined) {
+      timerId = setTimeout(timerExpired, wait);
+    }
+    return result;
+  }
+  debounced.cancel = cancel;
+  debounced.flush = flush;
+  return debounced;
+}
+
+/**
+ * Checks if `value` is the
+ * [language type](http://www.ecma-international.org/ecma-262/7.0/#sec-ecmascript-language-types)
+ * of `Object`. (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is an object, else `false`.
+ * @example
+ *
+ * _.isObject({});
+ * // => true
+ *
+ * _.isObject([1, 2, 3]);
+ * // => true
+ *
+ * _.isObject(_.noop);
+ * // => true
+ *
+ * _.isObject(null);
+ * // => false
+ */
+function isObject(value) {
+  var type = typeof value;
+  return !!value && (type == 'object' || type == 'function');
+}
+
+/**
+ * Checks if `value` is object-like. A value is object-like if it's not `null`
+ * and has a `typeof` result of "object".
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is object-like, else `false`.
+ * @example
+ *
+ * _.isObjectLike({});
+ * // => true
+ *
+ * _.isObjectLike([1, 2, 3]);
+ * // => true
+ *
+ * _.isObjectLike(_.noop);
+ * // => false
+ *
+ * _.isObjectLike(null);
+ * // => false
+ */
+function isObjectLike(value) {
+  return !!value && typeof value == 'object';
+}
+
+/**
+ * Checks if `value` is classified as a `Symbol` primitive or object.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to check.
+ * @returns {boolean} Returns `true` if `value` is a symbol, else `false`.
+ * @example
+ *
+ * _.isSymbol(Symbol.iterator);
+ * // => true
+ *
+ * _.isSymbol('abc');
+ * // => false
+ */
+function isSymbol(value) {
+  return typeof value == 'symbol' ||
+    (isObjectLike(value) && objectToString.call(value) == symbolTag);
+}
+
+/**
+ * Converts `value` to a number.
+ *
+ * @static
+ * @memberOf _
+ * @since 4.0.0
+ * @category Lang
+ * @param {*} value The value to process.
+ * @returns {number} Returns the number.
+ * @example
+ *
+ * _.toNumber(3.2);
+ * // => 3.2
+ *
+ * _.toNumber(Number.MIN_VALUE);
+ * // => 5e-324
+ *
+ * _.toNumber(Infinity);
+ * // => Infinity
+ *
+ * _.toNumber('3.2');
+ * // => 3.2
+ */
+function toNumber(value) {
+  if (typeof value == 'number') {
+    return value;
+  }
+  if (isSymbol(value)) {
+    return NAN;
+  }
+  if (isObject(value)) {
+    var other = typeof value.valueOf == 'function' ? value.valueOf() : value;
+    value = isObject(other) ? (other + '') : other;
+  }
+  if (typeof value != 'string') {
+    return value === 0 ? value : +value;
+  }
+  value = value.replace(reTrim, '');
+  var isBinary = reIsBinary.test(value);
+  return (isBinary || reIsOctal.test(value))
+    ? freeParseInt(value.slice(2), isBinary ? 2 : 8)
+    : (reIsBadHex.test(value) ? NAN : +value);
+}
+
+module.exports = debounce;
+
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(9)))
+
+/***/ }),
+/* 12 */
+/***/ (function(module, exports) {
+
+/**
+ * lodash (Custom Build) <https://lodash.com/>
+ * Build: `lodash modularize exports="npm" -o ./`
+ * Copyright jQuery Foundation and other contributors <https://jquery.org/>
+ * Released under MIT license <https://lodash.com/license>
+ * Based on Underscore.js 1.8.3 <http://underscorejs.org/LICENSE>
+ * Copyright Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ */
+
+/** Used as the `TypeError` message for "Functions" methods. */
+var FUNC_ERROR_TEXT = 'Expected a function';
+
+/**
+ * A faster alternative to `Function#apply`, this function invokes `func`
+ * with the `this` binding of `thisArg` and the arguments of `args`.
+ *
+ * @private
+ * @param {Function} func The function to invoke.
+ * @param {*} thisArg The `this` binding of `func`.
+ * @param {Array} args The arguments to invoke `func` with.
+ * @returns {*} Returns the result of `func`.
+ */
+function apply(func, thisArg, args) {
+  switch (args.length) {
+    case 0: return func.call(thisArg);
+    case 1: return func.call(thisArg, args[0]);
+    case 2: return func.call(thisArg, args[0], args[1]);
+    case 3: return func.call(thisArg, args[0], args[1], args[2]);
+  }
+  return func.apply(thisArg, args);
+}
+
+/* Built-in method references for those with the same name as other `lodash` methods. */
+var nativeMax = Math.max;
+
+/**
+ * The base implementation of `_.delay` and `_.defer` which accepts `args`
+ * to provide to `func`.
+ *
+ * @private
+ * @param {Function} func The function to delay.
+ * @param {number} wait The number of milliseconds to delay invocation.
+ * @param {Array} args The arguments to provide to `func`.
+ * @returns {number} Returns the timer id.
+ */
+function baseDelay(func, wait, args) {
+  if (typeof func != 'function') {
+    throw new TypeError(FUNC_ERROR_TEXT);
+  }
+  return setTimeout(function() { func.apply(undefined, args); }, wait);
+}
+
+/**
+ * The base implementation of `_.rest` which doesn't validate or coerce arguments.
+ *
+ * @private
+ * @param {Function} func The function to apply a rest parameter to.
+ * @param {number} [start=func.length-1] The start position of the rest parameter.
+ * @returns {Function} Returns the new function.
+ */
+function baseRest(func, start) {
+  start = nativeMax(start === undefined ? (func.length - 1) : start, 0);
+  return function() {
+    var args = arguments,
+        index = -1,
+        length = nativeMax(args.length - start, 0),
+        array = Array(length);
+
+    while (++index < length) {
+      array[index] = args[start + index];
+    }
+    index = -1;
+    var otherArgs = Array(start + 1);
+    while (++index < start) {
+      otherArgs[index] = args[index];
+    }
+    otherArgs[start] = array;
+    return apply(func, this, otherArgs);
+  };
+}
+
+/**
+ * Defers invoking the `func` until the current call stack has cleared. Any
+ * additional arguments are provided to `func` when it's invoked.
+ *
+ * @static
+ * @memberOf _
+ * @since 0.1.0
+ * @category Function
+ * @param {Function} func The function to defer.
+ * @param {...*} [args] The arguments to invoke `func` with.
+ * @returns {number} Returns the timer id.
+ * @example
+ *
+ * _.defer(function(text) {
+ *   console.log(text);
+ * }, 'deferred');
+ * // => Logs 'deferred' after one or more milliseconds.
+ */
+var defer = baseRest(function(func, args) {
+  return baseDelay(func, 1, args);
+});
+
+module.exports = defer;
 
 
 /***/ })

@@ -1,7 +1,11 @@
 import saKnife from './libs/saKnife.js';
 import Immutable from '../node_modules/immutable/dist/immutable.js';
 import find from '../node_modules/lodash.find/index.js';
+import debounce from '../node_modules/lodash.debounce/index.js';
+import defer from '../node_modules/lodash.defer/index.js';
 const _ = {
+    debounce,
+    defer,
     find
 }
 function initComponents(angular) {
@@ -11,42 +15,46 @@ function initComponents(angular) {
         ($compile, $q, $sce, $resource, $templateCache, $cacheFactory, $timeout, $document) => {
         class stateConstructor {
             constructor(def = {}) {
-                let s = Immutable.Map(def),
-                    dispatcher = (s) => {};
-                const options = s,
-                    keyDispatchers = {};
-
-                this.set = (key, value) => {
-                    s = s.set(key, value);
-                    if (keyDispatchers[key] != null) {
-                        keyDispatchers[key](value, s.toObject());
+                this.s = Immutable.Map(def);
+                this.pristine = this.s;
+                this.dispatcher = (s) => {};
+                this.keyDispatchers = {};
+            }
+            set(key, value) {
+                this.s = this.s.set(key, value);
+                if (this.keyDispatchers[key] != null) {
+                    this.keyDispatchers[key](value, this.s.toObject());
+                }
+            }
+            setDispatch(fn) {
+                this.dispatcher = fn;
+            }
+            dispatch() {
+                this.dispatcher(this.s.toObject());
+            }
+            setKeyDispatcher(key1, fn) {
+                this.s.forEach((val, key2) => {
+                    if (key1 === key2) {
+                        this.keyDispatchers[key1] = fn; 
+                        return false; 
                     }
-                };
-                this.setMultiple = (obj) => s = s.concat(obj);
-                this.new = (obj) => s = options.concat(obj);
-                this.get = (key) => s.get(key);
-                this.setDispatch = (fn) => dispatcher = fn;
-                this.dispatch = () => dispatcher(s.toObject());
-                this.setKeyDispatcher = (key1, fn) => {
-                    s.forEach((val, key2) => {
-                        if (key1 === key2) {
-                            keyDispatchers[key1] = fn; 
-                            return false; 
-                        }
-                    });
-                };
-                this.getObj = () => s.toObject();
+                });
+            };
+            setMultiple(obj) {
+                this.s = this.s.concat(obj);
+            }
+            new(obj){
+                this.s = this.pristine.concat(obj);
             }
         };
         
         const main = $document[0].querySelector('.main'),
             lang = getLang(),
-            jqWindow = jqLite(window),
-            mainJQ = jqLite(main),
             base = lang.url,
             restUrl = base + '/wp-json/wp/v2',
             cache = {
-                posts: $cacheFactory('posts')
+                posts: [],
+                tags: []
             },
             defaultResourceOptions = {
                 get: { method:'GET', cache: true},
@@ -56,10 +64,7 @@ function initComponents(angular) {
                 allPosts: $resource(restUrl + '/:type?page=:page', {
                     type: 'posts',
                     page: '@pageNum'
-                }, {
-                    get: { method:'GET', cache: cache.posts},
-                    query: { method:'GET', cache: cache.posts, isArray:true }
-                }),
+                }, defaultResourceOptions),
                 byFilter: $resource(restUrl + '/:type?:filter=:slug&page=:page', { 
                     type: '@type',
                     filter: '@filter',
@@ -76,10 +81,20 @@ function initComponents(angular) {
                 }, defaultResourceOptions)
             },
             get = {
-                postsPage: (page) => rest.allPosts.query({ page }).$promise,
-                byFilter: (slug, type, filter, page = 1) => rest.byFilter.query({ 
-                    type, filter, slug, page
-                }).$promise, 
+                postsPage: (page) => {
+                    let request = rest.allPosts.query({ page }, (val) => {
+                        cache.posts = cache.posts.concat(val);
+                    });
+                    return request.$promise;
+                },
+                byFilter: (slug, type, filter, page = 1) => {
+                    let request = rest.byFilter.query({ type, filter, slug, page }, (val) => {
+                        if (type === 'posts' && filter === 'tags') {
+                            cache.tags = cache.tags.concat(val);
+                        }
+                    });
+                    return request.$promise;
+                }, 
                 byId: (type, id) => rest.byId.get({ type, id }).$promise,
                 all: (type, perPage) => rest.all.query({ type, perPage }).$promise
             },
@@ -100,9 +115,14 @@ function initComponents(angular) {
             }),
             allUsersDef = reallyGetAll('users'),
             allTagsDef = reallyGetAll('tags');
-        let unbindLoop = checkIfLoop();
+        let unbindLoop = () => {};
+        jqLite(window).on('scroll', _.debounce(checkScrollPosition, 250));
+
+        checkIfLoop().then((fn) => {
+            unbindLoop = fn;
+        });
         return {
-            link: (scope, element, attrs) => {
+            link: function (scope, element, attrs) {
                 const fetch = {
                     byId: ($event, type, id) => {
                         $event.preventDefault();
@@ -229,15 +249,28 @@ function initComponents(angular) {
                     jqLite(window).on('popstate', (event) => {
                         event.preventDefault();
                         const eventState = event.state;
-                        let posts = cache.posts
+
                         // Verify if history item was loaded through ajax
                         if (eventState != null) {
                             eventState.animated = prepareWindow();
                             state.new(eventState);
-                            setContent(eventState);
+                            if (eventState.requestType === 'loop' && eventState.currentPage > 1) {
+                                loopPosts(state.s.toObject());
+                            } else {
+                                setContent(eventState);
+                            }
                         }
                         else {
                             fetch.postOrPage(window.location.href.replace(base, ''), true);
+                        }
+                        function loopPosts(subState) {
+                            subState.val = cache[subState.loopType];
+                            $q.when(setContent(subState)).then(() => {
+                                const y = state.s.get('scrolled');
+                                if (window.scrollTo != null) {
+                                    window.scrollTo(0, y);
+                                }
+                            });
                         }
                     });    
                 });
@@ -278,7 +311,7 @@ function initComponents(angular) {
                     }
                 }
                 function changeState(obj) {
-                    const oldState = state.getObj();
+                    const oldState = state.s.toObject();
                     history.replaceState(oldState, '', oldState.url);
                     if (obj.requestType === 'loop') {
                         obj.currentPage = 1;
@@ -300,15 +333,18 @@ function initComponents(angular) {
                 function prepareWindow(append, small) {
                     const def = $q.defer();
                     state.set('scrolled', window.scrollY);
-
+                    debugger;
                     if (small === true) scope.showScreenSm = true;
-                    else scope.showScreen = true;                    
-                    $timeout(() => {
-                        if (window.scrollTo != null && append == null) {
-                            window.scrollTo(0, 0);
-                        }
-                        def.resolve();
-                    }, 200);
+                    else scope.showScreen = true;
+                    _.defer(function() {
+                        scope.$digest();
+                        $timeout(() => {
+                            if (window.scrollTo != null && append == null) {
+                                window.scrollTo(0, 0);
+                            }
+                            def.resolve();
+                        }, 200);
+                    });      
                     return def.promise;
                 }
                 function setContent(s, append) {
@@ -320,7 +356,7 @@ function initComponents(angular) {
                                 subScope = scope.$new();
                             if (s.requestType === 'posts') {
                                 s.meta = {
-                                    author: _.find(values[1], (o) => o.id === s.val.author )
+                                    author: _.find(values[1], (author) => author.id === s.val.author )
                                 };
                             }
                             subScope = Object.assign(subScope, {
@@ -336,9 +372,9 @@ function initComponents(angular) {
                             scope.showMenu = false; 
 
                             el = $compile(template)(subScope);
-                            if (append !== true) mainJQ.empty();
 
-                            mainJQ.append(el);
+                            if (append !== true) jqLite(main).empty();
+                            jqLite(main).append(el);
                             $timeout(() => {
                                 scope.$digest();
                                 def.resolve();
@@ -355,7 +391,7 @@ function initComponents(angular) {
                     return def.promise;
                 }
                 function loopDispatcher(val) {
-                    const currentState = state.getObj(),
+                    const currentState = state.s.toObject(),
                         nextPage = currentState.currentPage + 1;
                     let promise, animated;
                     if (val === true && currentState.requestType === 'loop' && currentState.lastPage !== true) {
@@ -372,7 +408,7 @@ function initComponents(angular) {
                                     currentPage: nextPage,
                                     val
                                 });
-                                setContent(state.getObj(), true);
+                                setContent(state.s.toObject(), true);
                             }
                             else {
                                 state.setMultiple({
@@ -386,6 +422,9 @@ function initComponents(angular) {
                 }
             }
         };
+        function checkScrollPosition() {
+            state.s.set('scrolled', window.scrollY);
+        }
         function reallyGetAll(name) {
             const def = $q.defer();
             let page = 1,
@@ -408,37 +447,36 @@ function initComponents(angular) {
         }
         function checkIfLoop() {
             const slug = window.location.href.replace(base, ''),
-                isTag = slug.includes('tag');
+                isTag = slug.includes('tag'),
+                def = $q.defer();
             if (isTag === true || slug === '/') {
                 if (isTag === true) {
                     $q.when(allTagsDef).then((tags) => {
-                        let found = [];
-                        tags.forEach((tag) => {
-                            if (tag.link === window.location.href) found.push(tag);
-                            return false;
+                        let tagMeta = _.find(tags, (tag) => tag.link === window.location.href);
+                        state.new({
+                            loopType: 'tags',
+                            meta: tagMeta,
+                            requestType: 'loop',
+                            url: window.location.href
                         });
-                        if (found.length > 0) state.set('meta', found[0]);
-                    });
-                    state.setMultiple({
-                        url: window.location.href,
-                        requestType: 'loop',
-                        loopType: 'tags'
+                        def.resolve(bindLoop());
                     });
                 } else {
                     // Post loop 
                     get.postsPage(1).then((val) => {
                         state.set('val', val)
                     });
-                    state.setMultiple({
+                    state.new({
                         url: window.location.href,
                         requestType: 'loop',
                         loopType: 'posts'
                     });
+                    def.resolve(bindLoop());
                 }
-                return bindLoop();
             } else {
-                return () => {};
+                def.resolve(() => {});
             }
+            return def.promise;
         }
         function bindLoop() {
             const padding = 200;
@@ -446,8 +484,8 @@ function initComponents(angular) {
                 pastBottom = false;
             state.set('pastBottom', pastBottom);
 
-            jqWindow.on('resize', checkMainEnd).on('scroll', scrollBind);
-            mainJQ.on('resize', checkMainEnd);
+            jqLite(window).on('resize', checkMainEnd).on('scroll', scrollBind);
+            jqLite(main).on('resize', checkMainEnd);
 
             checkMainEnd();
             function checkMainEnd() {
@@ -462,8 +500,8 @@ function initComponents(angular) {
                 }
             }
             return () => {
-                mainJQ.off('resize', checkMainEnd);
-                jqWindow.off('resize', checkMainEnd).off('scroll', scrollBind);;
+                jqLite(main).off('resize', checkMainEnd);
+                jqLite(window).off('resize', checkMainEnd).off('scroll', scrollBind);;
             };
         }
         function getLang() {
