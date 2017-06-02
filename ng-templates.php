@@ -1,11 +1,15 @@
+    <?php 
+        // script url
+        $scriptUrl = "https://script.google.com/macros/s/AKfycbxSLxSc1hQDCem19CwratFghY8qzc65iLYfPOIZMAQa9IE1u7k/exec";
+    ?>
     <script type="application/json" id="section-titles">
         {
             "url": "<?php echo home_url(); ?>",
             "archives": "<?php _e( 'Archives', 'html5blank' ); ?>",
             "categories": "<?php _e( 'Categories for ', 'html5blank' ); ?>",
             "posts": "<?php _e( 'Latest Posts', 'html5blank' ); ?>",
-            "tags": "<?php _e( 'Tags: ', 'html5blank' ); ?>",
-            "tagArchive": "<?php _e( 'Tag Archive: ', 'html5blank' ); ?>",
+            "tags": "<?php _e( 'Tag Archive: ', 'html5blank' ); ?>",
+            "author": "<?php _e( 'Tag Archive: ', 'html5blank' ); ?>",
             "categoriesIn": "<?php _e( 'Categorised in: ', 'html5blank' ); ?>"
         }
     </script>
@@ -13,7 +17,12 @@
         <section>
             <article class="article article--page page">
                 <h1 class="main__title" ng-bind-html="trustHtml(data.title.rendered)"></h1>
-                <div class="article__content" ng-bind-html="trustHtml(data.content.rendered)"></div>
+                <div class="article__content" 
+                    ng-if="data.slug !== 'contacto'"
+                    ng-bind-html="trustHtml(data.content.rendered)"></div>
+                <div class="article__content"
+                    ng-if="data.slug === 'contacto'"
+                    aata-form="<?php echo $scriptUrl; ?>"></div>
             </article>
         </section>
     </script>
@@ -49,7 +58,7 @@
             </div>
             <h1 class="main__title main__title--margin"
                 ng-if="append != true && loopType == 'tags'"
-                ng-bind="lang.tagArchive + ' ' + meta.name"></h1>
+                ng-bind="lang[loopType] + ' ' + meta.name"></h1>
             <article ng-repeat="item in data" 
                 id="post-{{item.id}}"
                 class="article">
@@ -79,4 +88,29 @@
                 <span class="sr-only">Expandir</span>
                 <?php get_template_part('img/icons/add'); ?>
         </button>
+    </script>
+    <script type="text/ng-template" id="form.html">
+        <form class="aata-form" method="POST" 
+            action="{{url}}">
+
+            <label class="aata-form__label" for="name">Nombre</label>
+            <input id="name" class="aata-form__input" name="name" ng-model="name" />
+
+            <label class="aata-form__label" for="lastName">Apellido Paterno</label>
+            <input id="lastName" class="aata-form__input" name="lastName" ng-model="lastName" />
+
+            <label class="aata-form__label" for="email">Email</label>
+            <input id="email" class="aata-form__input" name="email" ng-model="email" />
+
+            <label class="aata-form__label" for="tel">Teléfono</label>
+            <input id="tel" class="aata-form__input" name="tel" ng-model="tel" />
+
+            <label class="aata-form__label" for="comments">Preguntas o Comentarios</label>
+            <textarea id="comments" class="aata-form__input" name="comments"
+                    ng-model="comments"></textarea>
+
+            <button type="submit" class="button aata-form__button"
+                    ng-click="submitForm($event)"
+                    >Enviar</button>
+        </form>
     </script>

@@ -3,16 +3,57 @@ import Immutable from '../node_modules/immutable/dist/immutable.js';
 import find from '../node_modules/lodash.find/index.js';
 import debounce from '../node_modules/lodash.debounce/index.js';
 import defer from '../node_modules/lodash.defer/index.js';
+import unionWith from '../node_modules/lodash.unionwith/index.js';
+import isEqual from '../node_modules/lodash.isequal/index.js';
 const _ = {
     debounce,
     defer,
-    find
+    find,
+    isEqual,
+    unionWith
 }
 function initComponents(angular) {
     const jqLite = angular.element;
     angular.module('components', ['ngResource'])
-    .directive('aataResources', [ '$compile', '$q', '$sce', '$resource', '$templateCache', '$cacheFactory', '$timeout', '$document',
-        ($compile, $q, $sce, $resource, $templateCache, $cacheFactory, $timeout, $document) => {
+    .directive('aataForm', ['$http', function($http) {
+        //const url = 'https://script.google.com/macros/s/AKfycbxSLxSc1hQDCem19CwratFghY8qzc65iLYfPOIZMAQa9IE1u7k/exec';
+        return {
+            templateUrl: 'form.html',
+            scope: true,
+            link: function(scope, element, attrs) {
+                scope.submitForm = function(event) {
+                    event.preventDefault();
+                    const url = attrs.aataForm,
+                        formData = {
+                            Nombre: scope.name,
+                            Apellidos: scope.lastName
+                        };
+                    $http({
+                        method: 'POST',
+                        url: url,
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        data: getEncoded(formData)
+                    }).then(
+                        function success(response) {
+                            debugger;
+                        }, 
+                        function error(response) {
+                            debugger;
+                        }
+                    );
+                }               
+            }
+        }
+        function getEncoded(data) {
+            return Object.keys(data).map(function(k) {
+                    return encodeURIComponent(k) + '=' + encodeURIComponent(data[k])
+                }).join('&');
+        }
+    }])
+    .directive('aataResources', [ '$compile', '$q', '$sce', '$resource', '$templateCache', '$timeout', '$document',
+        function ($compile, $q, $sce, $resource, $templateCache, $timeout, $document) {
         class stateConstructor {
             constructor(def = {}) {
                 this.s = Immutable.Map(def);
@@ -83,7 +124,7 @@ function initComponents(angular) {
             get = {
                 postsPage: (page) => {
                     let request = rest.allPosts.query({ page }, (val) => {
-                        cache.posts = cache.posts.concat(val);
+                        cache.posts = _.unionWith(cache.posts, val, _.isEqual);
                     });
                     return request.$promise;
                 },
@@ -99,7 +140,7 @@ function initComponents(angular) {
                 all: (type, perPage) => rest.all.query({ type, perPage }).$promise
             },
             comeOnDude = [ base ], // strings
-            youShallNotPass = [ 'php', 'feed', 'wp-admin', 'contacto' ], // strings
+            youShallNotPass = [ 'php', 'feed', 'wp-admin' ], // strings
             state = new stateConstructor({
                 animated: null, // promise
                 currentPage: 1,
@@ -118,7 +159,59 @@ function initComponents(angular) {
         let unbindLoop = () => {};
         jqLite(window).on('scroll', _.debounce(checkScrollPosition, 250));
 
-        checkIfLoop().then((fn) => {
+        (function checkCurrentPage() {
+            const slug = window.location.href.replace(base, ''),
+                processed = processSlug(slug),
+                def = $q.defer();
+            let requestType = '';
+            if (processed.isTag || processed.isAuthor || processed.isSearch || processed === false) {
+                if (processed.isTag) {
+                    $q.when(allTagsDef).then((tags) => {
+                        let tagMeta = _.find(tags, (tag) => tag.link === window.location.href);
+                        state.new({
+                            loopType: 'tags',
+                            meta: tagMeta,
+                            requestType: 'loop',
+                            url: window.location.href
+                        });
+                        get.byFilter(tagMeta.id, 'posts', 'tags').then((val) => {
+                            state.set('val', val)
+                        });
+                        def.resolve(bindLoop());
+                    });
+                } else {
+                    // Post loop 
+                    state.new({
+                        url: window.location.href,
+                        requestType: 'loop',
+                        loopType: 'posts'
+                    });
+                    get.postsPage(1).then((val) => {
+                        state.set('val', val)
+                    });
+                    def.resolve(bindLoop());
+                }
+            } else {
+                if (processed.isPosts) {
+                    requestType = 'posts';
+                }
+                else {
+                    requestType = 'pages';
+                }
+                state.new({
+                    loopType: null,
+                    meta: {},
+                    requestType,
+                    url: window.location.href
+                });
+                // processed.slugArray[processed.slugArray.length - 1] = last
+                get.byFilter(processed.slugArray[processed.slugArray.length - 1], requestType, 'slug').then((val) => {
+                    state.set('val', val[0])
+                });
+                def.resolve(() => {});
+            }
+            return def.promise;
+        })().then((fn) => {
             unbindLoop = fn;
         });
         return {
@@ -155,34 +248,56 @@ function initComponents(angular) {
                             });
                         });
                     },
-                    postOrPage: (slug, replace) => {
-                        const types = ['pages', 'posts'];
-                        let promise = null,
-                            slugArray = slug.match(/(([a-zA-Z0-9-_]+)(?=\/*))/g),
+                    postOrPage: function(slug, replace) {
+                        const processed = processSlug(slug),
+                            slugArray = processed.slugArray,
+                            types = ['pages', 'posts'];
+
+                        let promise = $q.defer(),
                             pageNum = null,
                             slugIndex = 0,
                             cleanSlug = '',
                             requestType = '',
                             animated = prepareWindow(),
-                            filter = '';
+                            filter = '',
+                            loopType = '',
+                            meta = {};
 
                         if (slugArray != null) {
                             // Verify if it's a paging link
-                            if (slugArray[0] === 'page') {
+                            if (processed.isPagingPage) {
                                 pageNum = parseInt(slugArray[1]);
                                 if (typeof pageNum === 'number') {
                                     promise = get.postsPage(pageNum);
                                 }
                             }
-                            else if (slugArray[0] === 'announcements') {
+                            else if (processed.isPosts) {
                                 cleanSlug = slugArray[slugArray.length - 1];
                                 requestType = 'posts';
-                                if (slugArray[1] === 'author'){
-                                    filter = slugArray[1]; // ToDo
-                                } else {
-                                    filter = 'slug';
+                                if (processed.isAuthor || processed.isTag){
+                                    $q.all([allTagsDef, allUsersDef]).then((defValues) => {
+                                        const allTags = defValues[0],
+                                            allUsers = defValues[1];
+                                        if (processed.isTag) {
+                                            meta = _.find(allTags, (tag) => tag.slug === cleanSlug);
+                                            cleanSlug = meta.id;
+                                            filter = loopType = 'tags';
+                                        }
+                                        else {
+                                            meta = _.find(allUsers, (user) => user.slug === cleanSlug);
+                                            cleanSlug = meta.id;
+                                            filter = loopType = 'author';
+                                        }
+                                        requestType = 'loop';
+                                        get.byFilter(cleanSlug, 'posts', filter).then((val) => {
+                                            promise.resolve(val);
+                                        });
+                                    });
                                 }
-                                promise = get.byFilter(cleanSlug, requestType, filter);
+                                else {
+                                    filter = 'slug';
+                                    promise = get.byFilter(cleanSlug, 'posts', filter);
+                                }
                             }
                             else {                
                                 cleanSlug = slugArray[slugArray.length - 1];
@@ -191,13 +306,17 @@ function initComponents(angular) {
                             }
                             
                             $q.when(promise).then((values) => {
+                                let val = (processed.isAuthor || processed.isTag) ? values : values[0];
+
                                 if (values.length > 0) {
                                     changeState({
-                                        animated: animated,
-                                        requestType: requestType,
+                                        animated,
+                                        loopType,
+                                        meta,
+                                        replace,
+                                        requestType,
                                         url: base + slug,
-                                        val: values[0],
-                                        replace: replace
+                                        val
                                     });
                                 } else {
                                     getHome(animated);
@@ -333,18 +452,20 @@ function initComponents(angular) {
                 function prepareWindow(append, small) {
                     const def = $q.defer();
                     state.set('scrolled', window.scrollY);
-                    debugger;
+
                     if (small === true) scope.showScreenSm = true;
                     else scope.showScreen = true;
-                    _.defer(function() {
-                        scope.$digest();
-                        $timeout(() => {
-                            if (window.scrollTo != null && append == null) {
-                                window.scrollTo(0, 0);
-                            }
-                            def.resolve();
-                        }, 200);
-                    });      
+                    requestAnimationFrame(function() {
+                        requestAnimationFrame(function() {
+                            scope.$digest();
+                            $timeout(() => {
+                                if (window.scrollTo != null && append == null) {
+                                    window.scrollTo(0, 0);
+                                }
+                                def.resolve();
+                            }, 200);
+                        });      
+                    });
                     return def.promise;
                 }
                 function setContent(s, append) {
@@ -375,15 +496,17 @@ function initComponents(angular) {
 
                             if (append !== true) jqLite(main).empty();
                             jqLite(main).append(el);
-                            $timeout(() => {
-                                scope.$digest();
-                                def.resolve();
-                                bindLinks();
-                                if (s.requestType === 'loop') {
-                                    unbindLoop = bindLoop();
-                                } else {
-                                    unbindLoop();
-                                }
+                            requestAnimationFrame(function() {
+                                requestAnimationFrame(function () {
+                                    scope.$digest();
+                                    def.resolve();
+                                    bindLinks();
+                                    if (s.requestType === 'loop') {
+                                        unbindLoop = bindLoop();
+                                    } else {
+                                        unbindLoop();
+                                    }
+                                });
                             });
                         }, (val) => {
                             def.reject();
@@ -422,6 +545,28 @@ function initComponents(angular) {
                 }
             }
         };
+
+        function processSlug(slug) {
+            const slugArray = slug.replace(/#([a-zA-Z0-9\-\_])+/g, '')
+                                .match(/(([a-zA-Z0-9\-\_?=]+)(?=\/*))/g);
+            if (slugArray != null) {
+                let last = slugArray[slugArray.length - 1],
+                    isSearch = (last.indexOf('?s=') !== -1);
+                if (isSearch) {
+                    last = last.replace('?s=', '');
+                }
+                return {
+                    slugArray,
+                    isSearch,
+                    isTag: slugArray[1] === 'tag',
+                    isAuthor: slugArray[1] === 'author',
+                    isPosts: slugArray[0] === 'announcements',
+                    isPagingPage: slugArray[1] === 'page',
+                    isPage: slugArray[0] === 'page'
+                }
+            }
+            else return false; // isHome
+        }
         function checkScrollPosition() {
             state.s.set('scrolled', window.scrollY);
         }
@@ -444,39 +589,6 @@ function initComponents(angular) {
                     def.resolve(items);
                 }
             }
-        }
-        function checkIfLoop() {
-            const slug = window.location.href.replace(base, ''),
-                isTag = slug.includes('tag'),
-                def = $q.defer();
-            if (isTag === true || slug === '/') {
-                if (isTag === true) {
-                    $q.when(allTagsDef).then((tags) => {
-                        let tagMeta = _.find(tags, (tag) => tag.link === window.location.href);
-                        state.new({
-                            loopType: 'tags',
-                            meta: tagMeta,
-                            requestType: 'loop',
-                            url: window.location.href
-                        });
-                        def.resolve(bindLoop());
-                    });
-                } else {
-                    // Post loop 
-                    get.postsPage(1).then((val) => {
-                        state.set('val', val)
-                    });
-                    state.new({
-                        url: window.location.href,
-                        requestType: 'loop',
-                        loopType: 'posts'
-                    });
-                    def.resolve(bindLoop());
-                }
-            } else {
-                def.resolve(() => {});
-            }
-            return def.promise;
         }
         function bindLoop() {
             const padding = 200;
@@ -509,13 +621,10 @@ function initComponents(angular) {
             let titles = 'titles = ';
 
             return eval(titles + titlesEl.html());
-        }
-        function insertCachedPostPages() {
-            // ToDo
-        }
+        } 
     }])
-    .directive('aataMenu', ['$document', '$compile', '$templateCache', 
-        ($document, $compile, $templateCache) => {
+    .directive('aataMenu', ['$document', '$compile', '$templateCache',
+        function ($document, $compile, $templateCache) {
         return {
             link: (scope, element, attrs) => {
                 const selector = attrs.aataMenu,
