@@ -1,0 +1,49 @@
+// Buttons
+@mixin button-style($bg, $text) {
+    background: $bg;
+    color: $text;
+    .icon__fill {
+        fill: $text;    
+    }
+}
+@mixin button($bg, $text, $type: "", $border: false) {
+	font-weight: 700;
+	box-sizing: border-box;
+    transition: all .2s ease-out;
+    border: 0;
+    @include button-style($bg, $text);
+    
+    .icon__fill {
+        transition: all .2s ease-in-out;    
+    }
+    @if $type == 'round' {
+        border-radius: 50%;
+    }
+    @if $border == true {
+    	border: 2px solid $bg;
+    }
+    &:focus {
+        outline: 0;
+    }
+    & > .icon {
+        width: auto;
+        height: 100%;
+        max-width: 100%;
+    }
+}
+@mixin button-pad() {
+    line-height: 1;
+    padding: 0.3333rem 0.6666rem;
+}
+@mixin button-raise() {
+    transform: scale(1.1);
+    box-shadow: 0 1px 3px rgba(0,0,0,.25);
+}
+
+.button {
+	@include button($brand, #fff, '', true);
+    @include button-pad();
+    &:hover, &:focus {
+        @include button-style(#fff, $brand);
+    }
+}

@@ -15,35 +15,133 @@ const _ = {
 function initComponents(angular) {
     const jqLite = angular.element;
     angular.module('components', ['ngResource'])
+    .directive('aataScript', function() {
+        return {
+          //restrict: 'E',
+          scope: false,
+          link: function(scope, elem, attr) {
+            debugger;
+            if (attr.type==='text/javascript-lazy') 
+            {
+              var s = document.createElement("script");
+              s.type = "text/javascript";                
+              var src = elem.attr('src');
+              if(src!==undefined)
+              {
+                  s.src = src;
+              }
+              else
+              {
+                  var code = elem.text();
+                  s.text = code;
+              }
+              document.head.appendChild(s);
+              elem.remove();
+            }
+          }
+        };
+      })
     .directive('aataForm', ['$http', function($http) {
         //const url = 'https://script.google.com/macros/s/AKfycbxSLxSc1hQDCem19CwratFghY8qzc65iLYfPOIZMAQa9IE1u7k/exec';
         return {
             templateUrl: 'form.html',
             scope: true,
             link: function(scope, element, attrs) {
+                const url = attrs.aataForm;
+                const defs = Immutable.Map({
+                                    name: '',
+                                    lastName: '',
+                                    email: '',
+                                    tel: '',
+                                    asunto: {
+                                        adopcion: {
+                                            text: 'Adopción',
+                                            selected: false
+                                        },
+                                        capitul: {
+                                            text: 'Capitulaciones Matrimoniales',
+                                            selected: false
+                                        },
+                                        custodia: {
+                                            text: 'Custodia',
+                                            selected: false
+                                        },
+                                        decla: {
+                                            text: 'Declaratoria de Herederos',
+                                            selected: false
+                                        },
+                                        divi: {
+                                            text: 'División de Bienes Gananciales',
+                                            selected: false
+                                        },
+                                        divorcio: {
+                                            text: 'Divorcio',
+                                            selected: false
+                                        },
+                                        herencia: {
+                                            text: 'Herencia',
+                                            selected: false
+                                        },
+                                        patriaPot: {
+                                            text: 'Patria Potestad',
+                                            selected: false
+                                        },
+                                        pension: {
+                                            text: 'Pensión Alimentaria',
+                                            selected: false
+                                        },
+                                        otro: {
+                                            text: 'Otro',
+                                            selected: false
+                                        }
+                                    },
+                                    comments: ''
+                                });
+                scope = Object.assign(scope, defs.toObject());
                 scope.submitForm = function(event) {
                     event.preventDefault();
-                    const url = attrs.aataForm,
-                        formData = {
-                            Nombre: scope.name,
-                            Apellidos: scope.lastName
-                        };
-                    $http({
-                        method: 'POST',
-                        url: url,
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
-                        },
-                        data: getEncoded(formData)
-                    }).then(
-                        function success(response) {
-                            debugger;
-                        }, 
-                        function error(response) {
-                            debugger;
+                    window.submitForm = submitForm;
+                    grecaptcha.execute();
+
+                    function submitForm(token) {
+                        debugger;
+                        const formData = {
+                                Nombre: scope.name,
+                                Apellidos: scope.lastName,
+                                Email: scope.email,
+                                Telefono: scope.tel,
+                                Asunto: generateList(scope.asunto),
+                                Pregunta: scope.comments,
+                                'g-recaptcha-response': token
+                            },
+                            encoded = getEncoded(formData);
+                        debugger;
+                        $http({
+                            method: 'POST',
+                            url: url,
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            data: encoded
+                        }).then(
+                            function success(response) {
+                                debugger;
+                            }, 
+                            function error(response) {
+
+                            }
+                        );
+                        function generateList(items) {
+                            let list = '', key;
+                            for (key in items) {
+                                if (items[key].selected) {
+                                    list += ' - ' + items[key].text;
+                                }
+                            }
+                            return list;
                         }
-                    );
-                }               
+                    }
+                }
             }
         }
         function getEncoded(data) {
@@ -179,7 +277,8 @@ function initComponents(angular) {
                         });
                         def.resolve(bindLoop());
                     });
-                } else {
+                } 
+                else {
                     // Post loop 
                     state.new({
                         url: window.location.href,
@@ -371,13 +470,16 @@ function initComponents(angular) {
 
                         // Verify if history item was loaded through ajax
                         if (eventState != null) {
-                            eventState.animated = prepareWindow();
-                            state.new(eventState);
-                            if (eventState.requestType === 'loop' && eventState.currentPage > 1) {
-                                loopPosts(state.s.toObject());
-                            } else {
-                                setContent(eventState);
+                            if (location.href.indexOf('?s=') === -1) {
+                                eventState.animated = prepareWindow();
+                                state.new(eventState);
+                                if (eventState.requestType === 'loop' && eventState.currentPage > 1) {
+                                    loopPosts(state.s.toObject());
+                                } else {
+                                    setContent(eventState);
+                                }
                             }
+                            else location.href = location.href;
                         }
                         else {
                             fetch.postOrPage(window.location.href.replace(base, ''), true);
@@ -553,7 +655,7 @@ function initComponents(angular) {
                 let last = slugArray[slugArray.length - 1],
                     isSearch = (last.indexOf('?s=') !== -1);
                 if (isSearch) {
-                    last = last.replace('?s=', '');
+                    slugArray[slugArray.length - 1] = last.replace('?s=', '');
                 }
                 return {
                     slugArray,

@@ -63,82 +63,27 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 7);
+/******/ 	return __webpack_require__(__webpack_require__.s = 5);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports) {
-
-var g;
-
-// This works in non-strict mode
-g = (function() {
-	return this;
-})();
-
-try {
-	// This works if eval is allowed (see CSP)
-	g = g || Function("return this")() || (1,eval)("this");
-} catch(e) {
-	// This works if the window reference is available
-	if(typeof window === "object")
-		g = window;
-}
-
-// g can still be undefined, but nothing to do about it...
-// We return undefined, instead of nothing here, so it's
-// easier to handle this case. if(!global) { ...}
-
-module.exports = g;
-
-
-/***/ }),
-/* 1 */
-/***/ (function(module, exports) {
-
-module.exports = function(module) {
-	if(!module.webpackPolyfill) {
-		module.deprecate = function() {};
-		module.paths = [];
-		// module.parent = undefined by default
-		if(!module.children) module.children = [];
-		Object.defineProperty(module, "loaded", {
-			enumerable: true,
-			get: function() {
-				return module.l;
-			}
-		});
-		Object.defineProperty(module, "id", {
-			enumerable: true,
-			get: function() {
-				return module.i;
-			}
-		});
-		module.webpackPolyfill = 1;
-	}
-	return module;
-};
-
-
-/***/ }),
-/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(5);
+__webpack_require__(3);
 module.exports = 'ngResource';
 
 
 /***/ }),
-/* 3 */
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(6);
+__webpack_require__(4);
 module.exports = angular;
 
 
 /***/ }),
-/* 4 */
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -191,31 +136,123 @@ var _ = {
 };
 function initComponents(angular) {
     var jqLite = angular.element;
-    angular.module('components', ['ngResource']).directive('aataForm', ['$http', function ($http) {
+    angular.module('components', ['ngResource']).directive('aataScript', function () {
+        return {
+            //restrict: 'E',
+            scope: false,
+            link: function link(scope, elem, attr) {
+                debugger;
+                if (attr.type === 'text/javascript-lazy') {
+                    var s = document.createElement("script");
+                    s.type = "text/javascript";
+                    var src = elem.attr('src');
+                    if (src !== undefined) {
+                        s.src = src;
+                    } else {
+                        var code = elem.text();
+                        s.text = code;
+                    }
+                    document.head.appendChild(s);
+                    elem.remove();
+                }
+            }
+        };
+    }).directive('aataForm', ['$http', function ($http) {
         //const url = 'https://script.google.com/macros/s/AKfycbxSLxSc1hQDCem19CwratFghY8qzc65iLYfPOIZMAQa9IE1u7k/exec';
         return {
             templateUrl: 'form.html',
             scope: true,
             link: function link(scope, element, attrs) {
+                var url = attrs.aataForm;
+                var defs = _immutable2.default.Map({
+                    name: '',
+                    lastName: '',
+                    email: '',
+                    tel: '',
+                    asunto: {
+                        adopcion: {
+                            text: 'Adopción',
+                            selected: false
+                        },
+                        capitul: {
+                            text: 'Capitulaciones Matrimoniales',
+                            selected: false
+                        },
+                        custodia: {
+                            text: 'Custodia',
+                            selected: false
+                        },
+                        decla: {
+                            text: 'Declaratoria de Herederos',
+                            selected: false
+                        },
+                        divi: {
+                            text: 'División de Bienes Gananciales',
+                            selected: false
+                        },
+                        divorcio: {
+                            text: 'Divorcio',
+                            selected: false
+                        },
+                        herencia: {
+                            text: 'Herencia',
+                            selected: false
+                        },
+                        patriaPot: {
+                            text: 'Patria Potestad',
+                            selected: false
+                        },
+                        pension: {
+                            text: 'Pensión Alimentaria',
+                            selected: false
+                        },
+                        otro: {
+                            text: 'Otro',
+                            selected: false
+                        }
+                    },
+                    comments: ''
+                });
+                scope = Object.assign(scope, defs.toObject());
                 scope.submitForm = function (event) {
                     event.preventDefault();
-                    var url = attrs.aataForm,
-                        formData = {
-                        Nombre: scope.name,
-                        Apellidos: scope.lastName
-                    };
-                    $http({
-                        method: 'POST',
-                        url: url,
-                        headers: {
-                            'Content-Type': 'application/x-www-form-urlencoded'
+                    window.submitForm = submitForm;
+                    grecaptcha.execute();
+
+                    function submitForm(token) {
+                        debugger;
+                        var formData = {
+                            Nombre: scope.name,
+                            Apellidos: scope.lastName,
+                            Email: scope.email,
+                            Telefono: scope.tel,
+                            Asunto: generateList(scope.asunto),
+                            Pregunta: scope.comments,
+                            'g-recaptcha-response': token
                         },
-                        data: getEncoded(formData)
-                    }).then(function success(response) {
+                            encoded = getEncoded(formData);
                         debugger;
-                    }, function error(response) {
-                        debugger;
-                    });
+                        $http({
+                            method: 'POST',
+                            url: url,
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded'
+                            },
+                            data: encoded
+                        }).then(function success(response) {
+                            debugger;
+                        }, function error(response) {});
+                        function generateList(items) {
+                            var list = '',
+                                key = void 0;
+                            for (key in items) {
+                                if (items[key].selected) {
+                                    list += ' - ' + items[key].text;
+                                }
+                            }
+                            return list;
+                        }
+                    }
                 };
             }
         };
@@ -579,13 +616,15 @@ function initComponents(angular) {
 
                         // Verify if history item was loaded through ajax
                         if (eventState != null) {
-                            eventState.animated = prepareWindow();
-                            state.new(eventState);
-                            if (eventState.requestType === 'loop' && eventState.currentPage > 1) {
-                                loopPosts(state.s.toObject());
-                            } else {
-                                setContent(eventState);
-                            }
+                            if (location.href.indexOf('?s=') === -1) {
+                                eventState.animated = prepareWindow();
+                                state.new(eventState);
+                                if (eventState.requestType === 'loop' && eventState.currentPage > 1) {
+                                    loopPosts(state.s.toObject());
+                                } else {
+                                    setContent(eventState);
+                                }
+                            } else location.href = location.href;
                         } else {
                             fetch.postOrPage(window.location.href.replace(base, ''), true);
                         }
@@ -763,7 +802,7 @@ function initComponents(angular) {
                 var last = slugArray[slugArray.length - 1],
                     isSearch = last.indexOf('?s=') !== -1;
                 if (isSearch) {
-                    last = last.replace('?s=', '');
+                    slugArray[slugArray.length - 1] = last.replace('?s=', '');
                 }
                 return {
                     slugArray: slugArray,
@@ -864,7 +903,7 @@ function initComponents(angular) {
 exports.default = initComponents;
 
 /***/ }),
-/* 5 */
+/* 3 */
 /***/ (function(module, exports) {
 
 /**
@@ -1728,7 +1767,7 @@ angular.module('ngResource', ['ng']).
 
 
 /***/ }),
-/* 6 */
+/* 4 */
 /***/ (function(module, exports) {
 
 /**
@@ -35105,21 +35144,21 @@ $provide.value("$locale", {
 !window.angular.$$csp().noInlineStyle && window.angular.element(document.head).prepend('<style type="text/css">@charset "UTF-8";[ng\\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide:not(.ng-hide-animate){display:none !important;}ng\\:form{display:block;}.ng-animate-shim{visibility:hidden;}.ng-anchor{position:absolute;}</style>');
 
 /***/ }),
-/* 7 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _index = __webpack_require__(3);
+var _index = __webpack_require__(1);
 
 var _index2 = _interopRequireDefault(_index);
 
-var _index3 = __webpack_require__(2);
+var _index3 = __webpack_require__(0);
 
 var _index4 = _interopRequireDefault(_index3);
 
-var _components = __webpack_require__(4);
+var _components = __webpack_require__(2);
 
 var _components2 = _interopRequireDefault(_components);
 
@@ -35127,6 +35166,61 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 (0, _components2.default)(_index2.default);
 _index2.default.module('aata', ['components']).controller('MainController', ['$document', '$scope', function ($document, $scope) {}]);
+
+/***/ }),
+/* 6 */
+/***/ (function(module, exports) {
+
+var g;
+
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
+
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || Function("return this")() || (1,eval)("this");
+} catch(e) {
+	// This works if the window reference is available
+	if(typeof window === "object")
+		g = window;
+}
+
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+module.exports = g;
+
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports) {
+
+module.exports = function(module) {
+	if(!module.webpackPolyfill) {
+		module.deprecate = function() {};
+		module.paths = [];
+		// module.parent = undefined by default
+		if(!module.children) module.children = [];
+		Object.defineProperty(module, "loaded", {
+			enumerable: true,
+			get: function() {
+				return module.l;
+			}
+		});
+		Object.defineProperty(module, "id", {
+			enumerable: true,
+			get: function() {
+				return module.i;
+			}
+		});
+		module.webpackPolyfill = 1;
+	}
+	return module;
+};
+
 
 /***/ }),
 /* 8 */
@@ -40558,7 +40652,7 @@ function toNumber(value) {
 
 module.exports = debounce;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(6)))
 
 /***/ }),
 /* 11 */
@@ -43128,7 +43222,7 @@ function property(path) {
 
 module.exports = find;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(1)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(6), __webpack_require__(7)(module)))
 
 /***/ }),
 /* 13 */
@@ -44983,7 +45077,7 @@ function stubFalse() {
 
 module.exports = isEqual;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(1)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(6), __webpack_require__(7)(module)))
 
 /***/ }),
 /* 14 */
@@ -46199,7 +46293,7 @@ function noop() {
 
 module.exports = unionWith;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(6)))
 
 /***/ })
 /******/ ]);

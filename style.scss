@@ -41,7 +41,10 @@ body {
         }
     };
 }
-@import 'partials/defaults';
+@import 
+    'partials/defaults',
+    'partials/buttons';
+
 // --------------------------- Wrapper
 .wrapper {
     position: relative;
@@ -155,10 +158,11 @@ body {
         flex: 1 1 auto;
     }
 }
-// --------------------------- Nav 
+// --------------------------- Nav
+$nav-font: 0.9em;
 .nav {
     clear: both;
-    font-size: .9rem;
+    font-size: $nav-font;
     //@include sans-serif();
     padding: 0;
     width: 100%;
@@ -225,13 +229,11 @@ body {
     top: .4rem;
     right: ($spacing / 2);
 
-    width: $spacing * 1.5;
-    height: $spacing * 1.5;
+    width: $nav-font * $base-line;
+    height: $nav-font * $base-line;
     padding: 0;
     margin: 0;
     @include landscape() {
-        width: $spacing;
-        height: $spacing;
         right: $spacing * .25;
     }
     @include button($grey-base, $grey-dark, 'round');
@@ -536,16 +538,34 @@ body {
     }
 }
 
-/*------------------------------------*\
-    MISC
-\*------------------------------------*/
+// --------------------------- MISC
 
-::selection {
-	background:#04A4CC;
-	color:#FFF;
-	text-shadow:none;
+.aata-form {
+    width: 24rem;
+    max-width: 100%;
+    margin: 0 auto;
+
+    &__label, &__input, &__textarea, &__button, &__fieldset {
+        display: block;
+        width: 100%;
+        margin-bottom: $spacing / 2;
+    }
+    &__label {
+        margin-bottom: $spacing / 4;
+    }
+    &__button {
+        width: 10rem;
+        margin: $spacing auto;
+
+
+    }
 }
 
+::selection {
+	// background:#04A4CC;
+	// color:#FFF;
+	// text-shadow:none;
+}
 
 @import 
     'partials/wordpress',

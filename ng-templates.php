@@ -1,6 +1,6 @@
     <?php 
         // script url
-        $scriptUrl = "https://script.google.com/macros/s/AKfycbxSLxSc1hQDCem19CwratFghY8qzc65iLYfPOIZMAQa9IE1u7k/exec";
+        $scriptUrl = "https://script.google.com/macros/s/AKfycbwcFsFPjH-JmUsgPJL7unf7HSerbqPMXDvYakZCqTQPTx0vdwI/exec";
     ?>
     <script type="application/json" id="section-titles">
         {
@@ -21,8 +21,11 @@
                     ng-if="data.slug !== 'contacto'"
                     ng-bind-html="trustHtml(data.content.rendered)"></div>
                 <div class="article__content"
-                    ng-if="data.slug === 'contacto'"
-                    aata-form="<?php echo $scriptUrl; ?>"></div>
+                    ng-if="data.slug === 'contacto'">
+                    <aata-script type="text/javascript-lazy" src="https://www.google.com/recaptcha/api.js"></aata-script>
+                    <div aata-form="<?php echo $scriptUrl; ?>"></div>
+                    <div ng-bind-html="trustHtml(data.content.rendered)"></div>
+                </div>
             </article>
         </section>
     </script>
@@ -92,23 +95,39 @@
     <script type="text/ng-template" id="form.html">
         <form class="aata-form" method="POST" 
             action="{{url}}">
-
+            <p>
+                Las consultas serán contestadas por correo electrónico.  Si no interesas recibir la misma por dicho medio, debes comunicarte al 787-200-6474.
+            </p>
             <label class="aata-form__label" for="name">Nombre</label>
             <input id="name" class="aata-form__input" name="name" ng-model="name" />
 
-            <label class="aata-form__label" for="lastName">Apellido Paterno</label>
+            <label class="aata-form__label" for="lastName">Apellidos</label>
             <input id="lastName" class="aata-form__input" name="lastName" ng-model="lastName" />
 
             <label class="aata-form__label" for="email">Email</label>
-            <input id="email" class="aata-form__input" name="email" ng-model="email" />
+            <input id="email" type="email" class="aata-form__input" name="email" ng-model="email" />
 
             <label class="aata-form__label" for="tel">Teléfono</label>
             <input id="tel" class="aata-form__input" name="tel" ng-model="tel" />
 
-            <label class="aata-form__label" for="comments">Preguntas o Comentarios</label>
-            <textarea id="comments" class="aata-form__input" name="comments"
-                    ng-model="comments"></textarea>
+            <fieldset class="aata-form__fieldset">
+                <legend>Asunto</legend>
+                <label class="aata-form__label" ng-repeat="(itemSlug, item) in asunto">
+                    <input id="{{itemSlug}}" type="checkbox"
+                           ng-model="item.selected"
+                           name="{{itemSlug}}">
+                    {{item.text}}
+                </label>
+            </fieldset>
 
+            <label class="aata-form__label" for="comments">Pregunta</label>
+            <textarea id="comments" class="aata-form__textarea" name="comments"
+                    ng-model="comments"></textarea>
+            <div class="g-recaptcha"
+                  data-sitekey="6LeQ0yMUAAAAANoaZAyILYzQghGNKCGHUKA8_7s-"
+                  data-callback="submitForm"
+                  data-size="invisible">
+            </div>
             <button type="submit" class="button aata-form__button"
                     ng-click="submitForm($event)"
                     >Enviar</button>

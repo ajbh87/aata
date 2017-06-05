@@ -1,7 +1,7 @@
 /*
 	Theme Name: AATA
-	Theme URI: http://alfredo.xyz
-	Description: Wordpress Theme for Abogados a tu Alcance
+	Theme URI: http://alfredo.xyz 
+    Description: Wordpress Theme for Abogados a tu Alcance
 	Version: 0.5.0
 	Author: Alfredo J. Bermudez
 	Author URI: http://alfredo.xyz
@@ -100,6 +100,32 @@ input[type="search"] {
   width: 0 !important;
   height: 0 !important; }
 
+.button {
+  font-weight: 700;
+  box-sizing: border-box;
+  transition: all .2s ease-out;
+  border: 0;
+  background: #45b8ac;
+  color: #fff;
+  border: 2px solid #45b8ac;
+  line-height: 1;
+  padding: 0.3333rem 0.6666rem; }
+  .button .icon__fill {
+    fill: #fff; }
+  .button .icon__fill {
+    transition: all .2s ease-in-out; }
+  .button:focus {
+    outline: 0; }
+  .button > .icon {
+    width: auto;
+    height: 100%;
+    max-width: 100%; }
+  .button:hover, .button:focus {
+    background: #fff;
+    color: #45b8ac; }
+    .button:hover .icon__fill, .button:focus .icon__fill {
+      fill: #45b8ac; }
+
 .wrapper {
   position: relative;
   width: 100%;
@@ -145,9 +171,11 @@ input[type="search"] {
   float: right;
   height: 100%;
   width: 3.9rem;
+  font-weight: 700;
+  box-sizing: border-box;
   transition: all .2s ease-out;
-  background: #fff;
   border: 0;
+  background: #fff;
   color: #45b8ac; }
   .menu-button .icon__fill {
     fill: #45b8ac; }
@@ -161,19 +189,16 @@ input[type="search"] {
     max-width: 100%; }
   .menu-button:hover, .menu-button:focus {
     background: #e6e6e6;
-    border: 0;
     color: #45b8ac; }
     .menu-button:hover .icon__fill, .menu-button:focus .icon__fill {
       fill: #45b8ac; }
   .menu-button[aria-expanded="true"] {
     background: #45b8ac;
-    border: 0;
     color: #fff; }
     .menu-button[aria-expanded="true"] .icon__fill {
       fill: #fff; }
     .menu-button[aria-expanded="true"]:hover, .menu-button[aria-expanded="true"]:focus {
       background: #78c4bd;
-      border: 0;
       color: #fff; }
       .menu-button[aria-expanded="true"]:hover .icon__fill, .menu-button[aria-expanded="true"]:focus .icon__fill {
         fill: #fff; }
@@ -220,7 +245,7 @@ input[type="search"] {
 
 .nav {
   clear: both;
-  font-size: .9rem;
+  font-size: 0.9em;
   padding: 0;
   width: 100%;
   background: #fff; }
@@ -270,20 +295,20 @@ input[type="search"] {
   position: absolute;
   top: .4rem;
   right: 0.65rem;
-  width: 1.95rem;
-  height: 1.95rem;
+  width: 1.49994em;
+  height: 1.49994em;
   padding: 0;
   margin: 0;
+  font-weight: 700;
+  box-sizing: border-box;
   transition: all .2s ease-out;
-  background: #d3d3d3;
   border: 0;
+  background: #d3d3d3;
   color: #444;
   border-radius: 50%;
   font-weight: 700; }
   @media only screen and (orientation: landscape) and (min-width: 1200px) {
     .expand {
-      width: 1.3rem;
-      height: 1.3rem;
       right: 0.325rem; } }
   .expand .icon__fill {
     fill: #444; }
@@ -297,19 +322,16 @@ input[type="search"] {
     max-width: 100%; }
   .expand:hover, .expand:focus {
     background: #e6e6e6;
-    border: 0;
     color: #45b8ac; }
     .expand:hover .icon__fill, .expand:focus .icon__fill {
       fill: #45b8ac; }
   .expand[aria-expanded="true"] {
     background: #45b8ac;
-    border: 0;
     color: #fff; }
     .expand[aria-expanded="true"] .icon__fill {
       fill: #fff; }
     .expand[aria-expanded="true"]:hover, .expand[aria-expanded="true"]:focus {
       background: #78c4bd;
-      border: 0;
       color: #fff; }
       .expand[aria-expanded="true"]:hover .icon__fill, .expand[aria-expanded="true"]:focus .icon__fill {
         fill: #fff; }
@@ -396,9 +418,11 @@ input[type="search"] {
     flex: 0 0 auto;
     width: 2rem;
     height: 2rem;
+    font-weight: 700;
+    box-sizing: border-box;
     transition: all .2s ease-out;
-    background: #45b8ac;
     border: 0;
+    background: #45b8ac;
     color: #fff;
     padding: .25rem;
     margin: 0; }
@@ -414,7 +438,6 @@ input[type="search"] {
       max-width: 100%; }
     .search__submit:hover, .search__submit:focus {
       background: #78c4bd;
-      border: 0;
       color: #fff; }
       .search__submit:hover .icon__fill, .search__submit:focus .icon__fill {
         fill: #fff; }
@@ -611,27 +634,19 @@ input[type="search"] {
     .screen-sm {
       left: 16.9rem; } }
 
-/*------------------------------------*\
-    MISC
-\*------------------------------------*/
-::selection {
-  background: #04A4CC;
-  color: #FFF;
-  text-shadow: none; }
-
-[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak],
-.ng-cloak, .x-ng-cloak,
-.ng-hide:not(.ng-hide-animate) {
-  display: none !important; }
-
-ng\:form {
-  display: block; }
-
-.ng-animate-shim {
-  visibility: hidden; }
-
-.ng-anchor {
-  position: absolute; }
+.aata-form {
+  width: 24rem;
+  max-width: 100%;
+  margin: 0 auto; }
+  .aata-form__label, .aata-form__input, .aata-form__textarea, .aata-form__button, .aata-form__fieldset {
+    display: block;
+    width: 100%;
+    margin-bottom: 0.65rem; }
+  .aata-form__label {
+    margin-bottom: 0.325rem; }
+  .aata-form__button {
+    width: 10rem;
+    margin: 1.3rem auto; }
 
 /*------------------------------------*\
     WORDPRESS CORE

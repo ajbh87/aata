@@ -20,7 +20,7 @@ $base-line: 1.6666;
 $min-font: $min-width * ($font-to-width / 100);
 $max-font: $max-width * ($font-to-width / 100);
 $weight: 400;
-$family: 'Playfair Display', "adobe-garamond-pro", "Garamond", "Book Antiqua", Palatino ,serif;
+$family: 'Playfair Display', "adobe-garamond-pro", "Garamond", "Book Antiqua", Palatino, serif;
 $ss-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 $font-smaller: .75rem;
 $main-title: 1.2rem;
@@ -45,43 +45,7 @@ $footer-h: ($footer-f-size * $base-line) + $spacing;
     background-image: $bg-pattern;
     background-attachment: fixed;
 }
-@mixin button-style($bg, $text) {
-    background: $bg;
-    //border: 1px solid darken($bg, 10%);
-    border: 0;
-    color: $text;
-    .icon__fill {
-        fill: $text;    
-    }
-}
-@mixin button($bg, $text, $type: "") {
-    //@include sans-serif();
-    transition: all .2s ease-out;
-    @include button-style($bg, $text);
-    
-    .icon__fill {
-        transition: all .2s ease-in-out;    
-    }
-    @if $type == 'round' {
-        border-radius: 50%;
-    }
-    &:focus {
-        outline: 0;
-    }
-    & > .icon {
-        width: auto;
-        height: 100%;
-        max-width: 100%;
-    }
-}
-@mixin button-pad() {
-    line-height: 1;
-    padding: 0.75rem;
-}
-@mixin button-raise() {
-    transform: scale(1.1);
-    box-shadow: 0 1px 3px rgba(0,0,0,.25);
-}
+
 @mixin landscape() {
     @media only screen and (orientation: landscape) and (min-width: $landscape-min) {
         @content;
