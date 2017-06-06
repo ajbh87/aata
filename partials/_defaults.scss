@@ -40,28 +40,61 @@ a {
     border-bottom: 3px dotted $grey-base;
     transition: all .2s ease-out;
     &:hover,
-    &:active {
+    &:focus {
         background: $grey-light;
         border-bottom-color: $brand;
     }
-    &:focus {
-        border-bottom-color: $brand;
-        background: $grey-lighter;
-    }
+
     &:focus,
     &:hover,
     &:active {
         outline:0;
     }
 }
-input {
+fieldset {
+    border: 2px dotted $grey-base;
+}
+legend {
+    padding: 0 .25rem;
+}
+input, textarea, fieldset {
+    $w: 2px;
+    font-family: $ss-family;
+    border: $w dotted $grey-base;
+    padding: .25rem;
 	&:focus {
 	    outline:0;
-	    border:1px solid #04A4CC;
+	    border: $w solid $brand;
 	}
 	&[type="search"] {
 	    box-sizing: border-box;
 	}
+}
+input[type="checkbox"] {
+    position: relative;
+    height: 0.8rem;
+    width: 0.8rem;
+    // &:after {
+    //     cursor: pointer;
+    //     content: " ";
+    //     display: block;
+    //     position: absolute;
+    //     z-index: 50;
+    //     width: 100%;
+    //     height: 100%;
+    //     background: #fff;
+    //     border: 2px solid $grey-base;
+    // }
+    // &:checked:after {
+    //     background-color: $brand;
+    //     border-color: $brand;
+    // }
+    &:focus {
+        outline: 2px solid $brand;
+    }
+    &:checked:focus {
+        outline: 2px solid $grey-base;
+    }
 }
 
 .hidden {

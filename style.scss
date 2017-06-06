@@ -339,7 +339,6 @@ $nav-font: 0.9em;
     &__input {
         box-sizing: border-box;
         flex: 1 1 auto;
-        padding: .25rem;
         border: 0;
         border-bottom: 3px solid $grey-base;
         &:focus {
@@ -541,24 +540,64 @@ $nav-font: 0.9em;
 // --------------------------- MISC
 
 .aata-form {
-    width: 24rem;
-    max-width: 100%;
-    margin: 0 auto;
-
     &__label, &__input, &__textarea, &__button, &__fieldset {
         display: block;
         width: 100%;
         margin-bottom: $spacing / 2;
     }
+    &__checkbox {
+        margin: 0 $spacing / 4;
+    }
+    &__checkbox-label {
+        cursor: pointer;
+    }
+    &__checkbox-container {
+
+    }
     &__label {
         margin-bottom: $spacing / 4;
+    }
+    &__disclaimer {
+        font-size: $font-smaller;
+    }
+    &__message {
+        font-size: $font-smaller;
+        > div {
+            padding: $spacing / 4;
+        }
     }
     &__button {
         width: 10rem;
         margin: $spacing auto;
-
-
     }
+    @include portrait() {
+        width: 24rem;
+        max-width: 100%;
+        margin: 0 auto;
+    };
+    &__textarea {
+        min-height: $base-line * 4rem;
+    }
+    @include landscape() {
+        &__input-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: $spacing / 2;
+        }
+        &__input-group &__label {
+            flex: 0 0 15%;
+            margin-bottom: 0;
+        }
+        &__input-group &__input {
+            flex: 0 0 35%;
+            margin: 0 $spacing / 2;
+        }
+        &__grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-gap: $spacing / 4;
+        }
+    };
 }
 
 ::selection {

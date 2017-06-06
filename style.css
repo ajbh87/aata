@@ -76,20 +76,36 @@ a {
   text-decoration: none;
   border-bottom: 3px dotted #d3d3d3;
   transition: all .2s ease-out; }
-  a:hover, a:active {
+  a:hover, a:focus {
     background: #e6e6e6;
     border-bottom-color: #45b8ac; }
-  a:focus {
-    border-bottom-color: #45b8ac;
-    background: #f9f9f9; }
   a:focus, a:hover, a:active {
     outline: 0; }
 
-input:focus {
-  outline: 0;
-  border: 1px solid #04A4CC; }
-input[type="search"] {
-  box-sizing: border-box; }
+fieldset {
+  border: 2px dotted #d3d3d3; }
+
+legend {
+  padding: 0 .25rem; }
+
+input, textarea, fieldset {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  border: 2px dotted #d3d3d3;
+  padding: .25rem; }
+  input:focus, textarea:focus, fieldset:focus {
+    outline: 0;
+    border: 2px solid #45b8ac; }
+  input[type="search"], textarea[type="search"], fieldset[type="search"] {
+    box-sizing: border-box; }
+
+input[type="checkbox"] {
+  position: relative;
+  height: 0.8rem;
+  width: 0.8rem; }
+  input[type="checkbox"]:focus {
+    outline: 2px solid #45b8ac; }
+  input[type="checkbox"]:checked:focus {
+    outline: 2px solid #d3d3d3; }
 
 .hidden {
   display: none; }
@@ -116,6 +132,14 @@ input[type="search"] {
     transition: all .2s ease-in-out; }
   .button:focus {
     outline: 0; }
+  .button[disabled] {
+    background: #a1dcd6;
+    border-color: #a1dcd6;
+    cursor: not-allowed; }
+    .button[disabled]:hover, .button[disabled]:focus {
+      background: #45b8ac;
+      border-color: #45b8ac;
+      color: #fff; }
   .button > .icon {
     width: auto;
     height: 100%;
@@ -183,6 +207,14 @@ input[type="search"] {
     transition: all .2s ease-in-out; }
   .menu-button:focus {
     outline: 0; }
+  .menu-button[disabled] {
+    background: white;
+    border-color: white;
+    cursor: not-allowed; }
+    .menu-button[disabled]:hover, .menu-button[disabled]:focus {
+      background: #fff;
+      border-color: #fff;
+      color: #45b8ac; }
   .menu-button > .icon {
     width: auto;
     height: 100%;
@@ -316,6 +348,14 @@ input[type="search"] {
     transition: all .2s ease-in-out; }
   .expand:focus {
     outline: 0; }
+  .expand[disabled] {
+    background: white;
+    border-color: white;
+    cursor: not-allowed; }
+    .expand[disabled]:hover, .expand[disabled]:focus {
+      background: #d3d3d3;
+      border-color: #d3d3d3;
+      color: #444; }
   .expand > .icon {
     width: auto;
     height: 100%;
@@ -408,7 +448,6 @@ input[type="search"] {
   .search__input {
     box-sizing: border-box;
     flex: 1 1 auto;
-    padding: .25rem;
     border: 0;
     border-bottom: 3px solid #d3d3d3; }
     .search__input:focus {
@@ -432,6 +471,14 @@ input[type="search"] {
       transition: all .2s ease-in-out; }
     .search__submit:focus {
       outline: 0; }
+    .search__submit[disabled] {
+      background: #a1dcd6;
+      border-color: #a1dcd6;
+      cursor: not-allowed; }
+      .search__submit[disabled]:hover, .search__submit[disabled]:focus {
+        background: #45b8ac;
+        border-color: #45b8ac;
+        color: #fff; }
     .search__submit > .icon {
       width: auto;
       height: 100%;
@@ -634,19 +681,47 @@ input[type="search"] {
     .screen-sm {
       left: 16.9rem; } }
 
-.aata-form {
-  width: 24rem;
-  max-width: 100%;
-  margin: 0 auto; }
-  .aata-form__label, .aata-form__input, .aata-form__textarea, .aata-form__button, .aata-form__fieldset {
-    display: block;
-    width: 100%;
+.aata-form__label, .aata-form__input, .aata-form__textarea, .aata-form__button, .aata-form__fieldset {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.65rem; }
+.aata-form__checkbox {
+  margin: 0 0.325rem; }
+.aata-form__checkbox-label {
+  cursor: pointer; }
+.aata-form__label {
+  margin-bottom: 0.325rem; }
+.aata-form__disclaimer {
+  font-size: 0.75rem; }
+.aata-form__message {
+  font-size: 0.75rem; }
+  .aata-form__message > div {
+    padding: 0.325rem; }
+.aata-form__button {
+  width: 10rem;
+  margin: 1.3rem auto; }
+@media only screen and (orientation: portrait), (max-width: 1199px) {
+  .aata-form {
+    width: 24rem;
+    max-width: 100%;
+    margin: 0 auto; } }
+.aata-form__textarea {
+  min-height: 6.6664rem; }
+@media only screen and (orientation: landscape) and (min-width: 1200px) {
+  .aata-form__input-group {
+    display: flex;
+    align-items: center;
     margin-bottom: 0.65rem; }
-  .aata-form__label {
-    margin-bottom: 0.325rem; }
-  .aata-form__button {
-    width: 10rem;
-    margin: 1.3rem auto; }
+  .aata-form__input-group .aata-form__label {
+    flex: 0 0 15%;
+    margin-bottom: 0; }
+  .aata-form__input-group .aata-form__input {
+    flex: 0 0 35%;
+    margin: 0 0.65rem; }
+  .aata-form__grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 0.325rem; } }
 
 /*------------------------------------*\
     WORDPRESS CORE

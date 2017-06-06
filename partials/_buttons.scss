@@ -11,6 +11,7 @@
 	box-sizing: border-box;
     transition: all .2s ease-out;
     border: 0;
+
     @include button-style($bg, $text);
     
     .icon__fill {
@@ -24,6 +25,18 @@
     }
     &:focus {
         outline: 0;
+    }
+
+    &[disabled] {
+    	background: lighten($bg, 25%);
+    	border-color: lighten($bg, 25%);
+    	cursor: not-allowed;
+
+    	&:hover, &:focus {
+			background: $bg;
+    		border-color: $bg;
+    		color: $text;
+    	}
     }
     & > .icon {
         width: auto;

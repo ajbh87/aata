@@ -4,8 +4,10 @@ import find from '../node_modules/lodash.find/index.js';
 import debounce from '../node_modules/lodash.debounce/index.js';
 import defer from '../node_modules/lodash.defer/index.js';
 import unionWith from '../node_modules/lodash.unionwith/index.js';
+import assign from '../node_modules/lodash.assign/index.js';
 import isEqual from '../node_modules/lodash.isequal/index.js';
 const _ = {
+    assign,
     debounce,
     defer,
     find,
@@ -14,13 +16,12 @@ const _ = {
 }
 function initComponents(angular) {
     const jqLite = angular.element;
-    angular.module('components', ['ngResource'])
+    angular.module('components', ['ngResource', 'ngMessages'])
     .directive('aataScript', function() {
         return {
           //restrict: 'E',
           scope: false,
           link: function(scope, elem, attr) {
-            debugger;
             if (attr.type==='text/javascript-lazy') 
             {
               var s = document.createElement("script");
@@ -49,6 +50,7 @@ function initComponents(angular) {
             link: function(scope, element, attrs) {
                 const url = attrs.aataForm;
                 const defs = Immutable.Map({
+                                    telRegex: /([\+\.\-\)\(]*[0-9]{1,4})+/,
                                     name: '',
                                     lastName: '',
                                     email: '',
@@ -97,14 +99,15 @@ function initComponents(angular) {
                                     },
                                     comments: ''
                                 });
-                scope = Object.assign(scope, defs.toObject());
-                scope.submitForm = function(event) {
-                    event.preventDefault();
-                    window.submitForm = submitForm;
-                    grecaptcha.execute();
+                scope = _.assign(scope, defs.toObject());
 
-                    function submitForm(token) {
-                        debugger;
+                scope.submitForm = function() {
+                    if (scope.contact.$valid) {
+                        window.postForm = postForm;
+                        grecaptcha.execute();
+                    }
+
+                    function postForm(token) {
                         const formData = {
                                 Nombre: scope.name,
                                 Apellidos: scope.lastName,
@@ -115,7 +118,6 @@ function initComponents(angular) {
                                 'g-recaptcha-response': token
                             },
                             encoded = getEncoded(formData);
-                        debugger;
                         $http({
                             method: 'POST',
                             url: url,
@@ -125,10 +127,11 @@ function initComponents(angular) {
                             data: encoded
                         }).then(
                             function success(response) {
-                                debugger;
+                                var recaptchaResponse = response.data.content.recaptcha;
+                                grecaptcha.reset();
                             }, 
                             function error(response) {
-
+                                grecaptcha.reset();
                             }
                         );
                         function generateList(items) {
@@ -582,7 +585,7 @@ function initComponents(angular) {
                                     author: _.find(values[1], (author) => author.id === s.val.author )
                                 };
                             }
-                            subScope = Object.assign(subScope, {
+                            subScope = _.assign(subScope, {
                                 loopType: s.loopType,
                                 meta: s.meta,
                                 data: s.val,
