@@ -538,65 +538,119 @@ $nav-font: 0.9em;
 }
 
 // --------------------------- MISC
-
+.g-recaptcha { position: absolute; }
 .aata-form {
-    &__label, &__input, &__textarea, &__button, &__fieldset {
-        display: block;
-        width: 100%;
-        margin-bottom: $spacing / 2;
-    }
-    &__checkbox {
-        margin: 0 $spacing / 4;
-    }
-    &__checkbox-label {
-        cursor: pointer;
-    }
-    &__checkbox-container {
-
-    }
-    &__label {
-        margin-bottom: $spacing / 4;
+    margin-bottom: $spacing;
+    @supports (display: grid) {
+        display: grid;
+        grid-template-columns: repeat(16, 1fr);
+        grid-gap: $spacing 0;
     }
     &__disclaimer {
         font-size: $font-smaller;
-    }
-    &__message {
-        font-size: $font-smaller;
-        > div {
-            padding: $spacing / 4;
+        grid-column: span 16;
+        @include landscape() {
+            grid-column: 3 / span 12;
         }
     }
-    &__button {
-        width: 10rem;
-        margin: $spacing auto;
-    }
-    @include portrait() {
-        width: 24rem;
+    &__input-group {
+        position: relative;
+        width: 20rem;
         max-width: 100%;
-        margin: 0 auto;
-    };
+        margin-bottom: $spacing / 2;
+        @supports (display: grid) {
+            width: auto;
+            margin-bottom: 0;
+            grid-column: span 8;
+            &:nth-child(2n) {
+                > .aata-form__input {
+                    border-right-color: $grey-base;
+                    &:focus {
+                        border-right-color: $brand;
+                    }
+                }
+            }
+            @include landscape() {
+                grid-column: span 6;
+                &:nth-child(2n) {
+                    grid-column: 3 / span 6;
+                }
+            }
+        }
+        > .aata-form__label {
+            position: relative;
+            bottom: -0.3rem;
+        }
+    }
+    &__label {
+        display: block;
+    }
+    &__input {
+        width: 100%;
+        &.ng-invalid.ng-dirty {
+            border-bottom-color: $danger;
+        }
+    }
+    &__fieldset {
+        margin-bottom: $spacing / 2;
+        @supports (display: grid) {
+            margin-bottom: 0;
+            grid-column: span 16;
+            @include landscape() {
+                grid-column: 3 / span 12;
+            }
+        }
+        &-grid {
+            grid-template-columns: repeat(2, 1fr);
+            grid-gap: ($spacing / 4);
+            @include landscape() {
+                display: grid;
+            };
+        }
+    }
     &__textarea {
+        &-group {
+            @supports (display: grid) {
+                grid-column: span 16;
+                @include landscape() {
+                    grid-column: 3 / span 12;
+                }
+            }
+        }
+        width: 100%;
         min-height: $base-line * 4rem;
     }
+    &__button {
+        @supports (display: grid) {
+            grid-column: 5 / span 8;
+            @include landscape() {
+                grid-column: 6 / span 6;
+            }
+        }
+    }
+    &__checkbox {
+
+    }
+    &__checkbox-label {
+
+    }
+    &__checkbox-container {
+        
+    }
+    &__message {
+        color: $danger;
+        position: absolute;
+        font-size: $font-smaller;
+        font-weight: 700;
+        left: 0;
+        > div {
+
+        }
+    }
+    @include portrait() {
+
+    };
     @include landscape() {
-        &__input-group {
-            display: flex;
-            align-items: center;
-            margin-bottom: $spacing / 2;
-        }
-        &__input-group &__label {
-            flex: 0 0 15%;
-            margin-bottom: 0;
-        }
-        &__input-group &__input {
-            flex: 0 0 35%;
-            margin: 0 $spacing / 2;
-        }
-        &__grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            grid-gap: $spacing / 4;
-        }
     };
 }
 

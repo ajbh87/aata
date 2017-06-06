@@ -173,7 +173,7 @@
 
             <fieldset class="aata-form__fieldset">
                 <legend>Asunto</legend>
-                <div class="aata-form__grid">
+                <div class="aata-form__fieldset-grid">
                     <div class="aata-form__checkbox-container" ng-repeat="(itemSlug, item) in asunto">
                         <input id="{{itemSlug}}" class="aata-form__checkbox" type="checkbox"
                                ng-model="item.selected"
@@ -183,14 +183,16 @@
                 </div>
             </fieldset>
 
-            <label class="aata-form__label" for="comments">Pregunta</label>
-            <textarea id="comments" class="aata-form__textarea" name="comments"
-                    ng-model="comments"
-                    ng-maxlength="500"></textarea>
-            <div role="alert" class="aata-form__message" 
-                ng-messages="contact.comments.$error" 
-                ng-show="!contact.comments.$valid && contact.comments.$dirty">
-                <div ng-message="maxlength">El campo debe contener un máximo de 500 caracteres.</div>
+            <div class="aata-form__input-group aata-form__textarea-group">
+                <label class="aata-form__label" for="comments">Pregunta</label>
+                <textarea id="comments" class="aata-form__textarea" name="comments"
+                        ng-model="comments"
+                        ng-maxlength="500"></textarea>
+                <div role="alert" class="aata-form__message" 
+                    ng-messages="contact.comments.$error" 
+                    ng-show="!contact.comments.$valid && contact.comments.$dirty">
+                    <div ng-message="maxlength">El campo debe contener un máximo de 500 caracteres.</div>
+                </div>
             </div>
 
             <div class="g-recaptcha"

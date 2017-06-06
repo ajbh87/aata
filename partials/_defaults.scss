@@ -51,49 +51,40 @@ a {
         outline:0;
     }
 }
-fieldset {
-    border: 2px dotted $grey-base;
-}
 legend {
-    padding: 0 .25rem;
+    
 }
-input, textarea, fieldset {
-    $w: 2px;
-    font-family: $ss-family;
+$w: 2px;
+input {
+    border: $w dotted transparent;
+    border-bottom-color: $grey-base;
+}
+textarea, fieldset {
     border: $w dotted $grey-base;
-    padding: .25rem;
-	&:focus {
-	    outline:0;
-	    border: $w solid $brand;
-	}
-	&[type="search"] {
-	    box-sizing: border-box;
-	}
 }
-input[type="checkbox"] {
-    position: relative;
-    height: 0.8rem;
-    width: 0.8rem;
-    // &:after {
-    //     cursor: pointer;
-    //     content: " ";
-    //     display: block;
-    //     position: absolute;
-    //     z-index: 50;
-    //     width: 100%;
-    //     height: 100%;
-    //     background: #fff;
-    //     border: 2px solid $grey-base;
-    // }
-    // &:checked:after {
-    //     background-color: $brand;
-    //     border-color: $brand;
-    // }
+input, textarea {
+    font-family: $ss-family;
+    padding: .25rem;
     &:focus {
-        outline: 2px solid $brand;
+        outline:0;
+        border: $w solid $brand;
     }
-    &:checked:focus {
-        outline: 2px solid $grey-base;
+}
+input {
+    &[type="search"] {
+        box-sizing: border-box;
+    }
+
+    &[type="checkbox"] {
+        position: relative;
+        height: 0.8rem;
+        width: 0.8rem;
+        &:focus {
+            outline: 2px solid $brand;
+        }
+        &:checked:focus {
+            outline: 2px solid $grey-base;
+        }
     }
 }
 

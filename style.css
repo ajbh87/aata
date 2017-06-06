@@ -82,22 +82,22 @@ a {
   a:focus, a:hover, a:active {
     outline: 0; }
 
-fieldset {
+input {
+  border: 2px dotted transparent;
+  border-bottom-color: #d3d3d3; }
+
+textarea, fieldset {
   border: 2px dotted #d3d3d3; }
 
-legend {
-  padding: 0 .25rem; }
-
-input, textarea, fieldset {
+input, textarea {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  border: 2px dotted #d3d3d3;
   padding: .25rem; }
-  input:focus, textarea:focus, fieldset:focus {
+  input:focus, textarea:focus {
     outline: 0;
     border: 2px solid #45b8ac; }
-  input[type="search"], textarea[type="search"], fieldset[type="search"] {
-    box-sizing: border-box; }
 
+input[type="search"] {
+  box-sizing: border-box; }
 input[type="checkbox"] {
   position: relative;
   height: 0.8rem;
@@ -681,47 +681,86 @@ input[type="checkbox"] {
     .screen-sm {
       left: 16.9rem; } }
 
-.aata-form__label, .aata-form__input, .aata-form__textarea, .aata-form__button, .aata-form__fieldset {
-  display: block;
-  width: 100%;
-  margin-bottom: 0.65rem; }
-.aata-form__checkbox {
-  margin: 0 0.325rem; }
-.aata-form__checkbox-label {
-  cursor: pointer; }
-.aata-form__label {
-  margin-bottom: 0.325rem; }
-.aata-form__disclaimer {
-  font-size: 0.75rem; }
-.aata-form__message {
-  font-size: 0.75rem; }
-  .aata-form__message > div {
-    padding: 0.325rem; }
-.aata-form__button {
-  width: 10rem;
-  margin: 1.3rem auto; }
-@media only screen and (orientation: portrait), (max-width: 1199px) {
-  .aata-form {
-    width: 24rem;
-    max-width: 100%;
-    margin: 0 auto; } }
-.aata-form__textarea {
-  min-height: 6.6664rem; }
-@media only screen and (orientation: landscape) and (min-width: 1200px) {
+.g-recaptcha {
+  position: absolute; }
+
+.aata-form {
+  margin-bottom: 1.3rem; }
+  @supports (display: grid) {
+    .aata-form {
+      display: grid;
+      grid-template-columns: repeat(16, 1fr);
+      grid-gap: 1.3rem 0; } }
+  .aata-form__disclaimer {
+    font-size: 0.75rem;
+    grid-column: span 16; }
+    @media only screen and (orientation: landscape) and (min-width: 1200px) {
+      .aata-form__disclaimer {
+        grid-column: 3 / span 12; } }
   .aata-form__input-group {
-    display: flex;
-    align-items: center;
+    position: relative;
+    width: 20rem;
+    max-width: 100%;
     margin-bottom: 0.65rem; }
-  .aata-form__input-group .aata-form__label {
-    flex: 0 0 15%;
-    margin-bottom: 0; }
-  .aata-form__input-group .aata-form__input {
-    flex: 0 0 35%;
-    margin: 0 0.65rem; }
-  .aata-form__grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    grid-gap: 0.325rem; } }
+    @supports (display: grid) {
+      .aata-form__input-group {
+        width: auto;
+        margin-bottom: 0;
+        grid-column: span 8; }
+        .aata-form__input-group:nth-child(2n) > .aata-form__input {
+          border-right-color: #d3d3d3; }
+          .aata-form__input-group:nth-child(2n) > .aata-form__input:focus {
+            border-right-color: #45b8ac; }
+        @media only screen and (orientation: landscape) and (min-width: 1200px) {
+          .aata-form__input-group {
+            grid-column: span 6; }
+            .aata-form__input-group:nth-child(2n) {
+              grid-column: 3 / span 6; } } }
+    .aata-form__input-group > .aata-form__label {
+      position: relative;
+      bottom: -0.3rem; }
+  .aata-form__label {
+    display: block; }
+  .aata-form__input {
+    width: 100%; }
+    .aata-form__input.ng-invalid.ng-dirty {
+      border-bottom-color: #EB4541; }
+  .aata-form__fieldset {
+    margin-bottom: 0.65rem; }
+    @supports (display: grid) {
+      .aata-form__fieldset {
+        margin-bottom: 0;
+        grid-column: span 16; }
+        @media only screen and (orientation: landscape) and (min-width: 1200px) {
+          .aata-form__fieldset {
+            grid-column: 3 / span 12; } } }
+    .aata-form__fieldset-grid {
+      grid-template-columns: repeat(2, 1fr);
+      grid-gap: 0.325rem; }
+      @media only screen and (orientation: landscape) and (min-width: 1200px) {
+        .aata-form__fieldset-grid {
+          display: grid; } }
+  .aata-form__textarea {
+    width: 100%;
+    min-height: 6.6664rem; }
+    @supports (display: grid) {
+      .aata-form__textarea-group {
+        grid-column: span 16; }
+        @media only screen and (orientation: landscape) and (min-width: 1200px) {
+          .aata-form__textarea-group {
+            grid-column: 3 / span 12; } } }
+  @supports (display: grid) {
+    .aata-form__button {
+      grid-column: 5 / span 8; }
+      @media only screen and (orientation: landscape) and (min-width: 1200px) {
+        .aata-form__button {
+          grid-column: 6 / span 6; } } }
+  .aata-form__message {
+    color: #EB4541;
+    position: absolute;
+    font-size: 0.75rem;
+    font-weight: 700;
+    left: 0; }
 
 /*------------------------------------*\
     WORDPRESS CORE
