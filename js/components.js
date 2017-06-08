@@ -6,16 +6,18 @@ import defer from '../node_modules/lodash.defer/index.js';
 import unionWith from '../node_modules/lodash.unionwith/index.js';
 import assign from '../node_modules/lodash.assign/index.js';
 import isEqual from '../node_modules/lodash.isequal/index.js';
-const _ = {
-    assign,
-    debounce,
-    defer,
-    find,
-    isEqual,
-    unionWith
-}
-function initComponents(angular) {
-    const jqLite = angular.element;
+
+const initComponents = (function initComponents(angular) {
+    const _ = {
+            assign,
+            debounce,
+            defer,
+            find,
+            isEqual,
+            unionWith
+        }, 
+        jqLite = angular.element;
+
     angular.module('components', ['ngResource', 'ngMessages'])
     .directive('aataScript', function() {
         return {
@@ -42,13 +44,13 @@ function initComponents(angular) {
           }
         };
       })
-    .directive('aataForm', ['$http', function($http) {
-        //const url = 'https://script.google.com/macros/s/AKfycbxSLxSc1hQDCem19CwratFghY8qzc65iLYfPOIZMAQa9IE1u7k/exec';
+    .directive('aataForm', ['$http', '$timeout', function($http, $timeout) {
+        const url = 'https://script.google.com/macros/s/AKfycbzpv61xrCS11gcp-vy_7f_pKdlY1QaPc6OD0iazGY6rQpZoho6h/exec';
         return {
             templateUrl: 'form.html',
             scope: true,
             link: function(scope, element, attrs) {
-                const url = attrs.aataForm;
+                //const url = attrs.aataForm;
                 const defs = Immutable.Map({
                                     telRegex: /([\+\.\-\)\(]*[0-9]{1,4})+/,
                                     name: '',
@@ -97,55 +99,73 @@ function initComponents(angular) {
                                             selected: false
                                         }
                                     },
-                                    comments: ''
+                                    comments: '',
+                                    showFormScreen: false
                                 });
                 scope = _.assign(scope, defs.toObject());
 
                 scope.submitForm = function() {
                     if (scope.contact.$valid) {
-                        window.postForm = postForm;
+                        scope.showFormScreen = true;
+                        //postForm(0); // for error testing
                         grecaptcha.execute();
                     }
-
-                    function postForm(token) {
-                        const formData = {
-                                Nombre: scope.name,
-                                Apellidos: scope.lastName,
-                                Email: scope.email,
-                                Telefono: scope.tel,
-                                Asunto: generateList(scope.asunto),
-                                Pregunta: scope.comments,
-                                'g-recaptcha-response': token
-                            },
-                            encoded = getEncoded(formData);
-                        $http({
-                            method: 'POST',
-                            url: url,
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded'
-                            },
-                            data: encoded
-                        }).then(
-                            function success(response) {
-                                var recaptchaResponse = response.data.content.recaptcha;
-                                grecaptcha.reset();
-                            }, 
-                            function error(response) {
-                                grecaptcha.reset();
-                            }
-                        );
-                        function generateList(items) {
-                            let list = '', key;
-                            for (key in items) {
-                                if (items[key].selected) {
-                                    list += ' - ' + items[key].text;
-                                }
-                            }
-                            return list;
-                        }
+                }
+                window.postForm = postForm;
+                function postForm(token) {
+                    const formData = {
+                            Nombre: scope.name,
+                            Apellidos: scope.lastName,
+                            Email: scope.email,
+                            Telefono: scope.tel,
+                            Asunto: generateList(scope.asunto),
+                            Pregunta: scope.comments,
+                            'g-recaptcha-response': token
+                        },
+                        encoded = getEncoded(formData);
+                    $http({
+                        method: 'POST',
+                        url: url,
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        data: encoded
+                    }).then(success, error);
+                }
+                function success(response) {
+                    var recaptchaResponse = response.data.content.recaptcha;
+                    console.log(recaptchaResponse);
+                    grecaptcha.reset();
+                    if (recaptchaResponse.success === true) {
+                        scope.hideForm = true;
+                        scope.showSuccessMessage = true;
+                    } else {
+                        showErrorMessage();
                     }
+                    scope.showFormScreen = false;
+                }
+                function error(response) {
+                    grecaptcha.reset();
+                    showErrorMessage();
+                    scope.showFormScreen = false;
+                }
+                function showErrorMessage() {
+                    scope.showErrorMessage = true;
+
+                    $timeout(() => {
+                        scope.showErrorMessage = false;
+                    }, 3000);
                 }
             }
+        }
+        function generateList(items) {
+            let list = '', key;
+            for (key in items) {
+                if (items[key].selected) {
+                    list += ' - ' + items[key].text;
+                }
+            }
+            return list;
         }
         function getEncoded(data) {
             return Object.keys(data).map(function(k) {
@@ -595,7 +615,7 @@ function initComponents(angular) {
                             });
                             scope.showScreen = false;
                             scope.showScreenSm = false;
-                            scope.showMenu = false; 
+                            scope.menuToggle(); 
 
                             el = $compile(template)(subScope);
 
@@ -756,6 +776,6 @@ function initComponents(angular) {
             }
         };
     }]);
-}
-
+    return initComponents;
+})(angular);
 export default initComponents;

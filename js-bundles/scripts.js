@@ -63,62 +63,23 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 9);
+/******/ 	return __webpack_require__(__webpack_require__.s = 7);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-var g;
-
-// This works in non-strict mode
-g = (function() {
-	return this;
-})();
-
-try {
-	// This works if eval is allowed (see CSP)
-	g = g || Function("return this")() || (1,eval)("this");
-} catch(e) {
-	// This works if the window reference is available
-	if(typeof window === "object")
-		g = window;
-}
-
-// g can still be undefined, but nothing to do about it...
-// We return undefined, instead of nothing here, so it's
-// easier to handle this case. if(!global) { ...}
-
-module.exports = g;
+__webpack_require__(4);
+module.exports = 'ngMessages';
 
 
 /***/ }),
 /* 1 */
-/***/ (function(module, exports) {
+/***/ (function(module, exports, __webpack_require__) {
 
-module.exports = function(module) {
-	if(!module.webpackPolyfill) {
-		module.deprecate = function() {};
-		module.paths = [];
-		// module.parent = undefined by default
-		if(!module.children) module.children = [];
-		Object.defineProperty(module, "loaded", {
-			enumerable: true,
-			get: function() {
-				return module.l;
-			}
-		});
-		Object.defineProperty(module, "id", {
-			enumerable: true,
-			get: function() {
-				return module.i;
-			}
-		});
-		module.webpackPolyfill = 1;
-	}
-	return module;
-};
+__webpack_require__(5);
+module.exports = 'ngResource';
 
 
 /***/ }),
@@ -126,27 +87,11 @@ module.exports = function(module) {
 /***/ (function(module, exports, __webpack_require__) {
 
 __webpack_require__(6);
-module.exports = 'ngMessages';
-
-
-/***/ }),
-/* 3 */
-/***/ (function(module, exports, __webpack_require__) {
-
-__webpack_require__(7);
-module.exports = 'ngResource';
-
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-__webpack_require__(8);
 module.exports = angular;
 
 
 /***/ }),
-/* 5 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -194,16 +139,17 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var _ = {
-    assign: _index10.default,
-    debounce: _index4.default,
-    defer: _index6.default,
-    find: _index2.default,
-    isEqual: _index12.default,
-    unionWith: _index8.default
-};
-function initComponents(angular) {
-    var jqLite = angular.element;
+var initComponents = function initComponents(angular) {
+    var _ = {
+        assign: _index10.default,
+        debounce: _index4.default,
+        defer: _index6.default,
+        find: _index2.default,
+        isEqual: _index12.default,
+        unionWith: _index8.default
+    },
+        jqLite = angular.element;
+
     angular.module('components', ['ngResource', 'ngMessages']).directive('aataScript', function () {
         return {
             //restrict: 'E',
@@ -224,13 +170,13 @@ function initComponents(angular) {
                 }
             }
         };
-    }).directive('aataForm', ['$http', function ($http) {
-        //const url = 'https://script.google.com/macros/s/AKfycbxSLxSc1hQDCem19CwratFghY8qzc65iLYfPOIZMAQa9IE1u7k/exec';
+    }).directive('aataForm', ['$http', '$timeout', function ($http, $timeout) {
+        var url = 'https://script.google.com/macros/s/AKfycbzpv61xrCS11gcp-vy_7f_pKdlY1QaPc6OD0iazGY6rQpZoho6h/exec';
         return {
             templateUrl: 'form.html',
             scope: true,
             link: function link(scope, element, attrs) {
-                var url = attrs.aataForm;
+                //const url = attrs.aataForm;
                 var defs = _immutable2.default.Map({
                     telRegex: /([\+\.\-\)\(]*[0-9]{1,4})+/,
                     name: '',
@@ -279,54 +225,75 @@ function initComponents(angular) {
                             selected: false
                         }
                     },
-                    comments: ''
+                    comments: '',
+                    showFormScreen: false
                 });
                 scope = _.assign(scope, defs.toObject());
 
                 scope.submitForm = function () {
                     if (scope.contact.$valid) {
-                        window.postForm = postForm;
+                        scope.showFormScreen = true;
+                        //postForm(0); // for error testing
                         grecaptcha.execute();
                     }
-
-                    function postForm(token) {
-                        var formData = {
-                            Nombre: scope.name,
-                            Apellidos: scope.lastName,
-                            Email: scope.email,
-                            Telefono: scope.tel,
-                            Asunto: generateList(scope.asunto),
-                            Pregunta: scope.comments,
-                            'g-recaptcha-response': token
-                        },
-                            encoded = getEncoded(formData);
-                        $http({
-                            method: 'POST',
-                            url: url,
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded'
-                            },
-                            data: encoded
-                        }).then(function success(response) {
-                            var recaptchaResponse = response.data.content.recaptcha;
-                            grecaptcha.reset();
-                        }, function error(response) {
-                            grecaptcha.reset();
-                        });
-                        function generateList(items) {
-                            var list = '',
-                                key = void 0;
-                            for (key in items) {
-                                if (items[key].selected) {
-                                    list += ' - ' + items[key].text;
-                                }
-                            }
-                            return list;
-                        }
-                    }
                 };
+                window.postForm = postForm;
+                function postForm(token) {
+                    var formData = {
+                        Nombre: scope.name,
+                        Apellidos: scope.lastName,
+                        Email: scope.email,
+                        Telefono: scope.tel,
+                        Asunto: generateList(scope.asunto),
+                        Pregunta: scope.comments,
+                        'g-recaptcha-response': token
+                    },
+                        encoded = getEncoded(formData);
+                    $http({
+                        method: 'POST',
+                        url: url,
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        data: encoded
+                    }).then(success, error);
+                }
+                function success(response) {
+                    var recaptchaResponse = response.data.content.recaptcha;
+                    console.log(recaptchaResponse);
+                    grecaptcha.reset();
+                    if (recaptchaResponse.success === true) {
+                        scope.hideForm = true;
+                        scope.showSuccessMessage = true;
+                    } else {
+                        showErrorMessage();
+                    }
+                    scope.showFormScreen = false;
+                }
+                function error(response) {
+                    grecaptcha.reset();
+                    showErrorMessage();
+                    scope.showFormScreen = false;
+                }
+                function showErrorMessage() {
+                    scope.showErrorMessage = true;
+
+                    $timeout(function () {
+                        scope.showErrorMessage = false;
+                    }, 3000);
+                }
             }
         };
+        function generateList(items) {
+            var list = '',
+                key = void 0;
+            for (key in items) {
+                if (items[key].selected) {
+                    list += ' - ' + items[key].text;
+                }
+            }
+            return list;
+        }
         function getEncoded(data) {
             return Object.keys(data).map(function (k) {
                 return encodeURIComponent(k) + '=' + encodeURIComponent(data[k]);
@@ -811,7 +778,7 @@ function initComponents(angular) {
                         });
                         scope.showScreen = false;
                         scope.showScreenSm = false;
-                        scope.showMenu = false;
+                        scope.menuToggle();
 
                         el = $compile(template)(subScope);
 
@@ -969,12 +936,12 @@ function initComponents(angular) {
             }
         };
     }]);
-}
-
+    return initComponents;
+}(angular);
 exports.default = initComponents;
 
 /***/ }),
-/* 6 */
+/* 4 */
 /***/ (function(module, exports) {
 
 /**
@@ -1720,7 +1687,7 @@ function ngMessageDirectiveFactory() {
 
 
 /***/ }),
-/* 7 */
+/* 5 */
 /***/ (function(module, exports) {
 
 /**
@@ -2584,7 +2551,7 @@ angular.module('ngResource', ['ng']).
 
 
 /***/ }),
-/* 8 */
+/* 6 */
 /***/ (function(module, exports) {
 
 /**
@@ -35961,32 +35928,96 @@ $provide.value("$locale", {
 !window.angular.$$csp().noInlineStyle && window.angular.element(document.head).prepend('<style type="text/css">@charset "UTF-8";[ng\\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide:not(.ng-hide-animate){display:none !important;}ng\\:form{display:block;}.ng-animate-shim{visibility:hidden;}.ng-anchor{position:absolute;}</style>');
 
 /***/ }),
-/* 9 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _index = __webpack_require__(4);
+var _index = __webpack_require__(2);
 
 var _index2 = _interopRequireDefault(_index);
 
-var _index3 = __webpack_require__(3);
+var _index3 = __webpack_require__(1);
 
 var _index4 = _interopRequireDefault(_index3);
 
-var _index5 = __webpack_require__(2);
+var _index5 = __webpack_require__(0);
 
 var _index6 = _interopRequireDefault(_index5);
 
-var _components = __webpack_require__(5);
+var _components = __webpack_require__(3);
 
 var _components2 = _interopRequireDefault(_components);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-(0, _components2.default)(_index2.default);
-_index2.default.module('aata', ['components', 'ngMessages']).controller('MainController', ['$document', '$scope', function ($document, $scope) {}]);
+_index2.default.module('aata', ['components']).controller('MenuController', ['$scope', '$timeout', function ($scope, $timeout) {
+    $scope.hideMenu = true;
+    $scope.menuToggle = function () {
+        if ($scope.hideMenu) $scope.hideMenu = false;else {
+            $timeout(function () {
+                $scope.hideMenu = true;
+            }, 250);
+        }
+        $scope.showMenu = !$scope.showMenu;
+    };
+}]);
+
+/***/ }),
+/* 8 */
+/***/ (function(module, exports) {
+
+var g;
+
+// This works in non-strict mode
+g = (function() {
+	return this;
+})();
+
+try {
+	// This works if eval is allowed (see CSP)
+	g = g || Function("return this")() || (1,eval)("this");
+} catch(e) {
+	// This works if the window reference is available
+	if(typeof window === "object")
+		g = window;
+}
+
+// g can still be undefined, but nothing to do about it...
+// We return undefined, instead of nothing here, so it's
+// easier to handle this case. if(!global) { ...}
+
+module.exports = g;
+
+
+/***/ }),
+/* 9 */
+/***/ (function(module, exports) {
+
+module.exports = function(module) {
+	if(!module.webpackPolyfill) {
+		module.deprecate = function() {};
+		module.paths = [];
+		// module.parent = undefined by default
+		if(!module.children) module.children = [];
+		Object.defineProperty(module, "loaded", {
+			enumerable: true,
+			get: function() {
+				return module.l;
+			}
+		});
+		Object.defineProperty(module, "id", {
+			enumerable: true,
+			get: function() {
+				return module.i;
+			}
+		});
+		module.webpackPolyfill = 1;
+	}
+	return module;
+};
+
 
 /***/ }),
 /* 10 */
@@ -42061,7 +42092,7 @@ function toNumber(value) {
 
 module.exports = debounce;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(8)))
 
 /***/ }),
 /* 14 */
@@ -44631,7 +44662,7 @@ function property(path) {
 
 module.exports = find;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(1)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(8), __webpack_require__(9)(module)))
 
 /***/ }),
 /* 16 */
@@ -46486,7 +46517,7 @@ function stubFalse() {
 
 module.exports = isEqual;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(1)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(8), __webpack_require__(9)(module)))
 
 /***/ }),
 /* 17 */
@@ -47702,7 +47733,7 @@ function noop() {
 
 module.exports = unionWith;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(8)))
 
 /***/ })
 /******/ ]);

@@ -1,7 +1,3 @@
-    <?php 
-        // script url
-        $scriptUrl = "https://script.google.com/macros/s/AKfycbzpv61xrCS11gcp-vy_7f_pKdlY1QaPc6OD0iazGY6rQpZoho6h/exec";
-    ?>
     <script type="application/json" id="section-titles">
         {
             "url": "<?php echo home_url(); ?>",
@@ -23,7 +19,7 @@
                 <div class="article__content"
                     ng-if="data.slug === 'contacto'">
                     <aata-script type="text/javascript-lazy" src="https://www.google.com/recaptcha/api.js"></aata-script>
-                    <div aata-form="<?php echo $scriptUrl; ?>"></div>
+                    <aata-form></aata-form>
                     <div ng-bind-html="trustHtml(data.content.rendered)"></div>
                 </div>
             </article>
@@ -101,12 +97,15 @@
         <form id="contactForm"
             name="contact"
             class="aata-form" method="POST" 
-            ng-submit="submitForm()" >
+            ng-submit="submitForm()"
+            ng-hide="hideForm">
             <p class="aata-form__disclaimer">
                 Las consultas serán contestadas por correo electrónico.  Si no interesas recibir la misma por dicho medio, debes comunicarte al 787-200-6474.
             </p>
             <div class="aata-form__input-group">
-                <label class="aata-form__label" for="name">Nombre</label>
+                <label class="aata-form__label aata-form__label--bottom-" for="name">
+                    Nombre <span class="required">*</span>
+                </label>
                 <input id="name" class="aata-form__input"
                     name="name" 
                     ng-model="name"
@@ -123,7 +122,9 @@
             </div>
             
             <div class="aata-form__input-group">
-                <label class="aata-form__label" for="lastName">Apellidos</label>
+                <label class="aata-form__label aata-form__label--bottom-" for="lastName">
+                    Apellidos <span class="required">*</span>
+                </label>
                 <input id="lastName" class="aata-form__input" name="lastName" 
                     ng-model="lastName"
                     type="text"
@@ -139,10 +140,13 @@
             </div>
 
             <div class="aata-form__input-group">
-                <label class="aata-form__label" for="email">Email</label>
+                <label class="aata-form__label aata-form__label--bottom-" for="email">
+                    Email <span class="required">*</span>
+                </label>
                 <input id="email" type="email" class="aata-form__input" name="email" 
                     ng-model="email" 
                     type="email"
+                    ng-required="true"
                     ng-minlength="5"
                     ng-maxlength="30" />
                 <div class="aata-form__message" role="alert" 
@@ -151,11 +155,12 @@
                     <div ng-message="email">Por favor ingrese un email válido.</div>
                     <div ng-message="minlength">El campo debe contener un mínimo de 5 caracteres.</div>
                     <div ng-message="maxlength">El campo debe contener un máximo de 30 caracteres.</div>
+                    <div ng-messages-include="error-messages"></div>
                 </div>
             </div>
 
             <div class="aata-form__input-group">
-                <label class="aata-form__label" for="tel">Teléfono</label>
+                <label class="aata-form__label aata-form__label--bottom-" for="tel">Teléfono</label>
                 <input id="tel" class="aata-form__input" name="tel" 
                     ng-model="tel"
                     type="text"
@@ -184,14 +189,18 @@
             </fieldset>
 
             <div class="aata-form__input-group aata-form__textarea-group">
-                <label class="aata-form__label" for="comments">Pregunta</label>
+                <label class="aata-form__label" for="comments">
+                    Pregunta <span class="required">*</span>
+                </label>
                 <textarea id="comments" class="aata-form__textarea" name="comments"
                         ng-model="comments"
+                        ng-required="true"
                         ng-maxlength="500"></textarea>
                 <div role="alert" class="aata-form__message" 
                     ng-messages="contact.comments.$error" 
                     ng-show="!contact.comments.$valid && contact.comments.$dirty">
                     <div ng-message="maxlength">El campo debe contener un máximo de 500 caracteres.</div>
+                    <div ng-messages-include="error-messages"></div>
                 </div>
             </div>
 
@@ -200,6 +209,28 @@
                   data-callback="postForm"
                   data-size="invisible">
             </div>
-            <button type="submit" class="button aata-form__button" ng-disabled="contact.$invalid">Enviar</button>
+            <div class="aata-form__button-container">
+                <div class="required-message"><span class="required">*</span> Campos requeridos.</div>
+                <button type="submit" class="button aata-form__button">Enviar</button>            
+            </div>
         </form>
+        <div class="alert alert--success" role="alert" ng-show="showSuccessMessage">
+            <div class="alert__icon" aria-hidden="true">
+                <?php echo get_template_part("img/icons/checkcircleicon"); ?>
+            </div>
+            <div class="alert__content">
+                Gracias por comunicarte con Abogados a Tu Alcance, Tus Abogados en Puerto Rico, te enviaremos por correo electrónico la contestación a tu consulta a la brevedad posible. 
+            </div>
+        </div>
+        <div class="alert alert--error alert--floating" role="alert" ng-class="{'show': showErrorMessage}">
+            <div class="alert__icon" aria-hidden="true">
+                <?php echo get_template_part("img/icons/erroricon"); ?>
+            </div>
+            <div class="alert__content">
+                ¡Oops! Algo ha ocurrido y tu solicitud no ha sido procesada. Te agradecemos que trates más tarde o te comuniques al 787-200-6474.                
+            </div>
+        </div>
+        <div class="aata-form__screen" aria-hidden="true" ng-class="{'show': showFormScreen == true}">
+            <div class="loader screen-sm__loader"></div>
+        </div>
     </script>

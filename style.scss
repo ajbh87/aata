@@ -159,11 +159,11 @@ body {
     }
 }
 // --------------------------- Nav
-$nav-font: 0.9em;
+$nav-font: 0.9rem;
 .nav {
+    position: relative;
     clear: both;
     font-size: $nav-font;
-    //@include sans-serif();
     padding: 0;
     width: 100%;
     background: #fff;
@@ -171,13 +171,19 @@ $nav-font: 0.9em;
         height: 100vh;
         height: calc(100vh - #{$header-h});
         overflow: auto;
-        transition: all .2s ease-out;
+        transition: 
+            opacity .2s ease-out
+            visibility .2s ease-out;
         opacity: 0;
         visibility: hidden;
+        z-index: 500;
 
         &.is-active {
             opacity: 1;
             visibility: visible;
+        }
+        &.is-hidden {
+            display: none;
         }
     };
     ul {
@@ -226,15 +232,16 @@ $nav-font: 0.9em;
     justify-content: space-around;
     align-items: center;
     position: absolute;
-    top: .4rem;
+    top: ($spacing / 4);
     right: ($spacing / 2);
-
-    width: $nav-font * $base-line;
-    height: $nav-font * $base-line;
+    width: ($nav-font * $base-line) + ($spacing / 2) ;
+    height: ($nav-font * $base-line) + ($spacing / 2);
     padding: 0;
     margin: 0;
     @include landscape() {
-        right: $spacing * .25;
+        width: $nav-font * $base-line;
+        height: $nav-font * $base-line;
+        right: ($spacing / 4);
     }
     @include button($grey-base, $grey-dark, 'round');
     font-weight: 700;
@@ -519,7 +526,6 @@ $nav-font: 0.9em;
 
     z-index: 500;
 
-    
     background: $grey-dark;
     &.show {
         opacity: 1;
@@ -538,128 +544,62 @@ $nav-font: 0.9em;
 }
 
 // --------------------------- MISC
-.g-recaptcha { position: absolute; }
-.aata-form {
-    margin-bottom: $spacing;
-    @supports (display: grid) {
-        display: grid;
-        grid-template-columns: repeat(16, 1fr);
-        grid-gap: $spacing 0;
+.alert {
+    //padding: $spacing;
+    font-size: 1.25rem;
+    margin: ($spacing * 2) 0;
+    display: flex;
+    align-items: center;
+    &__icon {
+        margin: $spacing 0 $spacing $spacing;
+        width: 4rem;
+        height: 4rem;
+        flex: 0 0 auto;
     }
-    &__disclaimer {
-        font-size: $font-smaller;
-        grid-column: span 16;
-        @include landscape() {
-            grid-column: 3 / span 12;
+    &__content {
+        float: left;
+        width: 90%;
+        flex: 1 1 auto;
+        padding: $spacing;
+    }
+    &--success {
+        border: 2px dotted $brand;
+        .alert__icon {
+            fill: $brand;
         }
     }
-    &__input-group {
-        position: relative;
-        width: 20rem;
-        max-width: 100%;
-        margin-bottom: $spacing / 2;
-        @supports (display: grid) {
-            width: auto;
-            margin-bottom: 0;
-            grid-column: span 8;
-            &:nth-child(2n) {
-                > .aata-form__input {
-                    border-right-color: $grey-base;
-                    &:focus {
-                        border-right-color: $brand;
-                    }
-                }
-            }
-            @include landscape() {
-                grid-column: span 6;
-                &:nth-child(2n) {
-                    grid-column: 3 / span 6;
-                }
-            }
-        }
-        > .aata-form__label {
-            position: relative;
-            bottom: -0.3rem;
+    &--error {
+        border: 2px dotted $danger;
+        .alert__icon {
+            fill: $danger;
         }
     }
-    &__label {
-        display: block;
-    }
-    &__input {
-        width: 100%;
-        &.ng-invalid.ng-dirty {
-            border-bottom-color: $danger;
-        }
-    }
-    &__fieldset {
-        margin-bottom: $spacing / 2;
-        @supports (display: grid) {
-            margin-bottom: 0;
-            grid-column: span 16;
-            @include landscape() {
-                grid-column: 3 / span 12;
-            }
-        }
-        &-grid {
-            grid-template-columns: repeat(2, 1fr);
-            grid-gap: ($spacing / 4);
-            @include landscape() {
-                display: grid;
-            };
-        }
-    }
-    &__textarea {
-        &-group {
-            @supports (display: grid) {
-                grid-column: span 16;
-                @include landscape() {
-                    grid-column: 3 / span 12;
-                }
-            }
-        }
-        width: 100%;
-        min-height: $base-line * 4rem;
-    }
-    &__button {
-        @supports (display: grid) {
-            grid-column: 5 / span 8;
-            @include landscape() {
-                grid-column: 6 / span 6;
-            }
-        }
-    }
-    &__checkbox {
-
-    }
-    &__checkbox-label {
-
-    }
-    &__checkbox-container {
-        
-    }
-    &__message {
-        color: $danger;
+    &--floating {
         position: absolute;
-        font-size: $font-smaller;
-        font-weight: 700;
-        left: 0;
-        > div {
+        top: 50%;
+        z-index: 500;
+        background: #fff;
 
+        transition: all .2s ease-out;
+
+        visibility: hidden;
+        opacity: 0;
+        &.show {
+            visibility: visible;
+            opacity: 1;
         }
     }
-    @include portrait() {
-
-    };
-    @include landscape() {
-    };
 }
 
+
+
 ::selection {
-	// background:#04A4CC;
+	// background: $brand;
 	// color:#FFF;
 	// text-shadow:none;
 }
 
 @import 
+    'partials/aata-form',
     'partials/wordpress',
     'partials/print';

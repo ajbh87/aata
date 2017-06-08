@@ -18,9 +18,9 @@
         
         <?php wp_head(); ?>
     </head>
-    <body ng-controller="MainController"
-          aata-resources="<?php echo home_url(); ?>"
-          ng-class="{'menu-is-active': showMenu == true}">
+    <body ng-controller="MenuController"
+        aata-resources="<?php echo home_url(); ?>"
+        ng-class="{'menu-is-active': showMenu == true}">
         <!-- wrapper -->
         <div class="wrapper">
 
@@ -32,14 +32,14 @@
                     <?php get_template_part('img/logo'); ?>
                 </a>
             </div>
-            <button class="menu-button" ng-click="showMenu = !showMenu" aria-expanded="{{showMenu}}">
+            <button class="menu-button" ng-click="menuToggle()" aria-expanded="{{showMenu}}">
                 <span class="sr-only">Abrir Menú</span>
                 <?php get_template_part('img/icons/menuicon'); ?>
             </button>
             <!-- /logo -->
             <!-- nav -->
             <nav class="nav" role="navigation" 
-                ng-class="{'is-active': showMenu == true}"
+                ng-class="{'is-active': showMenu == true, 'is-hidden': hideMenu }"
                 aata-menu=".page_item_has_children">
                 <?php html5blank_nav(); ?>
             </nav>

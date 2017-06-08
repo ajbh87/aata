@@ -3,8 +3,16 @@ import ngResource from './node_modules/angular-resource/index.js';
 import ngMessages from './node_modules/angular-messages/index.js';
 import initComponents from './js/components.js';
 
-initComponents(angular);
-angular.module('aata', [ 'components', 'ngMessages' ])
-    .controller('MainController', ['$document', '$scope', function($document, $scope) {
-
+angular.module('aata', [ 'components' ])
+    .controller('MenuController', ['$scope', '$timeout', function($scope, $timeout) {
+    	$scope.hideMenu = true;
+    	$scope.menuToggle = function () {
+    		if ($scope.hideMenu) $scope.hideMenu = false;
+    		else {
+    			$timeout(() => {
+    				$scope.hideMenu = true;
+    			}, 250);
+    		} 
+    		$scope.showMenu = !$scope.showMenu;
+    	};
     }]);
