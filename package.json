@@ -6,17 +6,30 @@
   "scripts": {
     "uglifyjs": "uglifyjs ./js/*.js -b -o ./js-bundles/scripts.js",
     "uglifyjs-min": "uglifyjs ./js/*.js --compress -o ./js-bundles/scripts.js",
-    "webpack": "webpack --config ./webpack.config.js"
+    "webpack": "webpack --config ./webpack.config.js",
+    "webpack-min": "webpack --config ./webpack.config.min.js"
   },
   "author": "Alfredo J. Bermudez",
   "license": "ISC",
   "dependencies": {
     "angular": "^1.6.4",
-    "angular-animate": "^1.6.4",
+    "angular-messages": "^1.6.4",
     "angular-resource": "^1.6.4",
-    "angular-sanitize": "^1.6.4",
     "immutable": "^3.8.1",
-    "moment": "^2.18.1",
+    "lodash.assign": "^4.2.0",
+    "lodash.debounce": "^4.0.8",
+    "lodash.defer": "^4.1.0",
+    "lodash.find": "^4.6.0",
+    "lodash.isequal": "^4.5.0",
+    "lodash.unionwith": "^4.6.0"
+  },
+  "devDependencies": {
+    "babel-core": "^6.24.1",
+    "babel-loader": "^7.0.0",
+    "babel-preset-env": "^1.5.1",
+    "babel-preset-es2015": "^6.24.1",
+    "compression-webpack-plugin": "^0.4.0",
+    "uglifyjs-webpack-plugin": "^0.4.3",
     "webpack": "^2.6.1"
   }
 }

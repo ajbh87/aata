@@ -1,8 +1,8 @@
 /*
 	Theme Name: AATA
-	Theme URI: http://alfredo.xyz
-	Description: Wordpress Theme for Abogados a tu Alcance
-	Version: 0.1.0
+	Theme URI: http://alfredo.xyz 
+    Description: Wordpress Theme for Abogados a tu Alcance
+	Version: 0.5.0
 	Author: Alfredo J. Bermudez
 	Author URI: http://alfredo.xyz
 	Tags: AATA, HTML5, CSS3
@@ -11,24 +11,6 @@
 	License URI: http://opensource.org/licenses/mit-license.php
 */
 @import 'partials/vars';
-
-/*------------------------------------*\
-    MAIN
-\*------------------------------------*/
-
-/* global box-sizing */
-*,
-*:after,
-*:before {
-	-moz-box-sizing:border-box;
-	box-sizing:border-box;
-	-webkit-font-smoothing:antialiased;
-	font-smoothing:antialiased;
-	text-rendering:optimizeLegibility;
-}
-h1, h2, h3 { 
-    margin: $spacing 0;
-}
 html {
 	font-size: $min-font;
     line-height: $base-line;
@@ -38,10 +20,10 @@ html {
     margin: 0;
     padding: 0;
     
-    @media only screen and (min-width: 1060px) {
+    @media only screen and (min-width: $min-width) {
         font-size: $base-font;
     }
-    @media only screen and (min-width: 1920px) {
+    @media only screen and (min-width: $max-width) {
         font-size: $max-font;
     }
 }
@@ -53,291 +35,434 @@ body {
     padding: 0;
     
     @include bg;
-    
-    &.modal-active {
-        overflow: hidden;
-    }
+    @include portrait() {
+        &.menu-is-active {
+            overflow: hidden;
+        }
+    };
 }
-/* clear */
-.clear:before,
-.clear:after {
-    content:' ';
-    display:table;
-}
+@import 
+    'partials/defaults',
+    'partials/buttons';
 
-.clear:after {
-    clear:both;
-}
-.clear {
-    *zoom:1;
-}
-img {
-	max-width:100%;
-	vertical-align:bottom;
-}
-a {
-	color: $text-color;
-    text-decoration: none;
-    border-bottom: 3px dotted $grey-base;
-    transition: all .2s ease-out;
-//    text-decoration-style: dotted;
-//    text-decoration-color: lighten($text-color, 33.33);
-}
-a:hover {
-	//color: #fff;
-    background: $grey-light;
-    border-bottom-color: $blue;
-}
-a:focus {
-	outline:0;
-    border-bottom-color: $blue;
-    background: $grey-lighter;
-}
-a:hover,
-a:active {
-	outline:0;
-}
-input:focus {
-	outline:0;
-	border:1px solid #04A4CC;
-}
-
-/*------------------------------------*\
-    STRUCTURE
-\*------------------------------------*/
-
-/* wrapper */
+// --------------------------- Wrapper
 .wrapper {
     position: relative;
     width:100%;
+    min-height: 100vh;
+    min-height: calc(100vh - #{$footer-h});
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
 
-    @media only screen and (orientation: landscape) {
-        display: flex;
-        justify-content: space-between;
+    @include landscape() {
+        flex-direction: row;
         padding: 0 0 0 $side;
+        &:before {
+            content: ' ';
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: $banner-height;
+            z-index: 0;
+            background: $brand;
+        }
     }
 }
-/* header */
+// --------------------------- Header
 .header {
-    position: relative;
+    position: fixed;
     height: $header-h;
     width: 100%;
     flex: 1 0 auto;
+    z-index: 20;
     background: #fff;
-    @media only screen and (orientation: landscape) {
-        position: fixed;
+    border-bottom: 1px solid $grey-base;
+    @include landscape() {
         left: 0;
         top: 0;
         bottom: 0;
         width: $side;
         height: 100vh;
         overflow: auto;
-        //border-right: 1px solid $grey-base;
+        border: 0;
     }
 }
-/* logo */
+.menu-button {
+    float: right;
+    height: 100%;
+    width: $header-h;
+    @include button(#fff, $brand);
+    &:hover, &:focus {
+        @include button-style($grey-light, $brand);
+    }
+    &[aria-expanded="true"]{
+        @include button-style($brand, #fff);
+        &:hover, &:focus {
+            @include button-style($brand-light, #fff);
+        }
+        .icon--line-1 {
+            //transform: translate(0, 5px) rotate(45deg);
+            transform: translate(0, 5px);
+        }
+        .icon--line-3 {
+            //transform: translate(0, -5px) rotate(-45deg);
+            transform: translate(0, -5px);
+        }
+        .icon--line-2 {
+            //opacity: 0;
+        }
+    }
+    .icon--line-1, .icon--line-3 {
+        transform-origin: center center;
+    }
+    @include landscape() {
+        display: none;
+    };
+}
+// --------------------------- logo 
 .logo {
     height: 100%;
-    width: 100%;
-    
-    @media only screen and (orientation: landscape) {
+    width: auto;
+    float: left;
+    @include landscape() {
+        float: none;
         position: sticky;
         top: 0;
-        height: auto;
+        height: $banner-height;
         z-index: 50;
     }
     
     &__link {
         display: block;
         height: 100%;
-        width: 100%;
+        width: auto;
         padding: ($spacing / 2);
         background: #fff;
-        border-bottom: 1px solid $grey-base;
-        
+        border-bottom: 0;
         &:hover {
-            background: $grey-light;
+            background: $grey-lighter;
         }
-        @media only screen and (orientation: landscape) {
-            display: block;
+        @include landscape() {
+            border-bottom: 3px solid $brand;
             display: flex;
             align-items: center;
         }
     }
     &__image {
-        height: auto;
+        height: 100%;
         width: auto;
-        max-height: 100%;
         max-width: 100%;
         flex: 1 1 auto;
     }
 }
-/* nav */
+// --------------------------- Nav
+$nav-font: 0.9rem;
 .nav {
-    font-size: .9rem;
+    position: relative;
+    clear: both;
+    font-size: $nav-font;
     padding: 0;
     width: 100%;
     background: #fff;
+    @include portrait() {
+        height: 100vh;
+        height: calc(100vh - #{$header-h});
+        overflow: auto;
+        transition: 
+            opacity .2s ease-out
+            visibility .2s ease-out;
+        opacity: 0;
+        visibility: hidden;
+        z-index: 500;
+
+        &.is-active {
+            opacity: 1;
+            visibility: visible;
+        }
+        &.is-hidden {
+            display: none;
+        }
+    };
     ul {
         list-style: none;
         padding: 0;
         margin: 0;
-        &.children {
-            position: relative;
-            z-index: 5;
-            background: #fff;
-            > li a {
-                padding-left: $spacing;
-            }
-        }
     }
     a {
         display: block;
-        padding: ($spacing / 4) ($spacing / 2);
+        padding: ($spacing / 2) $spacing;
+        @include landscape() {
+            padding: ($spacing / 4) ($spacing / 2);
+        }
+    }
+    .children {
+        position: relative;
+        border-right: 3px dotted $brand;
+        
+        > li a {
+            padding-left: $spacing;
+        }
     }
     &.js {
-        li.page_item_has_children {
-            position: relative; 
+        .page_item_has_children {
+            position: relative;
             > a {
                 padding-right: $spacing * 2;
             }
         }
+        .children {
+            overflow: hidden;
+            visibility: hidden;
+            max-height: 0;
+            transition:
+                max-height .2s ease-in-out,
+                visibility .2s ease-in-out;
+            &.is-active {
+                visibility: visible;
+                max-height: 100vh;;
+            }
+        }
     }
 }
-@keyframes raise {
-    0% {
-        transform: scale(1);
-        box-shadow: unset;
-    }
-    50% {
-        transform: scale(1.2);
-        box-shadow: 0 5px 5px rgba(0,0,0,.2);
-    }
-    100% {
-        transform: scale(1);
-        box-shadow: 0 0 0 rgba(0,0,0,.2);
-    }
-}
-
 .expand {
     display: flex;
     justify-content: space-around;
     align-items: center;
     position: absolute;
-    top: .25rem;
-    right: $spacing * .25;
-
-    width: $spacing;
-    height: $spacing;
+    top: ($spacing / 4);
+    right: ($spacing / 2);
+    width: ($nav-font * $base-line) + ($spacing / 2) ;
+    height: ($nav-font * $base-line) + ($spacing / 2);
     padding: 0;
     margin: 0;
-    
+    @include landscape() {
+        width: $nav-font * $base-line;
+        height: $nav-font * $base-line;
+        right: ($spacing / 4);
+    }
     @include button($grey-base, $grey-dark, 'round');
     font-weight: 700;
     
     &:hover, &:focus {
         //@include button-raise();
-        @include button-style($grey-light, $blue);
+        @include button-style($grey-light, $brand);
     }
     &[aria-expanded="true"]{
-        @include button-style($blue, #fff);
+        @include button-style($brand, #fff);
         &:hover, &:focus {
-            @include button-style($blue-light, #fff);
-        } 
+            @include button-style($brand-light, #fff);
+        }
+        .add__v {
+            transform: rotate(90deg);
+        }
+    }
+    .add__v {
+        transform-origin: center center;    
     }
 }
-/* sidebar */
+// --------------------------- Sidebar
 .sidebar {
     background: $grey-light;
     position: relative;
-    flex: 0 1 auto;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    @include landscape() {
+        display: block;
+        flex: 0 1 auto;
+        width: $side;
+    }
+    &__search {
+        display: flex;
+        align-items: center;
+        background: $grey-dark;
+        padding: $spacing;
+        @include landscape() {
+            //display: block;
+            width: 100%;
+            height: $banner-height;
+            //background: $brand-light;
+        }
+    }
     &__content {
-        padding: ($spacing / 2);
-        //background: #fff;
-        @media only screen and (orientation: landscape) {
-            $f: 2rem;
-            $b: $base-line * $f;
+        //text-align: center;
+        padding: $spacing;
+        @include keep-flow();
+        @include landscape() {
             position: sticky;
-            top: ($spacing / 2);
-            width: $side;
-            margin-top: ($b + ($spacing * 2));   //5.43rem;
+            top: 0;
+            width: 100%;
+        }
+
+    }
+    &__link-list {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 $spacing 0;
+    }
+    &__link {
+        text-align: center;
+        display: block;
+        margin-bottom: $spacing / 4;
+        font-size: 1rem;
+
+        .icon {
+            $s: (($base-line * 1rem) - $spacing) / 2;
+            display: block;
+            float: left;
+            height: $spacing;
+            width: $spacing;
+            padding: 0.15rem;
+            background: $brand;
+            margin-top: $s;
+            margin-right: 0.5rem;
+            //border-radius: 50%;
+
+            @include landscape() {
+                position: absolute;
+                left: $spacing / -2;
+            };
+            
+            &__fill {
+                fill: #fff;
+            }
         }
     }
 }
-input[type="search"] {
-    box-sizing: border-box;
-}
 .search {
+    $s: 2rem;
     position: relative;
     display: flex;
     width: 100%;
-    height: 1.5rem;
-    font-size: .8rem;
+    height: $s;
+    font-size: $font-smaller;
     &__input, &__submit {
         display: block;
-        flex: 1 1 auto;
         height: 100%;
+        width: 75%;
     }
     &__input {
-        width: 75%;
+        box-sizing: border-box;
+        flex: 1 1 auto;
         border: 0;
+        border-bottom: 3px solid $grey-base;
+        &:focus {
+            border: 0;
+            border-bottom: 3px solid $brand;
+        }
     }
     &__submit {
-        width: 25%;
-        @include button($blue, #fff);
+        flex: 0 0 auto;
+        width: $s;
+        height: $s;
+        @include button($brand, #fff);
+        padding: .25rem;
+        margin: 0;
         &:hover, &:focus {
-            //@include button-raise();
-            @include button-style($blue-light, #fff);
+            @include button-style($brand-light, #fff);
+        }
+        .icon {
+            width: 100%;
+            height: auto;
+            max-height: 100%;
+            max-width: 100%;
         }
     }
 }
+// --------------------------- Main
 .main {
-    padding: 0 $spacing;
-    min-height: 100vh;
-    @media only screen and (orientation: landscape) {
-        flex: 0 1 40rem;
-        padding: 0 $spacing;
+    position: relative;
+    padding: $header-h ($spacing * 3.5) 0 $spacing;
+    z-index: 1;
+    border-left: $spacing solid $brand;
+    @include landscape() {
+        margin-right: 0.5rem;
+        padding: 0 ($spacing * 3.5) 0 $spacing;
+        flex: 0 1 $main-max;
+        min-height: 100vh;
+        min-height: calc(100vh - #{$footer-h});
     }
     &__title {
-        margin: 0;
-        padding: $spacing 0;
-        //border-bottom: 3px dotted $grey-base;
+        @include landscape() {
+            @include main-title();
+        }
+    }
+
+    .widget_text {
+        margin: $spacing 0;
+        
+        @include landscape() {
+            margin-top: 0;
+            h3 {
+                @include main-title();
+            }
+        };
+        .textwidget {
+            padding: $spacing;
+            background: #fff;
+            > :first-child {
+                margin-top: 0 !important;
+            }
+            > :last-child {
+                margin-bottom: 0 !important;
+            }
+        }
     }
 }
-
+// --------------------------- Article
 .article {
-    margin-bottom: $spacing;
+    margin: $spacing 0;
+    @include landscape() {
+        margin-top: 0;
+    };
     &__title {
-         margin-top: 0;
-         margin-bottom: $spacing / 2;
+        margin: 0 0 ($spacing / 2) 0;
     }
     &__date {
+        $w: $article-date-width;
+
         display: block;
-        margin-bottom: $spacing / 2;
+        position: absolute;
+        width: $w;
+        right: 0;
+        margin: $spacing;
+        padding: ($spacing / 2);
+        
+        text-align: center;
+        font-size: $font-smaller;
+        line-height: 1.25;
+
+        background: $grey-dark;
+        color: #fff;
+    }
+    &__author {
+        font-size: $font-smaller;
+        font-style: italic;
     }
     &__content {
-        background: #fff;
-        padding: ($spacing /2);
-        & > :first-child {
-            margin-top: 0;
-        }
-        & > :last-child {
-            margin-bottom: 0;
-        }
+        @include long-content();
     }
     &__excerpt {
-        background: #fff;
-        padding: ($spacing /2);
+        @include long-content();
         flex: 1 1 auto;
-        & > :first-child {
-            margin-top: 0;
+    }
+    &__tags {
+        margin: ($spacing / 2) 0;
+        .icon {
+            display: block;
+            float: left;
+            height: 1.4rem;
+            width: 1.4rem;
+            margin: 0.3rem 0.5rem 0 0;
         }
-        & > :last-child {
-            margin-bottom: 0;
+        .icon__fill {
+            fill: $brand;
         }
     }
 }
-/* footer */
+// --------------------------- Footer
 .footer {
     font-size: .7rem;
     color: #fff;
@@ -350,7 +475,7 @@ input[type="search"] {
             color: $grey-dark;
         }
     }
-    @media only screen and (orientation: landscape) {
+    @include landscape() {
         margin-left: $side;
     }
 }
@@ -363,21 +488,7 @@ input[type="search"] {
     }
 }
 .loader {
-    $s: 40px;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: $s;
-    height: $s;
-    margin-top: ($s / -2);
-    margin-left: ($s / -2);
-    border-radius: 50%;
-    border: 5px dotted $blue;
-    border-right-width: 0;
-    animation-name: rotateLoader;
-    animation-duration: .75s;
-    animation-iteration-count: infinite;
-    animation-timing-function: linear;
+    @include loader;
 }
 .screen {
     position: fixed;
@@ -386,16 +497,18 @@ input[type="search"] {
     left: 0;
     right: 0;
     
-    transition: all .5s ease-out;
+    transition: all .2s ease-out;
     opacity: 0;
     visibility: hidden;
+
+    z-index: 500;
     
     @include bg;
     &.show {
         opacity: 1;
         visibility: visible;
     }
-    @media only screen and (orientation: landscape) {
+    @include landscape() {
         top: 0;
         left: $side;
     }
@@ -405,72 +518,88 @@ input[type="search"] {
     bottom: 0;
     left: 0;
     right: 0;
-    height: $spacing * 2;
+    height: $footer-h;
     
-    transition: all .5s ease-out;
+    transition: all .2s ease-out;
     opacity: 0;
     visibility: hidden;
-    
+
+    z-index: 500;
+
     background: $grey-dark;
     &.show {
         opacity: 1;
         visibility: visible;
     }
 
-    // .loader {
-    //     border-color: #fff;
-    // }
+    .loader {
+        @include loader(1rem);
+        //border-color: #fff;
+    }
 
-    @media only screen and (orientation: landscape) {
+    @include landscape() {
         left: $side;
-        right: $side;
+        //right: $side;
     }
 }
 
-/*------------------------------------*\
-    MISC
-\*------------------------------------*/
+// --------------------------- MISC
+.alert {
+    //padding: $spacing;
+    font-size: 1.25rem;
+    margin: ($spacing * 2) 0;
+    display: flex;
+    align-items: center;
+    &__icon {
+        margin: $spacing 0 $spacing $spacing;
+        width: 4rem;
+        height: 4rem;
+        flex: 0 0 auto;
+    }
+    &__content {
+        float: left;
+        width: 90%;
+        flex: 1 1 auto;
+        padding: $spacing;
+    }
+    &--success {
+        border: 2px dotted $brand;
+        .alert__icon {
+            fill: $brand;
+        }
+    }
+    &--error {
+        border: 2px dotted $danger;
+        .alert__icon {
+            fill: $danger;
+        }
+    }
+    &--floating {
+        position: absolute;
+        top: 50%;
+        z-index: 500;
+        background: #fff;
+
+        transition: all .2s ease-out;
+
+        visibility: hidden;
+        opacity: 0;
+        &.show {
+            visibility: visible;
+            opacity: 1;
+        }
+    }
+}
+
+
 
 ::selection {
-	background:#04A4CC;
-	color:#FFF;
-	text-shadow:none;
-}
-::-webkit-selection {
-	background:#04A4CC;
-	color:#FFF;
-	text-shadow:none;
-}
-::-moz-selection {
-	background:#04A4CC;
-	color:#FFF;
-	text-shadow:none;
-}
-
-//Angular CSP
-[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak],
-.ng-cloak, .x-ng-cloak,
-.ng-hide:not(.ng-hide-animate) {
-  display: none !important;
-}
-
-ng\:form {
-  display: block;
-}
-
-.ng-animate-shim {
-  visibility:hidden;
-}
-
-.ng-anchor {
-  position:absolute;
-}
-
-.hidden {
-    display: none;
+	// background: $brand;
+	// color:#FFF;
+	// text-shadow:none;
 }
 
 @import 
-    //'partials/modal',
+    'partials/aata-form',
     'partials/wordpress',
     'partials/print';

@@ -1,12 +1,18 @@
-import saKnife from './js/libs/saKnife.js';
-window.saKnife = saKnife;
-import Immutable from './node_modules/immutable/dist/immutable.js';
-window.Immutable = Immutable;
-import moment from './node_modules/moment/moment.js';
-window.moment = moment;
-window.moment.locale('es');
 import angular from './node_modules/angular/index.js';
-window.angular = angular;
-import ngSanitize from './node_modules/angular-sanitize/index.js';
 import ngResource from './node_modules/angular-resource/index.js';
-import ngAnimate from './node_modules/angular-animate/index.js';
+import ngMessages from './node_modules/angular-messages/index.js';
+import initComponents from './js/components.js';
+
+angular.module('aata', [ 'components' ])
+    .controller('MenuController', ['$scope', '$timeout', function($scope, $timeout) {
+    	$scope.hideMenu = true;
+    	$scope.menuToggle = function () {
+    		if ($scope.hideMenu) $scope.hideMenu = false;
+    		else {
+    			$timeout(() => {
+    				$scope.hideMenu = true;
+    			}, 250);
+    		} 
+    		$scope.showMenu = !$scope.showMenu;
+    	};
+    }]);

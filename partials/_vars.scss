@@ -1,51 +1,109 @@
 // Colors
-$blue: #45b8ac;
-$blue-light: #78c4bd;
+$brand: #45b8ac;
+$brand-light: #78c4bd;
 $grey-lighter: #f9f9f9;
 $grey-light: #e6e6e6;
 $grey-base: #d3d3d3;
 $grey-dark: #444;
 
+$warning: #F0A100;
+$danger: #EB4541;
+
 $bg-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='32' viewBox='0 0 16 32'%3E%3Cg fill='%2345b8ac' fill-opacity='0.20'%3E%3Cpath fill-rule='evenodd' d='M0 24h4v2H0v-2zm0 4h6v2H0v-2zm0-8h2v2H0v-2zM0 0h4v2H0V0zm0 4h2v2H0V4zm16 20h-6v2h6v-2zm0 4H8v2h8v-2zm0-8h-4v2h4v-2zm0-20h-6v2h6V0zm0 4h-4v2h4V4zm-2 12h2v2h-2v-2zm0-8h2v2h-2V8zM2 8h10v2H2V8zm0 8h10v2H2v-2zm-2-4h14v2H0v-2zm4-8h6v2H4V4zm0 16h6v2H4v-2zM6 0h2v2H6V0zm0 24h2v2H6v-2z'/%3E%3C/g%3E%3C/svg%3E");
 
-// Font
-$text-color: $grey-dark;
-$base-font: 1.3vw;
-$base-line: 1.6;
-$min-font: 16px;
-$max-font: 25px;
-$weight: 400;
-$family: 'Playfair Display', "adobe-garamond-pro", "Garamond", "Book Antiqua", Palatino ,serif;
 
-$spacing: 1.5rem;
+// Font
+$min-width: 1500px;
+$max-width: 2200px;
+$landscape-min: 1200px;
+
+$text-color: $grey-dark;
+$font-to-width: 1;
+$base-font: $font-to-width * 1vw;
+$base-line: 1.6666;
+$min-font: $min-width * ($font-to-width / 100);
+$max-font: $max-width * ($font-to-width / 100);
+$weight: 400;
+$family: 'Playfair Display', "adobe-garamond-pro", "Garamond", "Book Antiqua", Palatino, serif;
+$ss-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+$font-smaller: .75rem;
+$main-title: 1.2rem;
+
+$banner-height: 6rem;
+
+$spacing: 1.3rem;
 
 $header-h: $spacing * 3;
+$side: $spacing * 13;
+$article-date-width: $spacing * 3;
+$main-max: 100rem - ($side * 2) - ($spacing * 2) - $article-date-width;
 
-$side: $spacing * 9;
+$footer-f-size: .7rem;
+$footer-h: ($footer-f-size * $base-line) + $spacing;
 
+@mixin sans-serif() {
+    font-family: $ss-family;
+}
 @mixin bg() {
     background-color: #fff;
     background-image: $bg-pattern;
     background-attachment: fixed;
 }
-@mixin button-style($bg, $text) {
-	background: $bg;
-    //border: 1px solid darken($bg, 10%);
-    border: 0;
-    color: $text;
-}
-@mixin button($bg, $text, $type: "") {
-    transition: all .2s ease-out;
-    @include button-style($bg, $text);
 
-    @if $type == 'round' {
-    	border-radius: 50%;
-    }
-    &:focus {
-    	outline: 0;
+@mixin landscape() {
+    @media only screen and (orientation: landscape) and (min-width: $landscape-min) {
+        @content;
+    }   
+}
+@mixin portrait() {
+    @media only screen and (orientation: portrait), (max-width: #{$landscape-min - 1}) {
+        @content;
+    }   
+}
+@mixin loader($s: 2rem) {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: $s;
+    height: $s;
+    margin-top: ($s / -2);
+    margin-left: ($s / -2);
+    border-radius: 50%;
+    border: 5px dotted $brand;
+    border-right-width: 0;
+    animation-name: rotateLoader;
+    animation-duration: .75s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+@mixin main-title() {
+    display: flex;
+    align-items: flex-end;
+    height: $banner-height - $spacing;
+    font-size: $main-title;
+    line-height: 1.25;
+    padding: ($spacing / 2) $spacing;
+    margin: 0;
+    color: #fff;
+
+    &--margin {
+        margin: $spacing 0;
     }
 }
-@mixin button-raise() {
-	transform: scale(1.1);
-    box-shadow: 0 1px 3px rgba(0,0,0,.25);
+@mixin keep-flow() {
+    & > :first-child {
+        margin-top: 0;
+    }
+    & > :last-child {
+        margin-bottom: 0;
+    }
 }
+@mixin long-content() {
+    //@include sans-serif();
+    //font-size: .8rem;
+    background: #fff;
+    padding: $spacing;
+    color: $text-color;
+    @include keep-flow();
+}
+

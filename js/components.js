@@ -1,126 +1,524 @@
-angular.module('components', ['ngResource'])
-    .directive('aataResources', [ '$compile', '$q', '$resource', '$templateCache', '$timeout', '$document', ($compile, $q, $resource, $templateCache, $timeout, $document) => {
+import saKnife from './libs/saKnife.js';
+import Immutable from '../node_modules/immutable/dist/immutable.js';
+import find from '../node_modules/lodash.find/index.js';
+import debounce from '../node_modules/lodash.debounce/index.js';
+import defer from '../node_modules/lodash.defer/index.js';
+import unionWith from '../node_modules/lodash.unionwith/index.js';
+import assign from '../node_modules/lodash.assign/index.js';
+import isEqual from '../node_modules/lodash.isequal/index.js';
+
+const initComponents = (function initComponents(angular) {
+    const _ = {
+            assign,
+            debounce,
+            defer,
+            find,
+            isEqual,
+            unionWith
+        }, 
+        jqLite = angular.element;
+
+    angular.module('components', ['ngResource', 'ngMessages'])
+    .directive('aataScript', function() {
+        return {
+          //restrict: 'E',
+          scope: false,
+          link: function(scope, elem, attr) {
+            if (attr.type==='text/javascript-lazy') 
+            {
+              var s = document.createElement("script");
+              s.type = "text/javascript";                
+              var src = elem.attr('src');
+              if(src!==undefined)
+              {
+                  s.src = src;
+              }
+              else
+              {
+                  var code = elem.text();
+                  s.text = code;
+              }
+              document.head.appendChild(s);
+              elem.remove();
+            }
+          }
+        };
+      })
+    .directive('aataForm', ['$http', '$timeout', function($http, $timeout) {
+        const url = 'https://script.google.com/macros/s/AKfycbzpv61xrCS11gcp-vy_7f_pKdlY1QaPc6OD0iazGY6rQpZoho6h/exec';
+        return {
+            templateUrl: 'form.html',
+            scope: true,
+            link: function(scope, element, attrs) {
+                //const url = attrs.aataForm;
+                const defs = Immutable.Map({
+                                    telRegex: /([\+\.\-\)\(]*[0-9]{1,4})+/,
+                                    name: '',
+                                    lastName: '',
+                                    email: '',
+                                    tel: '',
+                                    asunto: {
+                                        adopcion: {
+                                            text: 'Adopción',
+                                            selected: false
+                                        },
+                                        capitul: {
+                                            text: 'Capitulaciones Matrimoniales',
+                                            selected: false
+                                        },
+                                        custodia: {
+                                            text: 'Custodia',
+                                            selected: false
+                                        },
+                                        decla: {
+                                            text: 'Declaratoria de Herederos',
+                                            selected: false
+                                        },
+                                        divi: {
+                                            text: 'División de Bienes Gananciales',
+                                            selected: false
+                                        },
+                                        divorcio: {
+                                            text: 'Divorcio',
+                                            selected: false
+                                        },
+                                        herencia: {
+                                            text: 'Herencia',
+                                            selected: false
+                                        },
+                                        patriaPot: {
+                                            text: 'Patria Potestad',
+                                            selected: false
+                                        },
+                                        pension: {
+                                            text: 'Pensión Alimentaria',
+                                            selected: false
+                                        },
+                                        otro: {
+                                            text: 'Otro',
+                                            selected: false
+                                        }
+                                    },
+                                    comments: '',
+                                    showFormScreen: false
+                                });
+                scope = _.assign(scope, defs.toObject());
+
+                scope.submitForm = function() {
+                    if (scope.contact.$valid) {
+                        scope.showFormScreen = true;
+                        //postForm(0); // for error testing
+                        grecaptcha.execute();
+                    }
+                }
+                window.postForm = postForm;
+                function postForm(token) {
+                    const formData = {
+                            Nombre: scope.name,
+                            Apellidos: scope.lastName,
+                            Email: scope.email,
+                            Telefono: scope.tel,
+                            Asunto: generateList(scope.asunto),
+                            Pregunta: scope.comments,
+                            'g-recaptcha-response': token
+                        },
+                        encoded = getEncoded(formData);
+                    $http({
+                        method: 'POST',
+                        url: url,
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        data: encoded
+                    }).then(success, error);
+                }
+                function success(response) {
+                    var recaptchaResponse = response.data.content.recaptcha;
+                    console.log(recaptchaResponse);
+                    grecaptcha.reset();
+                    if (recaptchaResponse.success === true) {
+                        scope.hideForm = true;
+                        scope.showSuccessMessage = true;
+                    } else {
+                        showErrorMessage();
+                    }
+                    scope.showFormScreen = false;
+                }
+                function error(response) {
+                    grecaptcha.reset();
+                    showErrorMessage();
+                    scope.showFormScreen = false;
+                }
+                function showErrorMessage() {
+                    scope.showErrorMessage = true;
+
+                    $timeout(() => {
+                        scope.showErrorMessage = false;
+                    }, 3000);
+                }
+            }
+        }
+        function generateList(items) {
+            let list = '', key;
+            for (key in items) {
+                if (items[key].selected) {
+                    list += ' - ' + items[key].text;
+                }
+            }
+            return list;
+        }
+        function getEncoded(data) {
+            return Object.keys(data).map(function(k) {
+                    return encodeURIComponent(k) + '=' + encodeURIComponent(data[k])
+                }).join('&');
+        }
+    }])
+    .directive('aataResources', [ '$compile', '$q', '$sce', '$resource', '$templateCache', '$timeout', '$document',
+        function ($compile, $q, $sce, $resource, $templateCache, $timeout, $document) {
         class stateConstructor {
             constructor(def = {}) {
-                let s = Immutable.Map(def),
-                    dispatcher = (s) => {};
-                const options = s,
-                    keyDispatchers = {};
-
-                this.set = (key, value) => {
-                    s = s.set(key, value);
-                    if (keyDispatchers[key] != null) {
-                        keyDispatchers[key](value, s.toObject());
+                this.s = Immutable.Map(def);
+                this.pristine = this.s;
+                this.dispatcher = (s) => {};
+                this.keyDispatchers = {};
+            }
+            set(key, value) {
+                this.s = this.s.set(key, value);
+                if (this.keyDispatchers[key] != null) {
+                    this.keyDispatchers[key](value, this.s.toObject());
+                }
+            }
+            setDispatch(fn) {
+                this.dispatcher = fn;
+            }
+            dispatch() {
+                this.dispatcher(this.s.toObject());
+            }
+            setKeyDispatcher(key1, fn) {
+                this.s.forEach((val, key2) => {
+                    if (key1 === key2) {
+                        this.keyDispatchers[key1] = fn; 
+                        return false; 
                     }
-                };
-                this.setMultiple = (obj) => s = s.concat(obj);
-                this.get = (key) => s.get(key);
-                this.setDispatch = (fn) => dispatcher = fn;
-                this.dispatch = () => dispatcher(s.toObject());
-                this.setKeyDispatcher = (key1, fn) => {
-                    s.forEach((val, key2) => {
-                        if (key1 === key2) {
-                            keyDispatchers[key1] = fn; 
-                            return false; 
-                        }
-                    });
-                };
-                this.getObj = () => s.toObject();
+                });
+            };
+            setMultiple(obj) {
+                this.s = this.s.concat(obj);
+            }
+            new(obj){
+                this.s = this.pristine.concat(obj);
             }
         };
         
         const main = $document[0].querySelector('.main'),
             lang = getLang(),
-            jqWindow = jqLite(window),
-            mainJQ = jqLite(main),
-            screen = jqLite($document[0].querySelector('.screen')),
-            screenSM = jqLite($document[0].querySelector('.screen-sm')),
             base = lang.url,
             restUrl = base + '/wp-json/wp/v2',
+            cache = {
+                posts: [],
+                tags: []
+            },
             defaultResourceOptions = {
                 get: { method:'GET', cache: true},
                 query: { method:'GET', cache: true, isArray:true }
             },
             rest = {
-              allPosts: $resource(restUrl + '/:type?page=:page', {
-                  type: 'posts',
-                  page: '@pageNum'
-              }, defaultResourceOptions),
-              byFilter: $resource(restUrl + '/:type?:filter=:slug&page=:page', { 
-                  type: '@type',
-                  filter: '@filter',
-                  slug: '@slug',
-                  page: 1
-              }, defaultResourceOptions),
-              byId: $resource(restUrl + '/:type/:id', { 
-                  type: '@type',
-                  id: '@id'
-              }, defaultResourceOptions),
-              all: $resource(restUrl + '/:type?per_page=:perPage', { 
-                  type: '@type',
-                  perPage: 10
-              }, defaultResourceOptions)
+                allPosts: $resource(restUrl + '/:type?page=:page', {
+                    type: 'posts',
+                    page: '@pageNum'
+                }, defaultResourceOptions),
+                byFilter: $resource(restUrl + '/:type?:filter=:slug&page=:page', { 
+                    type: '@type',
+                    filter: '@filter',
+                    slug: '@slug',
+                    page: 1
+                }, defaultResourceOptions),
+                byId: $resource(restUrl + '/:type/:id', { 
+                    type: '@type',
+                    id: '@id'
+                }, defaultResourceOptions),
+                all: $resource(restUrl + '/:type?per_page=:perPage', { 
+                    type: '@type',
+                    perPage: 10
+                }, defaultResourceOptions)
             },
             get = {
-                postsPage: (page) => rest.allPosts.query({ page }).$promise,
-                byFilter: (slug, type, filter, page = 1) => rest.byFilter.query({ 
-                    type, filter, slug, page
-                }).$promise, 
+                postsPage: (page) => {
+                    let request = rest.allPosts.query({ page }, (val) => {
+                        cache.posts = _.unionWith(cache.posts, val, _.isEqual);
+                    });
+                    return request.$promise;
+                },
+                byFilter: (slug, type, filter, page = 1) => {
+                    let request = rest.byFilter.query({ type, filter, slug, page }, (val) => {
+                        if (type === 'posts' && filter === 'tags') {
+                            cache.tags = cache.tags.concat(val);
+                        }
+                    });
+                    return request.$promise;
+                }, 
                 byId: (type, id) => rest.byId.get({ type, id }).$promise,
                 all: (type, perPage) => rest.all.query({ type, perPage }).$promise
             },
             comeOnDude = [ base ], // strings
             youShallNotPass = [ 'php', 'feed', 'wp-admin' ], // strings
-            allTagsDef = get.all('tags', 100),
             state = new stateConstructor({
                 animated: null, // promise
-                loopType: null, // posts | tags
-                meta: null, // tag archive meta - obj
-                replace: null, // replace history - bool
-                requestType: null, // posts | pages | loop
-                url: null,
-                val: null, 
-                pastBottom: false,
                 currentPage: 1,
-                lastPage: false
-            });
-        let unbindLoop = checkIfLoop();
+                loopType: '', // posts | tags
+                lastPage: false,
+                meta: {}, // tag archive meta - obj
+                pastBottom: false,
+                replace: false, // replace history - bool
+                requestType: '', // posts | pages | loop
+                scrolled: 0,
+                url: '',
+                val: {}
+            }),
+            allUsersDef = reallyGetAll('users'),
+            allTagsDef = reallyGetAll('tags');
+        let unbindLoop = () => {};
+        jqLite(window).on('scroll', _.debounce(checkScrollPosition, 250));
 
+        (function checkCurrentPage() {
+            const slug = window.location.href.replace(base, ''),
+                processed = processSlug(slug),
+                def = $q.defer();
+            let requestType = '';
+            if (processed.isTag || processed.isAuthor || processed.isSearch || processed === false) {
+                if (processed.isTag) {
+                    $q.when(allTagsDef).then((tags) => {
+                        let tagMeta = _.find(tags, (tag) => tag.link === window.location.href);
+                        state.new({
+                            loopType: 'tags',
+                            meta: tagMeta,
+                            requestType: 'loop',
+                            url: window.location.href
+                        });
+                        get.byFilter(tagMeta.id, 'posts', 'tags').then((val) => {
+                            state.set('val', val)
+                        });
+                        def.resolve(bindLoop());
+                    });
+                } 
+                else {
+                    // Post loop 
+                    state.new({
+                        url: window.location.href,
+                        requestType: 'loop',
+                        loopType: 'posts'
+                    });
+                    get.postsPage(1).then((val) => {
+                        state.set('val', val)
+                    });
+                    def.resolve(bindLoop());
+                }
+            } else {
+                if (processed.isPosts) {
+                    requestType = 'posts';
+                }
+                else {
+                    requestType = 'pages';
+                }
+                state.new({
+                    loopType: null,
+                    meta: {},
+                    requestType,
+                    url: window.location.href
+                });
+                // processed.slugArray[processed.slugArray.length - 1] = last
+                get.byFilter(processed.slugArray[processed.slugArray.length - 1], requestType, 'slug').then((val) => {
+                    state.set('val', val[0])
+                });
+                def.resolve(() => {});
+            }
+            return def.promise;
+        })().then((fn) => {
+            unbindLoop = fn;
+        });
         return {
-            link: (scope, element, attrs) => {
+            link: function (scope, element, attrs) {
+                const fetch = {
+                    byId: ($event, type, id) => {
+                        $event.preventDefault();
+                        const promise = get.byId(type, id),
+                            animated = prepareWindow();
+                        
+                        promise.then((val) => {
+                            changeState({
+                                replace: false,
+                                animated: animated,
+                                requestType: type,
+                                url: val.link,
+                                val: val
+                            });
+                        });
+                    },
+                    allByTag: ($event, data) => {
+                        $event.preventDefault();
+                        const promise = get.byFilter(data.id, 'posts','tags'),
+                            animated = prepareWindow();
+                        promise.then((val) => {
+                            changeState({
+                                replace: false,
+                                animated: animated,
+                                loopType: 'tags',
+                                requestType: 'loop',
+                                url: data.link,
+                                val,
+                                meta: data
+                            });
+                        });
+                    },
+                    postOrPage: function(slug, replace) {
+                        const processed = processSlug(slug),
+                            slugArray = processed.slugArray,
+                            types = ['pages', 'posts'];
+
+                        let promise = $q.defer(),
+                            pageNum = null,
+                            slugIndex = 0,
+                            cleanSlug = '',
+                            requestType = '',
+                            animated = prepareWindow(),
+                            filter = '',
+                            loopType = '',
+                            meta = {};
+
+                        if (slugArray != null) {
+                            // Verify if it's a paging link
+                            if (processed.isPagingPage) {
+                                pageNum = parseInt(slugArray[1]);
+                                if (typeof pageNum === 'number') {
+                                    promise = get.postsPage(pageNum);
+                                }
+                            }
+                            else if (processed.isPosts) {
+                                cleanSlug = slugArray[slugArray.length - 1];
+                                requestType = 'posts';
+                                if (processed.isAuthor || processed.isTag){
+                                    $q.all([allTagsDef, allUsersDef]).then((defValues) => {
+                                        const allTags = defValues[0],
+                                            allUsers = defValues[1];
+                                        if (processed.isTag) {
+                                            meta = _.find(allTags, (tag) => tag.slug === cleanSlug);
+                                            cleanSlug = meta.id;
+                                            filter = loopType = 'tags';
+                                        }
+                                        else {
+                                            meta = _.find(allUsers, (user) => user.slug === cleanSlug);
+                                            cleanSlug = meta.id;
+                                            filter = loopType = 'author';
+                                        }
+                                        requestType = 'loop';
+                                        get.byFilter(cleanSlug, 'posts', filter).then((val) => {
+                                            promise.resolve(val);
+                                        });
+                                    });
+                                }
+                                else {
+                                    filter = 'slug';
+                                    promise = get.byFilter(cleanSlug, 'posts', filter);
+                                }
+                            }
+                            else {                
+                                cleanSlug = slugArray[slugArray.length - 1];
+                                requestType = 'pages';
+                                promise = get.byFilter(cleanSlug, requestType, 'slug');
+                            }
+                            
+                            $q.when(promise).then((values) => {
+                                let val = (processed.isAuthor || processed.isTag) ? values : values[0];
+
+                                if (values.length > 0) {
+                                    changeState({
+                                        animated,
+                                        loopType,
+                                        meta,
+                                        replace,
+                                        requestType,
+                                        url: base + slug,
+                                        val
+                                    });
+                                } else {
+                                    getHome(animated);
+                                }
+                            });
+                        } else {
+                            getHome(animated);
+                        }
+                        function getHome(animated) {
+                            get.postsPage(1).then((val) => {
+                                changeState({
+                                    animated: animated,
+                                    replace: replace,
+                                    requestType: 'loop',
+                                    loopType: 'posts',
+                                    url: base + slug,
+                                    val: val
+                                });
+                            });
+                        }
+                    }
+                }
                 state.setDispatch(dispatcher);
                 state.setKeyDispatcher('pastBottom', loopDispatcher);
+
                 scope.hidePagination = true;
                 scope.lang = lang;
+
                 // Scope functions
-                scope.findTagById = findTagById;
-                scope.fetchById = fetchById;
-                scope.fetchAllByTag = fetchAllByTag;
-                scope.formatDate = (date) => moment(date).format('MMMM D, YYYY h:mm a');
+                scope.fetch = fetch;
+                scope.findTagById = (id, tags) => _.find(tags, (o) => o.id === id );
+                scope.formatDate = (date) => {
+                    const monthsFull = [ "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" ],
+                        monthsAbbr = [ "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic" ];
+                    let theDay = new Date(date),
+                        monthName = monthsAbbr[theDay.getMonth()],
+                        formattedDate = '',
+                        amPM = '';
+                    formattedDate = theDay.getDate() + ' de ' +
+                                    monthName + ' de ' +
+                                    theDay.getFullYear();
+                    return formattedDate;
+                };
+                scope.trustHtml = (html) => $sce.trustAsHtml(html);
 
                 $timeout(() => {
                     bindLinks();
                     // Bind AjaxLink to popstate (Back/Forward) event 
-                    jqLite(window).on('popstate', onPopState);    
-                });
-                function onPopState(event) {
+                    jqLite(window).on('popstate', (event) => {
                         event.preventDefault();
                         const eventState = event.state;
-                        
-                        ajaxLink(eventState);
-                        
-                        function ajaxLink(eventState) {
-                            // Verify if history item was loaded through ajax
-                            if (eventState != null) {
+
+                        // Verify if history item was loaded through ajax
+                        if (eventState != null) {
+                            if (location.href.indexOf('?s=') === -1) {
                                 eventState.animated = prepareWindow();
-                                state.setMultiple(eventState);
-                                setContent(eventState);
+                                state.new(eventState);
+                                if (eventState.requestType === 'loop' && eventState.currentPage > 1) {
+                                    loopPosts(state.s.toObject());
+                                } else {
+                                    setContent(eventState);
+                                }
                             }
-                            else {
-                                fetchPostOrPage(window.location.href.replace(base, ''), true);
-                            }
+                            else location.href = location.href;
                         }
-                }; 
+                        else {
+                            fetch.postOrPage(window.location.href.replace(base, ''), true);
+                        }
+                        function loopPosts(subState) {
+                            subState.val = cache[subState.loopType];
+                            $q.when(setContent(subState)).then(() => {
+                                const y = state.s.get('scrolled');
+                                if (window.scrollTo != null) {
+                                    window.scrollTo(0, y);
+                                }
+                            });
+                        }
+                    });    
+                });
+
                 function bindLinks() {
                     const links = element[0].querySelectorAll('a:not([resource-binded])');
                     let linkID = 0;
@@ -139,7 +537,7 @@ angular.module('components', ['ngResource'])
                                 link.attr('resource-binded', true);
                                 link.on('click', (event) => {
                                     event.preventDefault();
-                                    fetchPostOrPage(href.replace(base, ''));
+                                    fetch.postOrPage(href.replace(base, ''));
                                 });
                             }
                         }
@@ -156,110 +554,18 @@ angular.module('components', ['ngResource'])
                         }
                     }
                 }
-                
-                function fetchAllByTag($event, data) {
-                    $event.preventDefault();
-                    const promise = get.byFilter(data.id, 'posts','tags'),
-                        animated = prepareWindow();
-                    promise.then((val) => {
-                        changeState({
-                            replace: false,
-                            animated: animated,
-                            loopType: 'tags',
-                            requestType: 'loop',
-                            url: data.link,
-                            val,
-                            meta: data
-                        });
-                    });
-                }
-                function fetchById($event, type, id) {
-                    $event.preventDefault();
-                    const promise = get.byId(type, id),
-                        animated = prepareWindow();
-                    
-                    promise.then((val) => {
-                        changeState({
-                            replace: false,
-                            animated: animated,
-                            requestType: type,
-                            url: val.link,
-                            val: val
-                        });
-                    });
-                }
-                function fetchPostOrPage(slug, replace) {
-                    const types = ['pages', 'posts'];
-                    let promise = null,
-                        slugArray = slug.match(/(([a-zA-Z0-9-_]+)(?=\/*))/g),
-                        pageNum = null,
-                        slugIndex = 0,
-                        cleanSlug = '',
-                        requestType = '',
-                        animated = prepareWindow();
-
-                    if (slugArray != null) {
-                        // Verify if it's a paging link
-                        if (slugArray[0] === 'page') {
-                            pageNum = parseInt(slugArray[1]);
-                            if (typeof pageNum === 'number') {
-                                promise = get.postsPage(pageNum);
-                            }
-                        }
-                        else if (slugArray[0] === 'announcements') {
-                            cleanSlug = slugArray[slugArray.length - 1];
-                            requestType = 'posts';
-                            promise = get.byFilter(cleanSlug, requestType, 'slug');
-                        }
-                        else {                
-                            cleanSlug = slugArray[slugArray.length - 1];
-                            requestType = 'pages';
-                            promise = get.byFilter(cleanSlug, requestType, 'slug');
-                        }
-                        
-                        $q.when(promise).then((values) => {
-                            if (values.length > 0) {
-                                changeState({
-                                    animated: animated,
-                                    requestType: requestType,
-                                    url: base + slug,
-                                    val: values[0],
-                                    replace: replace
-                                });
-                            } else {
-                                getHome(animated);
-                            }
-                        });
-                    } else {
-                        getHome(animated);
-                    }
-                    function getHome(animated) {
-                        get.postsPage(1).then((val) => {
-                            changeState({
-                                animated: animated,
-                                replace: replace,
-                                requestType: 'loop',
-                                loopType: 'posts',
-                                url: base + slug,
-                                val: val
-                            });
-                        });
-                    }
-                }
-                
                 function changeState(obj) {
+                    const oldState = state.s.toObject();
+                    history.replaceState(oldState, '', oldState.url);
                     if (obj.requestType === 'loop') {
                         obj.currentPage = 1;
                         obj.lastPage = false;
-                    } else {
-                        obj.loopType = null;
-                        obj.meta = null;
-                    }
-                    state.setMultiple(obj);
+                    } 
+                    state.new(obj);
                     state.dispatch();
                 }
                 function dispatcher(s) {
-                    let def = setContent(s);
+                    const def = setContent(s);
                     $q.when(def).then(() => {
                         let action = 'pushState'
                         if (s.replace === true) {
@@ -268,50 +574,64 @@ angular.module('components', ['ngResource'])
                         history[action](s, '', s.url);
                     });
                 }
-
                 function prepareWindow(append, small) {
                     const def = $q.defer();
-                    if (small === true) screenSM.addClass('show');
-                    else screen.addClass('show');
+                    state.set('scrolled', window.scrollY);
 
-                    $timeout(() => {
-                        if (window.scrollTo != null && append == null) {
-                            window.scrollTo(0, 0);
-                        }
-                        def.resolve();
-                    }, 500);
+                    if (small === true) scope.showScreenSm = true;
+                    else scope.showScreen = true;
+                    requestAnimationFrame(function() {
+                        requestAnimationFrame(function() {
+                            scope.$digest();
+                            $timeout(() => {
+                                if (window.scrollTo != null && append == null) {
+                                    window.scrollTo(0, 0);
+                                }
+                                def.resolve();
+                            }, 200);
+                        });      
+                    });
                     return def.promise;
                 }
                 function setContent(s, append) {
                     const def = $q.defer();
-                    $q.all([allTagsDef, s.animated])
+                    $q.all([allTagsDef, allUsersDef, s.animated])
                         .then((values) => {
                             const template = $templateCache.get(s.requestType + '-template.html');
                             let el, 
                                 subScope = scope.$new();
-                            subScope = Object.assign(subScope, {
+                            if (s.requestType === 'posts') {
+                                s.meta = {
+                                    author: _.find(values[1], (author) => author.id === s.val.author )
+                                };
+                            }
+                            subScope = _.assign(subScope, {
                                 loopType: s.loopType,
                                 meta: s.meta,
                                 data: s.val,
                                 tags: values[0],
-                                currentPage: s.currentPage
+                                currentPage: s.currentPage,
+                                append
                             });
-                            screen.removeClass('show');
-                            screenSM.removeClass('show');
+                            scope.showScreen = false;
+                            scope.showScreenSm = false;
+                            scope.menuToggle(); 
 
                             el = $compile(template)(subScope);
-                            if (append !== true) mainJQ.empty();
 
-                            mainJQ.append(el);
-                            $timeout(() => {
-                                scope.$digest();
-                                def.resolve();
-                                bindLinks();
-                                if (s.requestType === 'loop') {
-                                    unbindLoop = bindLoop();
-                                } else {
-                                    unbindLoop();
-                                }
+                            if (append !== true) jqLite(main).empty();
+                            jqLite(main).append(el);
+                            requestAnimationFrame(function() {
+                                requestAnimationFrame(function () {
+                                    scope.$digest();
+                                    def.resolve();
+                                    bindLinks();
+                                    if (s.requestType === 'loop') {
+                                        unbindLoop = bindLoop();
+                                    } else {
+                                        unbindLoop();
+                                    }
+                                });
                             });
                         }, (val) => {
                             def.reject();
@@ -319,16 +639,12 @@ angular.module('components', ['ngResource'])
                     return def.promise;
                 }
                 function loopDispatcher(val) {
-                    const currentPage = state.get('currentPage'),
-                        nextPage = currentPage + 1,
-                        requestType = state.get('requestType'),
-                        loopType = state.get('loopType'),
-                        lastPage = state.get('lastPage'),
-                        meta = state.get('meta');
+                    const currentState = state.s.toObject(),
+                        nextPage = currentState.currentPage + 1;
                     let promise, animated;
-                    if (val === true && requestType === 'loop' && lastPage !== true) {
-                        if (loopType === 'tags') {
-                            promise = get.byFilter(meta.id, 'posts','tags', nextPage);
+                    if (val === true && currentState.requestType === 'loop' && currentState.lastPage !== true) {
+                        if (currentState.loopType === 'tags') {
+                            promise = get.byFilter(currentState.meta.id, 'posts','tags', nextPage);
                         } else {
                             promise = get.postsPage(nextPage);
                         }
@@ -340,55 +656,63 @@ angular.module('components', ['ngResource'])
                                     currentPage: nextPage,
                                     val
                                 });
-                                setContent(state.getObj(), true);
+                                setContent(state.s.toObject(), true);
                             }
                             else {
                                 state.setMultiple({
                                     lastPage: true
                                 });
-                                screen.removeClass('show');
-                                screenSM.removeClass('show');
+                                scope.showScreen = false;
+                                scope.showScreenSm = false;
                             }
                         });
                     }
                 }
-                function findTagById(id, tags) {
-                    let found = [];
-                    tags.forEach((tag) => {
-                        if (tag.id === id) {
-                            found.push(tag)
-                        }
-                    });
-                    if (found.length > 0) {
-                        return found[0];
-                    }
-                }
             }
         };
-        function checkIfLoop() {
-            const slug = window.location.href.replace(base, ''),
-                isTag = slug.includes('tag');
-            if (isTag === true || slug === '/') {
-                if (isTag === true) {
-                    $q.when(allTagsDef).then((tags) => {
-                        let found = [];
-                        tags.forEach((tag) => {
-                            if (tag.link === window.location.href) found.push(tag);
-                            return false;
-                        });
-                        if (found.length > 0) state.set('meta', found[0]);
-                    });
-                    state.setMultiple({
-                        requestType: 'loop',
-                        loopType: 'tags'
+
+        function processSlug(slug) {
+            const slugArray = slug.replace(/#([a-zA-Z0-9\-\_])+/g, '')
+                                .match(/(([a-zA-Z0-9\-\_?=]+)(?=\/*))/g);
+            if (slugArray != null) {
+                let last = slugArray[slugArray.length - 1],
+                    isSearch = (last.indexOf('?s=') !== -1);
+                if (isSearch) {
+                    slugArray[slugArray.length - 1] = last.replace('?s=', '');
+                }
+                return {
+                    slugArray,
+                    isSearch,
+                    isTag: slugArray[1] === 'tag',
+                    isAuthor: slugArray[1] === 'author',
+                    isPosts: slugArray[0] === 'announcements',
+                    isPagingPage: slugArray[1] === 'page',
+                    isPage: slugArray[0] === 'page'
+                }
+            }
+            else return false; // isHome
+        }
+        function checkScrollPosition() {
+            state.s.set('scrolled', window.scrollY);
+        }
+        function reallyGetAll(name) {
+            const def = $q.defer();
+            let page = 1,
+                items = [];
+            get.all(name, 100, page).then((response) => {
+                getNextPage(response, page)
+            });
+            return def.promise;
+            function getNextPage(val, activePage) {
+                activePage++;
+                items = items.concat(val);
+                if (val.length >= 100) {
+                    get.all(name, 100, activePage).then((newVal) => {
+                        getNextPage(newVal, activePage);
                     });
                 } else {
-                    state.setMultiple({
-                        requestType: 'loop',
-                        loopType: 'posts'
-                    });
+                    def.resolve(items);
                 }
-                return bindLoop();
             }
         }
         function bindLoop() {
@@ -397,8 +721,8 @@ angular.module('components', ['ngResource'])
                 pastBottom = false;
             state.set('pastBottom', pastBottom);
 
-            jqWindow.on('resize', checkMainEnd).on('scroll', scrollBind);
-            mainJQ.on('resize', checkMainEnd);
+            jqLite(window).on('resize', checkMainEnd).on('scroll', scrollBind);
+            jqLite(main).on('resize', checkMainEnd);
 
             checkMainEnd();
             function checkMainEnd() {
@@ -413,8 +737,8 @@ angular.module('components', ['ngResource'])
                 }
             }
             return () => {
-                mainJQ.off('resize', checkMainEnd);
-                jqWindow.off('resize', checkMainEnd).off('scroll', scrollBind);;
+                jqLite(main).off('resize', checkMainEnd);
+                jqLite(window).off('resize', checkMainEnd).off('scroll', scrollBind);;
             };
         }
         function getLang() {
@@ -422,33 +746,36 @@ angular.module('components', ['ngResource'])
             let titles = 'titles = ';
 
             return eval(titles + titlesEl.html());
-        }
+        } 
     }])
-    .directive('aataMenu', ['$document', '$compile', ($document, $compile) => {
+    .directive('aataMenu', ['$document', '$compile', '$templateCache',
+        function ($document, $compile, $templateCache) {
         return {
             link: (scope, element, attrs) => {
                 const selector = attrs.aataMenu,
                     menu = element.find('div');
-                let items;
-
-                //menu.detach();
-                items = element[0].querySelectorAll(selector);
+                let items, index = 0;
+                menu.detach();
+                items = menu[0].querySelectorAll(selector);
                 element.addClass('js');
-                items.forEach((item) => {
+                for (index = 0; index < items.length; index++) {
+                    items[index].innerHtml = insertExpand(items[index]);
+                }
+                element.append(menu);
+
+                function insertExpand(item) {
                     let subScope = scope.$new(),
                         compiled = '';
-                    const expand =  '<button class="expand"' + 
-                                        'ng-click="showChildren = !showChildren"' + 
-                                        'aria-expanded="{{showChildren}}">' + 
-                                        '<span class="hidden">Expandir</span>+' + 
-                                    '</button>';
+                    const expand =  $templateCache.get('expand.html');;
                     const ulChildren = jqLite(item).find('ul');
                     subScope.showChildren = false;
-                    ulChildren.attr('ng-show', 'showChildren');
+                    ulChildren.attr('ng-class', "{'is-active': showChildren}");
                     jqLite(item).prepend(expand);
-                    item = $compile(item)(subScope);
-                });
-
+                    return $compile(item)(subScope);
+                }
             }
         };
     }]);
+    return initComponents;
+})(angular);
+export default initComponents;
