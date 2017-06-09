@@ -2,7 +2,7 @@
 @mixin button-style($bg, $text) {
     background: $bg;
     color: $text;
-    .icon__fill {
+    .icon {
         fill: $text;    
     }
 }
@@ -14,9 +14,6 @@
 
     @include button-style($bg, $text);
     
-    .icon__fill {
-        transition: all .2s ease-in-out;    
-    }
     @if $type == 'round' {
         border-radius: 50%;
     }
@@ -37,11 +34,6 @@
     		border-color: $bg;
     		color: $text;
     	}
-    }
-    & > .icon {
-        width: auto;
-        height: 100%;
-        max-width: 100%;
     }
 }
 @mixin button-pad() {

@@ -10,15 +10,10 @@
 	text-rendering:optimizeLegibility;
 }
 h1, h2, h3, h4, h5, h6 { 
-    font-weight: 400;
-    font-style: italic;
-    margin: $spacing 0;
-}
-h4, h5, h6 { 
-    margin: ($spacing * .75) 0;
+    margin: ($spacing * 1.5) 0 ($spacing * 0.5) 0
 }
 p {
-    margin: ($spacing * .5) 0;
+    margin: ($spacing * 0.5) 0;
 }
 .clear {
     *zoom:1;
@@ -91,9 +86,31 @@ input {
 .hidden {
     display: none;
 }
+.visually-hidden { 
+  position: absolute; 
+  overflow: hidden; 
+  clip: rect(0 0 0 0); 
+  height: 1px; width: 1px; 
+  margin: -1px; padding: 0; border: 0; 
+}
 .sr-only {
     display: block;
     overflow: hidden !important;
     width: 0 !important;
     height: 0 !important;
+}
+
+
+// icons
+.icon {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    transition: fill .2s ease-in-out;
+}
+.icon--full-block {
+    display: block;
+    width: auto;
+    height: 100%;
+    max-width: 100%;
 }

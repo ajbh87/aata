@@ -26,21 +26,23 @@
         </section>
     </script>
     <script type="text/ng-template" id="posts-template.html">
-        <article id="post-{{data.id}}" class="article article--post post">
+        <article id="post-{{data.id}}" class="article article--post post cat--{{data.categories[0]}}">
             <!-- post title -->
             <h1 class="main__title"
                 ng-bind-html="trustHtml(data.title.rendered)"></h1>
             <!-- /post title -->
+            <time class="article__date" ng-bind="formatDate(data.date)"></time>
             <div class="article__content">
                 <!-- post details -->
-                <time class="article__date" ng-bind="formatDate(data.date)"></time>
                 <span class="article__author" ng-bind="'Escrito por: ' + meta.author.name"></span>
                 <!-- /post details -->
                 <div ng-bind-html="trustHtml(data.content.rendered)"></div>
             </div>
             <div class="article__tags" ng-if="data.tags.length > 0">
                 <span class="sr-only" ng-bind="lang.tags"></span>
-                <?php get_template_part('img/icons/tagicon'); ?>
+                <svg class="icon icon--tag">
+                    <use xlink:href="#tagIcon" />
+                </svg>
                 <a href="{{tagInfo.link}}"
                     ng-repeat="tag in data.tags"
                     ng-init="tagInfo = findTagById(tag, tags)"
@@ -60,7 +62,7 @@
                 ng-bind="lang[loopType] + ' ' + meta.name"></h1>
             <article ng-repeat="item in data" 
                 id="post-{{item.id}}"
-                class="article">
+                class="article cat--{{item.categories[0]}}">
                 <!-- post title -->
                 <h2 class="article__title">
                     <a title="{{item.title.rendered}}"
@@ -215,17 +217,19 @@
             </div>
         </form>
         <div class="alert alert--success" role="alert" ng-show="showSuccessMessage">
-            <div class="alert__icon" aria-hidden="true">
-                <?php echo get_template_part("img/icons/checkcircleicon"); ?>
-            </div>
+            <svg class="alert__icon" aria-hidden="true">
+                <use xlink:href="#checkCircleIcon" />
+            </svg>
+            
             <div class="alert__content">
                 Gracias por comunicarte con Abogados a Tu Alcance, Tus Abogados en Puerto Rico, te enviaremos por correo electrónico la contestación a tu consulta a la brevedad posible. 
             </div>
         </div>
         <div class="alert alert--error alert--floating" role="alert" ng-class="{'show': showErrorMessage}">
-            <div class="alert__icon" aria-hidden="true">
-                <?php echo get_template_part("img/icons/erroricon"); ?>
-            </div>
+            <svg class="alert__icon" aria-hidden="true">
+                <use xlink:href="#errorIcon" />
+            </svg>
+
             <div class="alert__content">
                 ¡Oops! Algo ha ocurrido y tu solicitud no ha sido procesada. Te agradecemos que trates más tarde o te comuniques al 787-200-6474.                
             </div>

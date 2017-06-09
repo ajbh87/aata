@@ -69,7 +69,7 @@ $footer-h: ($footer-f-size * $base-line) + $spacing;
     margin-top: ($s / -2);
     margin-left: ($s / -2);
     border-radius: 50%;
-    border: 5px dotted $brand;
+    border: ($s / 6) dotted $brand;
     border-right-width: 0;
     animation-name: rotateLoader;
     animation-duration: .75s;
@@ -78,6 +78,7 @@ $footer-h: ($footer-f-size * $base-line) + $spacing;
 }
 @mixin main-title() {
     display: flex;
+    justify-content: center;
     align-items: flex-end;
     height: $banner-height - $spacing;
     font-size: $main-title;
@@ -102,7 +103,7 @@ $footer-h: ($footer-f-size * $base-line) + $spacing;
     //@include sans-serif();
     //font-size: .8rem;
     background: #fff;
-    padding: $spacing;
+    padding: ($spacing * 1.5);
     color: $text-color;
     @include keep-flow();
 }

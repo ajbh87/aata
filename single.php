@@ -7,7 +7,12 @@
 	<?php if (have_posts()): while (have_posts()) : the_post(); ?>
 
 		<!-- article -->
-		<article id="post-<?php the_ID(); ?>" class="article post">
+		<article id="post-<?php the_ID(); ?>" class="article post<?php 
+			$categories = get_the_category();
+			if ( ! empty( $categories ) ) {
+				echo " cat--".$categories[0]->term_id;   
+			}
+		?>">
 
 			<!-- post thumbnail -->
 			<?php if ( has_post_thumbnail()) : // Check if Thumbnail exists ?>
@@ -16,14 +21,19 @@
 				</a>
 			<?php endif; ?>
 			<!-- /post thumbnail -->
-
+			<?php if ($categories[0]->term_id == 34) { ?> 
+				<div class="label label--category">
+					<span class="sr-only">Categoría: </span>
+					<?php echo esc_html( $categories[0]->name ); ?>
+				</div>
+			<?php } ?>
 			<!-- post title -->
 			<h1 class="main__title"><?php the_title(); ?></h1>
 			<!-- /post title -->
 
+            <time class="article__date"><?php the_time('j \d\e M \d\e Y'); ?></time>
 			<div class="article__content">
 	            <!-- post details -->
-	            <time class="article__date"><?php the_time('j \d\e M \d\e Y'); ?></time>
 	            <span class="article__author">Escrito por: <?php the_author(); ?></span>
 	            <!-- the_author_posts_link(); /post details -->
 				<div>
@@ -34,9 +44,11 @@
             <div class="article__tags">
                 <span class="sr-only">Etiquetas </span>
                 <?php 
-	                if (has_tag()) {
-		                get_template_part('img/icons/tagicon');
-						the_tags( ' ', ', '); // Separated by commas with a line break at the end 
+	                if (has_tag()) { ?>
+		                <svg class="icon icon--tag">
+		                    <use xlink:href="#tagIcon" />
+		                </svg>
+						<?php the_tags( ' ', ', '); // Separated by commas with a line break at the end 
 	                }
 				?>
             </div>

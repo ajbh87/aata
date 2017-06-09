@@ -245,7 +245,7 @@ $nav-font: 0.9rem;
     }
     @include button($grey-base, $grey-dark, 'round');
     font-weight: 700;
-    
+
     &:hover, &:focus {
         //@include button-raise();
         @include button-style($grey-light, $brand);
@@ -303,7 +303,7 @@ $nav-font: 0.9rem;
         margin: 0 0 $spacing 0;
     }
     &__link {
-        text-align: center;
+        //text-align: center;
         display: block;
         margin-bottom: $spacing / 4;
         font-size: 1rem;
@@ -319,15 +319,14 @@ $nav-font: 0.9rem;
             margin-top: $s;
             margin-right: 0.5rem;
             //border-radius: 50%;
+            fill: #fff;
 
             @include landscape() {
                 position: absolute;
                 left: $spacing / -2;
             };
             
-            &__fill {
-                fill: #fff;
-            }
+            
         }
     }
 }
@@ -363,35 +362,30 @@ $nav-font: 0.9rem;
         &:hover, &:focus {
             @include button-style($brand-light, #fff);
         }
-        .icon {
-            width: 100%;
-            height: auto;
-            max-height: 100%;
-            max-width: 100%;
-        }
     }
 }
 // --------------------------- Main
 .main {
     position: relative;
-    padding: $header-h ($spacing * 3.5) 0 $spacing;
+    padding: $header-h ($article-date-width - $spacing) 0 $spacing;
+    margin-right: $spacing;
     z-index: 1;
     border-left: $spacing solid $brand;
     @include landscape() {
-        margin-right: 0.5rem;
-        padding: 0 ($spacing * 3.5) 0 $spacing;
+        padding-top: 0;
         flex: 0 1 $main-max;
         min-height: 100vh;
         min-height: calc(100vh - #{$footer-h});
     }
     &__title {
+        text-align: center;
         @include landscape() {
             @include main-title();
         }
     }
 
     .widget_text {
-        margin: $spacing 0;
+        margin: ($spacing * 2) 0;
         
         @include landscape() {
             margin-top: 0;
@@ -400,7 +394,7 @@ $nav-font: 0.9rem;
             }
         };
         .textwidget {
-            padding: $spacing;
+            padding: $spacing * 1.5;
             background: #fff;
             > :first-child {
                 margin-top: 0 !important;
@@ -413,11 +407,12 @@ $nav-font: 0.9rem;
 }
 // --------------------------- Article
 .article {
-    margin: $spacing 0;
+    margin: ($spacing * 2) 0;
     @include landscape() {
         margin-top: 0;
     };
     &__title {
+        font-size: 1.2rem;
         margin: 0 0 ($spacing / 2) 0;
     }
     &__date {
@@ -427,7 +422,7 @@ $nav-font: 0.9rem;
         position: absolute;
         width: $w;
         right: 0;
-        margin: $spacing;
+        margin-top: $spacing;
         padding: ($spacing / 2);
         
         text-align: center;
@@ -443,6 +438,23 @@ $nav-font: 0.9rem;
     }
     &__content {
         @include long-content();
+        aside {
+            $r: ($spacing * -1.5) - ($article-date-width - $spacing);
+            display: block;
+            position: relative;
+            float: right;
+            right: $r;
+            width: 45%;
+            padding: $spacing;
+            margin: $spacing 0 $spacing ($r + $spacing);
+            background: $grey-light;
+        }
+        blockquote {
+            font-style: italic;
+            border: 0px dotted $grey-light;
+            border-width: 3px 0;
+            margin: $spacing;
+        }
     }
     &__excerpt {
         @include long-content();
@@ -457,10 +469,11 @@ $nav-font: 0.9rem;
             width: 1.4rem;
             margin: 0.3rem 0.5rem 0 0;
         }
-        .icon__fill {
+        .icon--tag {
             fill: $brand;
         }
     }
+
 }
 // --------------------------- Footer
 .footer {
