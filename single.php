@@ -21,14 +21,19 @@
 				</a>
 			<?php endif; ?>
 			<!-- /post thumbnail -->
-			<?php if ($categories[0]->term_id == 34) { ?> 
-				<div class="label label--category">
-					<span class="sr-only">Categoría: </span>
-					<?php echo esc_html( $categories[0]->name ); ?>
-				</div>
-			<?php } ?>
 			<!-- post title -->
-			<h1 class="main__title"><?php the_title(); ?></h1>
+			<h1 class="main__title">
+				<?php the_title(); ?>
+				<?php if ($categories[0]->term_id == 34) { ?> 
+					<div class="label label--category">
+						<span class="sr-only">Categoría: </span>
+						<svg class="icon icon--happy" aria-hidden="true">
+	                        <use xlink:href="#happyIcon" />
+	                    </svg>
+						<?php echo esc_html( $categories[0]->name ); ?>
+					</div>
+				<?php } ?>
+			</h1>
 			<!-- /post title -->
 
             <time class="article__date"><?php the_time('j \d\e M \d\e Y'); ?></time>

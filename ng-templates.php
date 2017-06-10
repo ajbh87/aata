@@ -5,7 +5,6 @@
             "categories": "<?php _e( 'Categories for ', 'html5blank' ); ?>",
             "posts": "<?php _e( 'Latest Posts', 'html5blank' ); ?>",
             "tags": "<?php _e( 'Tag Archive: ', 'html5blank' ); ?>",
-            "author": "<?php _e( 'Tag Archive: ', 'html5blank' ); ?>",
             "categoriesIn": "<?php _e( 'Categorised in: ', 'html5blank' ); ?>"
         }
     </script>
@@ -28,8 +27,16 @@
     <script type="text/ng-template" id="posts-template.html">
         <article id="post-{{data.id}}" class="article article--post post cat--{{data.categories[0]}}">
             <!-- post title -->
-            <h1 class="main__title"
-                ng-bind-html="trustHtml(data.title.rendered)"></h1>
+            <h1 class="main__title">
+                {{trustHtml(data.title.rendered)}}
+                <div class="label label--category" ng-if="data.categories[0] == 34">
+                    <span class="sr-only">Categoría: </span>
+                    <svg class="icon icon--happy" aria-hidden="true">
+                        <use xlink:href="#happyIcon" />
+                    </svg>
+                    {{meta.category.name}}
+                </div>
+            </h1>
             <!-- /post title -->
             <time class="article__date" ng-bind="formatDate(data.date)"></time>
             <div class="article__content">
@@ -69,6 +76,13 @@
                         href="{{item.link}}"
                         ng-bind-html="trustHtml(item.title.rendered)"
                         ng-click="fetch.byId($event, 'posts', item.id)"></a>
+                    <div class="label label--category" ng-if="item.categories[0] == 34">
+                        <span class="sr-only">Categoría: </span>
+                        <svg class="icon icon--happy" aria-hidden="true">
+                            <use xlink:href="#happyIcon" />
+                        </svg>
+                        {{getCategoryName(item.categories[0])}}
+                    </div>
                 </h2>
                 <!-- /post title -->
                 <!-- post details -->

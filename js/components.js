@@ -5,11 +5,18 @@ const initComponents = (function initComponents(angular) {
     let jqLite = angular.element;
 
     angular.module('components', ['ngResource', 'ngMessages'])
-    .directive('aataScript', aataScript)
-    .directive('aataForm', aataForm)
-    .directive('aataResources', aataResources)
-    .directive('aataMenu', ['$document', '$compile', '$templateCache',
-        function ($document, $compile, $templateCache) {
+        .directive('aataScript', aataScript)
+        .directive('aataForm', aataForm)
+        .directive('aataResources', aataResources)
+        .directive('aataMenu', aataMenu);
+
+    aataMenu.$inject = ['$document', '$compile', '$templateCache'];
+    aataForm.$inject = ['$http', '$timeout'];
+    aataResources.$inject = [ '$compile', '$q', '$sce', '$resource', '$templateCache', '$timeout', '$document' ];
+
+    return 'initComponents';
+    
+    function aataMenu($document, $compile, $templateCache) {
         return {
             link: (scope, element, attrs) => {
                 const selector = attrs.aataMenu,
@@ -35,38 +42,29 @@ const initComponents = (function initComponents(angular) {
                 }
             }
         };
-    }]);
-    aataForm.$inject = ['$http', '$timeout'];
-    aataResources.$inject = [ '$compile', '$q', '$sce', '$resource', '$templateCache', '$timeout', '$document' ];
-
-    return;
-
+    }
     function aataScript() {
         return {
-          //restrict: 'E',
-          scope: false,
-          link: function(scope, elem, attr) {
-            if (attr.type==='text/javascript-lazy') 
-            {
-              var s = document.createElement("script");
-              s.type = "text/javascript";                
-              var src = elem.attr('src');
-              if(src!==undefined)
-              {
-                  s.src = src;
-              }
-              else
-              {
-                  var code = elem.text();
-                  s.text = code;
-              }
-              document.head.appendChild(s);
-              elem.remove();
+            scope: false,
+            link: function(scope, elem, attr) {
+                if (attr.type==='text/javascript-lazy') 
+                {
+                    var s = document.createElement("script");
+                    var src = elem.attr('src');
+                    s.type = "text/javascript";                
+                    if(src!==undefined) {
+                        s.src = src;
+                    } else {
+                        var code = elem.text();
+                        s.text = code;
+                    }
+                    document.head.appendChild(s);
+                    elem.remove();
+                }
             }
-          }
         };
-      }
-    
+    }
+
 
 })(angular);
 export default initComponents;

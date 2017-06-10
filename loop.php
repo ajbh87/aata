@@ -18,17 +18,20 @@
 		<?php endif; ?>
 		<!-- /post thumbnail -->
 
-		<?php if ($categories[0]->term_id == 34) { ?> 
-			<div class="label label--category">
-				<span class="sr-only">Categoría: </span>
-				<?php echo esc_html( $categories[0]->name ); ?>
-			</div>
-		<?php } ?>
 		<!-- post title -->
 		<h2 class="article__title">
 			<a href="<?php the_permalink(); ?>" title="<?php the_title(); ?>">
 				<?php the_title(); ?>
             </a>
+		<?php if ($categories[0]->term_id == 34) { ?> 
+			<div class="label label--category">
+				<span class="sr-only">Categoría: </span>
+				<svg class="icon icon--happy" aria-hidden="true">
+                        <use xlink:href="#happyIcon" />
+                    </svg>
+				<?php echo esc_html( $categories[0]->name ); ?>
+			</div>
+		<?php } ?>
 		</h2>
 		<!-- /post title -->
 

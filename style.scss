@@ -381,6 +381,9 @@ $nav-font: 0.9rem;
         text-align: center;
         @include landscape() {
             @include main-title();
+            .label {
+                color: #fff;
+            }
         }
     }
 
@@ -603,7 +606,18 @@ $nav-font: 0.9rem;
         }
     }
 }
-
+.label {
+    display: inline-block;
+    font-family: $ss-family;
+    font-size: 0.9rem;
+    margin-left: ($spacing / 2);
+    color: $brand;
+    .icon {
+        position: relative; 
+        bottom: -0.1rem;
+        margin-right: ($spacing / 2);
+    }
+}
 
 
 ::selection {
