@@ -107,6 +107,7 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
         state = new stateConstructor({
             animated: null, // promise
             currentPage: 1,
+            hash: false,
             loopType: '', // posts | tags
             lastPage: false,
             meta: {}, // tag archive meta - obj
@@ -120,7 +121,8 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
         allUsersDef = reallyGetAll('users'),
         allTagsDef = reallyGetAll('tags'),
         allCategoriesDef = reallyGetAll('categories');
-    let unbindLoop = () => {};
+    let unbindLoop = () => {},
+        comingFromHash = false;
     jqLite(window).on('scroll', _.debounce(checkScrollPosition, 50));
 
     (function checkCurrentPage() {
@@ -328,7 +330,7 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
             $q.when(allCategoriesDef).then((categories) => {
                 scope.getCategoryName = (id) => _.find(categories, (cat) => cat.id === id ).name;
             });
-            scope.fetch = fetch;
+
             scope.findTagById = (id, tags) => _.find(tags, (o) => o.id === id );
             scope.formatDate = (date) => {
                 const monthsFull = [ "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre" ],
@@ -354,12 +356,18 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
                     // Verify if history item was loaded through ajax
                     if (eventState != null) {
                         if (location.href.indexOf('?s=') === -1) {
-                            eventState.animated = prepareWindow();
-                            state.new(eventState);
-                            if (eventState.requestType === 'loop' && eventState.currentPage > 1) {
-                                loopPosts(state.s.toObject());
+                            if ((eventState.isHash === true || comingFromHash) 
+                                && window.scrollTo != null) {
+                                    window.scrollTo(0, eventState.scrolled);
+                                    comingFromHash = !comingFromHash;
                             } else {
-                                setContent(eventState);
+                                eventState.animated = prepareWindow();
+                                state.new(eventState);
+                                if (eventState.requestType === 'loop' && eventState.currentPage > 1) {
+                                    loopPosts(state.s.toObject());
+                                } else {
+                                    setContent(eventState);
+                                }
                             }
                         }
                         else location.href = location.href;
@@ -407,10 +415,20 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
                             link.attr('resource-binded', true);
                             link.on('click', (event) => {
                                 event.preventDefault();
-                                const target = element[0].querySelector(href.replace(base, '')),
-                                    offset = saKnife.offset(target);                                
+                                const id = href.replace(base, ''),
+                                    target = element[0].querySelector(id),
+                                    offset = saKnife.offset(target),
+                                    oldState = state.s.toObject(),
+                                    newState = _.assign(state.s.toObject(), {
+                                        scrolled: offset.top,
+                                        isHash: true
+                                    });
+                                    
                                 if (window.scrollTo != null) {
+                                    comingFromHash = true;
+                                    history.replaceState(oldState, '', location.href);
                                     window.scrollTo(0, offset.top);
+                                    history.pushState(newState, '', location.href + id);
                                 }
                             });
                         }
@@ -449,27 +467,27 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
                 });
             }
             function prepareWindow(append, small) {
-                const def = $q.defer();
-                state.set('scrolled', window.scrollY);
+                return $q(function(resolve){
+                    state.set('scrolled', window.scrollY);
 
-                if (small === true) scope.showScreenSm = true;
-                else scope.showScreen = true;
-                requestAnimationFrame(function() {
+                    if (small === true) scope.showScreenSm = true;
+                    else scope.showScreen = true;
                     requestAnimationFrame(function() {
                         scope.$digest();
                         $timeout(() => {
                             if (window.scrollTo != null && append == null) {
                                 window.scrollTo(0, 0);
                             }
-                            def.resolve();
+                            resolve();
                         }, 200);
-                    });      
+                    });
                 });
-                return def.promise;
             }
-            function setContent(s, append) {
-                const def = $q.defer();
-                $q.all([allTagsDef, allUsersDef, allCategoriesDef, s.animated])
+            function setContent(s, append) {                
+                return $q(deferred);
+
+                function deferred(resolve, reject) {
+                    $q.all([allTagsDef, allUsersDef, allCategoriesDef, s.animated])
                     .then((values) => {
                         const template = $templateCache.get(s.requestType + '-template.html');
                         let el, 
@@ -496,22 +514,20 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
 
                         if (append !== true) jqLite(main).empty();
                         jqLite(main).append(el);
-                        requestAnimationFrame(function() {
-                            requestAnimationFrame(function () {
-                                scope.$digest();
-                                def.resolve();
-                                bindLinks();
-                                if (s.requestType === 'loop') {
-                                    unbindLoop = bindLoop();
-                                } else {
-                                    unbindLoop();
-                                }
-                            });
+                        _.defer(function() {
+                            scope.$digest();
+                            resolve();
+                            bindLinks();
+                            if (s.requestType === 'loop') {
+                                unbindLoop = bindLoop();
+                            } else {
+                                unbindLoop();
+                            }
                         });
                     }, (val) => {
-                        def.reject();
+                        reject();
                     });
-                return def.promise;
+                } 
             }
             function loopDispatcher(val) {
                 const currentState = state.s.toObject(),
@@ -553,17 +569,19 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
                                     .match(/(([a-zA-Z0-9\-\_?=]+)(?=\/*))/g);
                 if (slugArray != null) {
                     let last = slugArray[slugArray.length - 1],
-                        isSearch = (last.indexOf('?s=') !== -1);
+                        isSearch = (last.indexOf('?s=') !== -1),
+                        findCat = _.find(cats, (cat) => cat.slug === slugArray[0] );
                     if (isSearch) {
                         slugArray[slugArray.length - 1] = last.replace('?s=', '');
                     }
+
                     resolve({
                         slugArray,
                         isSearch,
                         isCat: slugArray[0] === 'categories',
                         isTag: slugArray[0] === 'tag',
-                        isAuthor: slugArray[1] === 'author',
-                        isPosts: slugArray[0] === 'announcements',
+                        isAuthor: slugArray[0] === 'author',
+                        isPosts: findCat != null,
                         isPagingPage: slugArray[1] === 'page',
                         isPage: slugArray[0] === 'page'
                     });
