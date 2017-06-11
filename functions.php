@@ -98,9 +98,9 @@ function html5blank_header_scripts()
         wp_register_script('dev', get_template_directory_uri() . '/js-bundles/scripts.js', array(), '1.0.1');
         wp_enqueue_script('dev');
         
-        // Production
-        //wp_register_script('production', get_template_directory_uri() . '/js-bundles/scripts.min.js', array(), '1.0.1');
-        //wp_enqueue_script('production');
+        //Production
+        // wp_register_script('production', get_template_directory_uri() . '/js-bundles/scripts.min.js', array(), '1.0.1');
+        // wp_enqueue_script('production');
     }
 }
 
@@ -322,7 +322,8 @@ add_filter('image_send_to_editor', 'remove_thumbnail_dimensions', 10); // Remove
 remove_filter('the_excerpt', 'wpautop'); // Remove <p> tags from Excerpt altogether
 
 // Shortcodes
-add_shortcode('aside', 'aside_shortcode'); 
+add_shortcode('aside', 'aside_shortcode');
+add_shortcode('aata-form', 'aataForm_shortcode');
 
 /*------------------------------------*\
 	Custom Post Types
@@ -374,6 +375,10 @@ function create_post_type_html5()
 function aside_shortcode($atts, $content = null)
 {
     return '<aside>' . do_shortcode($content) . '</aside>'; // do_shortcode allows for nested Shortcodes
+}
+function aataForm_shortcode($atts)
+{
+    return '<div aata-script type="text/javascript-lazy" src="https://www.google.com/recaptcha/api.js"></div><div aata-form></div>'; // do_shortcode allows for nested Shortcodes
 }
 
 // // Shortcode Demo with simple <h2> tag
