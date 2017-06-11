@@ -10,8 +10,8 @@ export default function aataForm($http, $timeout) {
         templateUrl: 'form.html',
         scope: true,
         link: function(scope, element, attrs) {
-            //const url = attrs.aataForm;
-            const defs = Immutable.Map({
+            const message = attrs.aataMessage,
+                defs = Immutable.Map({
                     telRegex: /([\+\.\-\)\(]*[0-9]{1,4})+/,
                     name: '',
                     lastName: '',
@@ -60,7 +60,8 @@ export default function aataForm($http, $timeout) {
                         }
                     },
                     comments: '',
-                    showFormScreen: false
+                    showFormScreen: false,
+                    message
                 });
             scope = _.assign(scope, defs.toObject());
 

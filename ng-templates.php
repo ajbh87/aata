@@ -116,7 +116,7 @@
             ng-submit="submitForm()"
             ng-hide="hideForm">
             <p class="aata-form__disclaimer">
-                Las consultas serán contestadas por correo electrónico.  Si no interesas recibir la misma por dicho medio, debes comunicarte al 787-200-6474.
+                {{message}}
             </p>
             <div class="aata-form__input-group">
                 <label class="aata-form__label aata-form__label--bottom-" for="name">

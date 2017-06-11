@@ -376,9 +376,9 @@ function aside_shortcode($atts, $content = null)
 {
     return '<aside>' . do_shortcode($content) . '</aside>'; // do_shortcode allows for nested Shortcodes
 }
-function aataForm_shortcode($atts)
+function aataForm_shortcode($atts, $content = null)
 {
-    return '<div aata-script type="text/javascript-lazy" src="https://www.google.com/recaptcha/api.js"></div><div aata-form></div>'; // do_shortcode allows for nested Shortcodes
+    return '<div aata-script type="text/javascript-lazy" src="https://www.google.com/recaptcha/api.js"></div><div aata-form aata-message="'.$content.'"></div>'; // do_shortcode allows for nested Shortcodes
 }
 
 // // Shortcode Demo with simple <h2> tag
