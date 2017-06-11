@@ -128,10 +128,10 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
             processed = processSlug(slug),
             def = $q.defer();
         let requestType = '';
-        processed.then((request) => {
-            if (request.isTag || request.isAuthor || 
-                request.isSearch || request === false) {
-                if (request.isTag) {
+        processed.then((url) => {
+            if (url.isTag || url.isAuthor || 
+                url.isSearch || url === false) {
+                if (url.isTag) {
                     $q.when(allTagsDef).then((tags) => {
                         let tagMeta = _.find(tags, (tag) => tag.link === window.location.href);
                         state.new({
@@ -159,7 +159,7 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
                     def.resolve(bindLoop());
                 }
             } else {
-                if (processed.isPosts) {
+                if (url.isPosts) {
                     requestType = 'posts';
                 }
                 else {
@@ -171,8 +171,8 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
                     requestType,
                     url: window.location.href
                 });
-                // processed.slugArray[processed.slugArray.length - 1] = last
-                get.byFilter(processed.slugArray[processed.slugArray.length - 1], requestType, 'slug').then((val) => {
+                // url.slugArray[url.slugArray.length - 1] = last
+                get.byFilter(url.slugArray[url.slugArray.length - 1], requestType, 'slug').then((val) => {
                     state.set('val', val[0])
                 });
                 def.resolve(() => {});
@@ -236,7 +236,7 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
                             filter = '',
                             loopType = '',
                             meta = {};
-                            debugger;
+                            
                         if (slugArray != null) {
                             // Verify if it's a paging link
                             if (processed.isPagingPage) {
@@ -261,7 +261,7 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
                                         cleanSlug = meta.id;
                                         filter = loopType = 'author';
                                     }
-                                    debugger;
+                                    
                                     requestType = 'loop';
                                     get.byFilter(cleanSlug, 'posts', filter).then((val) => {
                                         deferred.resolve(val);
@@ -382,22 +382,36 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
             function bindLinks() {
                 const links = element[0].querySelectorAll('a:not([resource-binded])');
                 let linkID = 0;
-
+                
                 for (linkID = 0; linkID < links.length; linkID++) {
                     iterator(links[linkID]);
                 }
+
                 function iterator(linkEl) {
                     const link = jqLite(linkEl),
                           href = link.attr('href'),
                           ngClick = link.attr('ng-click'),
-                          binded = link.attr('resource-binded');
-
+                          binded = link.attr('resource-binded'),
+                          isHash = href.indexOf('#') !== -1;
+                    let fn = () => {};
                     if (href != null && ngClick == null && binded == null) {
-                        if (checkLists(href)) {
+                        if (isHash === false) {
+                                if (checkLists(href)) {
+                                    link.attr('resource-binded', true);
+                                    link.on('click', (event) => {
+                                        event.preventDefault();
+                                        fetch.postOrPage(href.replace(base, ''));
+                                    });
+                                }
+                        } else {
                             link.attr('resource-binded', true);
                             link.on('click', (event) => {
                                 event.preventDefault();
-                                fetch.postOrPage(href.replace(base, ''));
+                                const target = element[0].querySelector(href.replace(base, '')),
+                                    offset = saKnife.offset(target);                                
+                                if (window.scrollTo != null) {
+                                    window.scrollTo(0, offset.top);
+                                }
                             });
                         }
                     }
@@ -555,8 +569,7 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
                     });
                 }
                 else resolve(false); // isHome
-            });
-            
+            });        
         });
     }
     function checkScrollPosition() {
