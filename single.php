@@ -24,7 +24,7 @@
 			<!-- post title -->
 			<h1 class="main__title">
 				<?php the_title(); ?>
-				<?php if ($categories[0]->term_id == 34) { ?> 
+				<?php if ($categories[0]->term_id == get_special_cat()) { ?> 
 					<div class="label label--category">
 						<span class="sr-only">Categoría: </span>
 						<svg class="icon icon--happy" aria-hidden="true">

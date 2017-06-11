@@ -28,8 +28,8 @@
         <article id="post-{{data.id}}" class="article article--post post cat--{{data.categories[0]}}">
             <!-- post title -->
             <h1 class="main__title">
-                {{trustHtml(data.title.rendered)}}
-                <div class="label label--category" ng-if="data.categories[0] == 34">
+                <span ng-bind-html="trustHtml(data.title.rendered)"></span>
+                <div class="label label--category" ng-if="data.categories[0] == <?php echo get_special_cat() ?>">
                     <span class="sr-only">Categoría: </span>
                     <svg class="icon icon--happy" aria-hidden="true">
                         <use xlink:href="#happyIcon" />
@@ -76,7 +76,7 @@
                         href="{{item.link}}"
                         ng-bind-html="trustHtml(item.title.rendered)"
                         ng-click="fetch.byId($event, 'posts', item.id)"></a>
-                    <div class="label label--category" ng-if="item.categories[0] == 34">
+                    <div class="label label--category" ng-if="item.categories[0] == <?php echo get_special_cat() ?>">
                         <span class="sr-only">Categoría: </span>
                         <svg class="icon icon--happy" aria-hidden="true">
                             <use xlink:href="#happyIcon" />

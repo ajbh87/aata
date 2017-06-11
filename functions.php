@@ -61,6 +61,10 @@ if (function_exists('add_theme_support'))
 /*------------------------------------*\
 	Functions
 \*------------------------------------*/
+function get_special_cat() {
+    $catID = 34; //38
+    return $catID;
+}
 // HTML5 Blank navigation
 function html5blank_nav()
 {

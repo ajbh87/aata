@@ -121,60 +121,63 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
         allTagsDef = reallyGetAll('tags'),
         allCategoriesDef = reallyGetAll('categories');
     let unbindLoop = () => {};
-    jqLite(window).on('scroll', _.debounce(checkScrollPosition, 100));
+    jqLite(window).on('scroll', _.debounce(checkScrollPosition, 50));
 
     (function checkCurrentPage() {
         const slug = window.location.href.replace(base, ''),
             processed = processSlug(slug),
             def = $q.defer();
         let requestType = '';
-        if (processed.isTag || processed.isAuthor || processed.isSearch || processed === false) {
-            if (processed.isTag) {
-                $q.when(allTagsDef).then((tags) => {
-                    let tagMeta = _.find(tags, (tag) => tag.link === window.location.href);
-                    state.new({
-                        loopType: 'tags',
-                        meta: tagMeta,
-                        requestType: 'loop',
-                        url: window.location.href
+        processed.then((request) => {
+            if (request.isTag || request.isAuthor || 
+                request.isSearch || request === false) {
+                if (request.isTag) {
+                    $q.when(allTagsDef).then((tags) => {
+                        let tagMeta = _.find(tags, (tag) => tag.link === window.location.href);
+                        state.new({
+                            loopType: 'tags',
+                            meta: tagMeta,
+                            requestType: 'loop',
+                            url: window.location.href
+                        });
+                        get.byFilter(tagMeta.id, 'posts', 'tags').then((val) => {
+                            state.set('val', val)
+                        });
+                        def.resolve(bindLoop());
                     });
-                    get.byFilter(tagMeta.id, 'posts', 'tags').then((val) => {
+                } 
+                else {
+                    // Post loop 
+                    state.new({
+                        url: window.location.href,
+                        requestType: 'loop',
+                        loopType: 'posts'
+                    });
+                    get.postsPage(1).then((val) => {
                         state.set('val', val)
                     });
                     def.resolve(bindLoop());
-                });
-            } 
-            else {
-                // Post loop 
+                }
+            } else {
+                if (processed.isPosts) {
+                    requestType = 'posts';
+                }
+                else {
+                    requestType = 'pages';
+                }
                 state.new({
-                    url: window.location.href,
-                    requestType: 'loop',
-                    loopType: 'posts'
+                    loopType: null,
+                    meta: {},
+                    requestType,
+                    url: window.location.href
                 });
-                get.postsPage(1).then((val) => {
-                    state.set('val', val)
+                // processed.slugArray[processed.slugArray.length - 1] = last
+                get.byFilter(processed.slugArray[processed.slugArray.length - 1], requestType, 'slug').then((val) => {
+                    state.set('val', val[0])
                 });
-                def.resolve(bindLoop());
+                def.resolve(() => {});
             }
-        } else {
-            if (processed.isPosts) {
-                requestType = 'posts';
-            }
-            else {
-                requestType = 'pages';
-            }
-            state.new({
-                loopType: null,
-                meta: {},
-                requestType,
-                url: window.location.href
-            });
-            // processed.slugArray[processed.slugArray.length - 1] = last
-            get.byFilter(processed.slugArray[processed.slugArray.length - 1], requestType, 'slug').then((val) => {
-                state.set('val', val[0])
-            });
-            def.resolve(() => {});
-        }
+        });
         return def.promise;
     })().then((fn) => {
         unbindLoop = fn;
@@ -215,35 +218,39 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
                     });
                 },
                 postOrPage: function(slug, replace) {
-                    const processed = processSlug(slug),
-                        slugArray = processed.slugArray,
-                        types = ['pages', 'posts'];
+                    const processDef = processSlug(slug);
+                    $q.all([allTagsDef, allUsersDef, allCategoriesDef, processDef]).then((defValues) => {
+                        const processed = defValues[3],
+                            slugArray = processed.slugArray,
+                            types = ['pages', 'posts'],
+                            allTags = defValues[0],
+                            allUsers = defValues[1],
+                            allCats = defValues[2];
 
-                    let promise = $q.defer(),
-                        pageNum = null,
-                        slugIndex = 0,
-                        cleanSlug = '',
-                        requestType = '',
-                        animated = prepareWindow(),
-                        filter = '',
-                        loopType = '',
-                        meta = {};
-
-                    if (slugArray != null) {
-                        // Verify if it's a paging link
-                        if (processed.isPagingPage) {
-                            pageNum = parseInt(slugArray[1]);
-                            if (typeof pageNum === 'number') {
-                                promise = get.postsPage(pageNum);
+                        let deferred = $q.defer(),
+                            pageNum = null,
+                            slugIndex = 0,
+                            cleanSlug = '',
+                            requestType = '',
+                            animated = prepareWindow(),
+                            filter = '',
+                            loopType = '',
+                            meta = {};
+                            debugger;
+                        if (slugArray != null) {
+                            // Verify if it's a paging link
+                            if (processed.isPagingPage) {
+                                pageNum = parseInt(slugArray[1]);
+                                if (typeof pageNum === 'number') {
+                                    get.postsPage(pageNum).then((val) => {
+                                        deferred.resolve(val);
+                                    });
+                                }
                             }
-                        }
-                        else if (processed.isPosts) {
-                            cleanSlug = slugArray[slugArray.length - 1];
-                            requestType = 'posts';
-                            if (processed.isAuthor || processed.isTag){
-                                $q.all([allTagsDef, allUsersDef]).then((defValues) => {
-                                    const allTags = defValues[0],
-                                        allUsers = defValues[1];
+                            else if (processed.isPosts || processed.isAuthor || processed.isTag) {
+                                cleanSlug = slugArray[slugArray.length - 1];
+                                requestType = 'posts';
+                                if (processed.isAuthor || processed.isTag){
                                     if (processed.isTag) {
                                         meta = _.find(allTags, (tag) => tag.slug === cleanSlug);
                                         cleanSlug = meta.id;
@@ -254,55 +261,59 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
                                         cleanSlug = meta.id;
                                         filter = loopType = 'author';
                                     }
+                                    debugger;
                                     requestType = 'loop';
                                     get.byFilter(cleanSlug, 'posts', filter).then((val) => {
-                                        promise.resolve(val);
+                                        deferred.resolve(val);
                                     });
+                                }
+                                else {
+                                    filter = 'slug';
+                                    get.byFilter(cleanSlug, 'posts', filter).then((val) => {
+                                        deferred.resolve(val);
+                                    });
+                                }
+                            }
+                            else {                
+                                cleanSlug = slugArray[slugArray.length - 1];
+                                requestType = 'pages';
+                                get.byFilter(cleanSlug, requestType, 'slug').then((val) => {
+                                    deferred.resolve(val);
                                 });
                             }
-                            else {
-                                filter = 'slug';
-                                promise = get.byFilter(cleanSlug, 'posts', filter);
-                            }
-                        }
-                        else {                
-                            cleanSlug = slugArray[slugArray.length - 1];
-                            requestType = 'pages';
-                            promise = get.byFilter(cleanSlug, requestType, 'slug');
-                        }
-                        
-                        $q.when(promise).then((values) => {
-                            let val = (processed.isAuthor || processed.isTag) ? values : values[0];
-
-                            if (values.length > 0) {
-                                changeState({
-                                    animated,
-                                    loopType,
-                                    meta,
-                                    replace,
-                                    requestType,
-                                    url: base + slug,
-                                    val
-                                });
-                            } else {
-                                getHome(animated);
-                            }
-                        });
-                    } else {
-                        getHome(animated);
-                    }
-                    function getHome(animated) {
-                        get.postsPage(1).then((val) => {
-                            changeState({
-                                animated: animated,
-                                replace: replace,
-                                requestType: 'loop',
-                                loopType: 'posts',
-                                url: base + slug,
-                                val: val
+                            deferred.promise.then((values) => {
+                                let val = (processed.isAuthor || processed.isTag 
+                                            || processed.isCat ) ? values : values[0];
+                                if (values.length > 0) {
+                                    changeState({
+                                        animated,
+                                        loopType,
+                                        meta,
+                                        replace,
+                                        requestType,
+                                        url: base + slug,
+                                        val
+                                    });
+                                } else {
+                                    getHome(animated);
+                                }
                             });
-                        });
-                    }
+                        } else {
+                            getHome(animated);
+                        }
+                        function getHome(animated) {
+                            get.postsPage(1).then((val) => {
+                                changeState({
+                                    animated: animated,
+                                    replace: replace,
+                                    requestType: 'loop',
+                                    loopType: 'posts',
+                                    url: base,
+                                    val: val
+                                });
+                            });
+                        }
+                    });
                 }
             }
             state.setDispatch(dispatcher);
@@ -333,7 +344,7 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
             };
             scope.trustHtml = (html) => $sce.trustAsHtml(html);
 
-            $timeout(() => {
+            _.defer(() => {
                 bindLinks();
                 // Bind AjaxLink to popstate (Back/Forward) event 
                 jqLite(window).on('popstate', (event) => {
@@ -454,7 +465,6 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
                                 author: _.find(values[1], (author) => author.id === s.val.author ),
                                 category: _.find(values[2], (cat) => cat.id === s.val.categories[0] )
                             };
-                            debugger;
                         }
                         subScope = _.assign(subScope, {
                             loopType: s.loopType,
@@ -523,25 +533,31 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
     };
 
     function processSlug(slug) {
-        const slugArray = slug.replace(/#([a-zA-Z0-9\-\_])+/g, '')
-                            .match(/(([a-zA-Z0-9\-\_?=]+)(?=\/*))/g);
-        if (slugArray != null) {
-            let last = slugArray[slugArray.length - 1],
-                isSearch = (last.indexOf('?s=') !== -1);
-            if (isSearch) {
-                slugArray[slugArray.length - 1] = last.replace('?s=', '');
-            }
-            return {
-                slugArray,
-                isSearch,
-                isTag: slugArray[1] === 'tag',
-                isAuthor: slugArray[1] === 'author',
-                isPosts: slugArray[0] === 'announcements',
-                isPagingPage: slugArray[1] === 'page',
-                isPage: slugArray[0] === 'page'
-            }
-        }
-        else return false; // isHome
+        return $q((resolve)=> {
+            allCategoriesDef.then((cats) => {
+                const slugArray = slug.replace(/#([a-zA-Z0-9\-\_])+/g, '')
+                                    .match(/(([a-zA-Z0-9\-\_?=]+)(?=\/*))/g);
+                if (slugArray != null) {
+                    let last = slugArray[slugArray.length - 1],
+                        isSearch = (last.indexOf('?s=') !== -1);
+                    if (isSearch) {
+                        slugArray[slugArray.length - 1] = last.replace('?s=', '');
+                    }
+                    resolve({
+                        slugArray,
+                        isSearch,
+                        isCat: slugArray[0] === 'categories',
+                        isTag: slugArray[0] === 'tag',
+                        isAuthor: slugArray[1] === 'author',
+                        isPosts: slugArray[0] === 'announcements',
+                        isPagingPage: slugArray[1] === 'page',
+                        isPage: slugArray[0] === 'page'
+                    });
+                }
+                else resolve(false); // isHome
+            });
+            
+        });
     }
     function checkScrollPosition() {
         state.s.set('scrolled', window.scrollY);

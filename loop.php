@@ -23,7 +23,7 @@
 			<a href="<?php the_permalink(); ?>" title="<?php the_title(); ?>">
 				<?php the_title(); ?>
             </a>
-		<?php if ($categories[0]->term_id == 34) { ?> 
+		<?php if ($categories[0]->term_id == get_special_cat()) { ?> 
 			<div class="label label--category">
 				<span class="sr-only">Categoría: </span>
 				<svg class="icon icon--happy" aria-hidden="true">
