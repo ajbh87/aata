@@ -120,7 +120,8 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
         }),
         allUsersDef = reallyGetAll('users'),
         allTagsDef = reallyGetAll('tags'),
-        allCategoriesDef = reallyGetAll('categories');
+        allCategoriesDef = reallyGetAll('categories'),
+        scrollPad = 150;
     let unbindLoop = () => {},
         comingFromHash = false;
     jqLite(window).on('scroll', _.debounce(checkScrollPosition, 50));
@@ -357,8 +358,7 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
                     if (eventState != null) {
                         if (location.href.indexOf('?s=') === -1) {
                             if ((eventState.isHash === true || comingFromHash) 
-                                && window.scrollTo != null) {
-                                    window.scrollTo(0, eventState.scrolled);
+                                && goTo(eventState.scrolled)) {
                                     comingFromHash = !comingFromHash;
                             } else {
                                 eventState.animated = prepareWindow();
@@ -379,9 +379,7 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
                         subState.val = cache[subState.loopType];
                         $q.when(setContent(subState)).then(() => {
                             const y = state.s.get('scrolled');
-                            if (window.scrollTo != null) {
-                                window.scrollTo(0, y);
-                            }
+                            goTo(y);
                         });
                     }
                 });    
@@ -424,10 +422,9 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
                                         isHash: true
                                     });
                                     
-                                if (window.scrollTo != null) {
+                                if (goTo(offset.top)) {
                                     comingFromHash = true;
                                     history.replaceState(oldState, '', location.href);
-                                    window.scrollTo(0, offset.top);
                                     history.pushState(newState, '', location.href + id);
                                 }
                             });
@@ -472,15 +469,13 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
 
                     if (small === true) scope.showScreenSm = true;
                     else scope.showScreen = true;
-                    requestAnimationFrame(function() {
-                        scope.$digest();
-                        $timeout(() => {
-                            if (window.scrollTo != null && append == null) {
-                                window.scrollTo(0, 0);
-                            }
-                            resolve();
-                        }, 200);
-                    });
+                        requestAnimationFrame(function() {
+                            scope.$digest();
+                            $timeout(() => {
+                                if (append !== true) goTo(0);
+                                resolve();
+                            }, 200);
+                        });
                 });
             }
             function setContent(s, append) {                
@@ -514,6 +509,7 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
 
                         if (append !== true) jqLite(main).empty();
                         jqLite(main).append(el);
+                        debugger;
                         _.defer(function() {
                             scope.$digest();
                             resolve();
@@ -592,6 +588,13 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
     }
     function checkScrollPosition() {
         state.s.set('scrolled', window.scrollY);
+    }
+    function goTo(pos) {
+        if (window.scrollTo != null) {
+            pos = pos > scrollPad ? pos - scrollPad : pos;
+            window.scrollTo(0, pos);
+            return true;
+        } else return false;
     }
     function reallyGetAll(name) {
         const def = $q.defer();

@@ -1,5 +1,6 @@
 import aataResources from './aataResources.js';
 import aataForm from './aataForm.js';
+import saKnife from './libs/saKnife.js';
 
 const initComponents = (function initComponents(angular) {
     let jqLite = angular.element;
@@ -8,8 +9,10 @@ const initComponents = (function initComponents(angular) {
         .directive('aataScript', aataScript)
         .directive('aataForm', aataForm)
         .directive('aataResources', aataResources)
-        .directive('aataMenu', aataMenu);
+        .directive('aataMenu', aataMenu)
+        .directive('aataTransfer', aataTransfer);
 
+    aataTransfer.$inject = ['$document'];
     aataMenu.$inject = ['$document', '$compile', '$templateCache'];
     aataForm.$inject = ['$http', '$timeout'];
     aataResources.$inject = [ '$compile', '$q', '$sce', '$resource', '$templateCache', '$timeout', '$document' ];
@@ -65,6 +68,35 @@ const initComponents = (function initComponents(angular) {
         };
     }
 
-
+    function aataTransfer($document) {
+          return {
+            scope: false,
+            link: function(scope, elem, attr) {
+                const selector = attr.aataTransfer,
+                    jqEl = jqLite($document[0].querySelector(selector)),
+                    dad = elem.parent(),
+                    transferBreak = parseFloat(attr.aataTransferBreak);
+                let transfered = false;
+                transfer();
+                jqLite(window).on('resize', transfer);
+                function transfer() {
+                    let winSize = saKnife.winSize();
+                    if (winSize.width < transferBreak) {
+                        if (transfered === false) {
+                            elem.detach();
+                            jqEl.prepend(elem);
+                            transfered = true;
+                        }
+                    } else {
+                        if (transfered === true) {
+                            elem.detach();
+                            dad.append(elem);
+                            transfered = false;
+                        }
+                    }
+                }
+            }
+        }
+    }
 })(angular);
 export default initComponents;

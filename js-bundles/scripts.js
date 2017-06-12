@@ -5791,13 +5791,18 @@ var _aataForm = __webpack_require__(12);
 
 var _aataForm2 = _interopRequireDefault(_aataForm);
 
+var _saKnife = __webpack_require__(14);
+
+var _saKnife2 = _interopRequireDefault(_saKnife);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var initComponents = function initComponents(angular) {
     var jqLite = angular.element;
 
-    angular.module('components', ['ngResource', 'ngMessages']).directive('aataScript', aataScript).directive('aataForm', _aataForm2.default).directive('aataResources', _aataResources2.default).directive('aataMenu', aataMenu);
+    angular.module('components', ['ngResource', 'ngMessages']).directive('aataScript', aataScript).directive('aataForm', _aataForm2.default).directive('aataResources', _aataResources2.default).directive('aataMenu', aataMenu).directive('aataTransfer', aataTransfer);
 
+    aataTransfer.$inject = ['$document'];
     aataMenu.$inject = ['$document', '$compile', '$templateCache'];
     _aataForm2.default.$inject = ['$http', '$timeout'];
     _aataResources2.default.$inject = ['$compile', '$q', '$sce', '$resource', '$templateCache', '$timeout', '$document'];
@@ -5848,6 +5853,37 @@ var initComponents = function initComponents(angular) {
                     }
                     document.head.appendChild(s);
                     elem.remove();
+                }
+            }
+        };
+    }
+
+    function aataTransfer($document) {
+        return {
+            scope: false,
+            link: function link(scope, elem, attr) {
+                var selector = attr.aataTransfer,
+                    jqEl = jqLite($document[0].querySelector(selector)),
+                    dad = elem.parent(),
+                    transferBreak = parseFloat(attr.aataTransferBreak);
+                var transfered = false;
+                transfer();
+                jqLite(window).on('resize', transfer);
+                function transfer() {
+                    var winSize = _saKnife2.default.winSize();
+                    if (winSize.width < transferBreak) {
+                        if (transfered === false) {
+                            elem.detach();
+                            jqEl.prepend(elem);
+                            transfered = true;
+                        }
+                    } else {
+                        if (transfered === true) {
+                            elem.detach();
+                            dad.append(elem);
+                            transfered = false;
+                        }
+                    }
                 }
             }
         };
@@ -41235,7 +41271,8 @@ function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, 
     }),
         allUsersDef = reallyGetAll('users'),
         allTagsDef = reallyGetAll('tags'),
-        allCategoriesDef = reallyGetAll('categories');
+        allCategoriesDef = reallyGetAll('categories'),
+        scrollPad = 150;
     var unbindLoop = function unbindLoop() {},
         comingFromHash = false;
     jqLite(window).on('scroll', _.debounce(checkScrollPosition, 50));
@@ -41479,8 +41516,7 @@ function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, 
                     // Verify if history item was loaded through ajax
                     if (eventState != null) {
                         if (location.href.indexOf('?s=') === -1) {
-                            if ((eventState.isHash === true || comingFromHash) && window.scrollTo != null) {
-                                window.scrollTo(0, eventState.scrolled);
+                            if ((eventState.isHash === true || comingFromHash) && goTo(eventState.scrolled)) {
                                 comingFromHash = !comingFromHash;
                             } else {
                                 eventState.animated = prepareWindow();
@@ -41499,9 +41535,7 @@ function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, 
                         subState.val = cache[subState.loopType];
                         $q.when(setContent(subState)).then(function () {
                             var y = state.s.get('scrolled');
-                            if (window.scrollTo != null) {
-                                window.scrollTo(0, y);
-                            }
+                            goTo(y);
                         });
                     }
                 });
@@ -41544,10 +41578,9 @@ function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, 
                                     isHash: true
                                 });
 
-                                if (window.scrollTo != null) {
+                                if (goTo(offset.top)) {
                                     comingFromHash = true;
                                     history.replaceState(oldState, '', location.href);
-                                    window.scrollTo(0, offset.top);
                                     history.pushState(newState, '', location.href + id);
                                 }
                             });
@@ -41598,9 +41631,7 @@ function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, 
                     requestAnimationFrame(function () {
                         scope.$digest();
                         $timeout(function () {
-                            if (window.scrollTo != null && append == null) {
-                                window.scrollTo(0, 0);
-                            }
+                            if (append !== true) goTo(0);
                             resolve();
                         }, 200);
                     });
@@ -41640,6 +41671,7 @@ function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, 
 
                         if (append !== true) jqLite(main).empty();
                         jqLite(main).append(el);
+                        debugger;
                         _.defer(function () {
                             scope.$digest();
                             resolve();
@@ -41718,6 +41750,13 @@ function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, 
     }
     function checkScrollPosition() {
         state.s.set('scrolled', window.scrollY);
+    }
+    function goTo(pos) {
+        if (window.scrollTo != null) {
+            pos = pos > scrollPad ? pos - scrollPad : pos;
+            window.scrollTo(0, pos);
+            return true;
+        } else return false;
     }
     function reallyGetAll(name) {
         var def = $q.defer();
