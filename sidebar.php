@@ -1,5 +1,7 @@
 <!-- sidebar -->
-<aside class="sidebar" role="complementary">
+<aside class="sidebar" role="complementary" 
+	aata-transfer=".nav" 
+	aata-transfer-break="1200">
 	<div class="sidebar__search">
 		<?php get_template_part('searchform'); ?>
 	</div>

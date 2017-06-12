@@ -409,6 +409,9 @@ input[type="checkbox"] {
   position: relative;
   display: grid;
   grid-template-columns: 1fr 2fr; }
+  @media only screen and (max-width: 600px) {
+    .sidebar {
+      display: block; } }
   @media only screen and (orientation: landscape) and (min-width: 1200px) {
     .sidebar {
       display: block;
@@ -508,11 +511,15 @@ input[type="checkbox"] {
 .main {
   position: relative;
   padding: 3.9rem 2.6rem 0 1.3rem;
-  margin-right: 1.3rem;
   z-index: 1;
   border-left: 1.3rem solid #45b8ac; }
+  @media only screen and (max-width: 600px) {
+    .main {
+      padding: 3.9rem 1.3rem 0 1.3rem;
+      border-left-width: 2px; } }
   @media only screen and (orientation: landscape) and (min-width: 1200px) {
     .main {
+      margin-right: 1.3rem;
       padding-top: 0;
       flex: 0 1 59.7rem;
       min-height: 100vh;
@@ -552,12 +559,16 @@ input[type="checkbox"] {
           .main .widget_text h3--margin {
             margin: 1.3rem 0; } }
     .main .widget_text .textwidget {
+      background: #fff;
       padding: 1.95rem;
-      background: #fff; }
+      color: #444; }
       .main .widget_text .textwidget > :first-child {
-        margin-top: 0 !important; }
+        margin-top: 0; }
       .main .widget_text .textwidget > :last-child {
-        margin-bottom: 0 !important; }
+        margin-bottom: 0; }
+      @media only screen and (max-width: 600px) {
+        .main .widget_text .textwidget {
+          padding: 0.975rem; } }
 
 .article {
   margin: 2.6rem 0; }
@@ -579,6 +590,12 @@ input[type="checkbox"] {
     line-height: 1.25;
     background: #444;
     color: #fff; }
+    @media only screen and (max-width: 600px) {
+      .article__date {
+        position: relative;
+        width: auto;
+        height: auto;
+        text-align: left; } }
   .article__author {
     font-size: 0.75rem;
     font-style: italic; }
@@ -590,6 +607,9 @@ input[type="checkbox"] {
       margin-top: 0; }
     .article__content > :last-child {
       margin-bottom: 0; }
+    @media only screen and (max-width: 600px) {
+      .article__content {
+        padding: 0.975rem; } }
     .article__content aside {
       display: block;
       position: relative;
@@ -599,6 +619,16 @@ input[type="checkbox"] {
       padding: 1.3rem;
       margin: 1.3rem 0 1.3rem -3.25rem;
       background: #e6e6e6; }
+      .article__content aside > :first-child {
+        margin-top: 0; }
+      .article__content aside > :last-child {
+        margin-bottom: 0; }
+      @media only screen and (max-width: 600px) {
+        .article__content aside {
+          float: none;
+          right: auto;
+          width: auto;
+          margin: 1.3rem 0; } }
     .article__content blockquote {
       font-style: italic;
       border: 0px dotted #e6e6e6;
@@ -613,6 +643,9 @@ input[type="checkbox"] {
       margin-top: 0; }
     .article__excerpt > :last-child {
       margin-bottom: 0; }
+    @media only screen and (max-width: 600px) {
+      .article__excerpt {
+        padding: 0.975rem; } }
   .article__tags {
     margin: 0.65rem 0; }
     .article__tags .icon {
@@ -756,8 +789,7 @@ input[type="checkbox"] {
   color: #45b8ac; }
   .label .icon {
     position: relative;
-    bottom: -0.1rem;
-    margin-right: 0.65rem; }
+    bottom: -0.1rem; }
 
 .g-recaptcha {
   position: absolute; }

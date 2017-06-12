@@ -269,6 +269,9 @@ $nav-font: 0.9rem;
     position: relative;
     display: grid;
     grid-template-columns: 1fr 2fr;
+    @include portrait-sm() {
+        display: block;
+    };
     @include landscape() {
         display: block;
         flex: 0 1 auto;
@@ -368,10 +371,14 @@ $nav-font: 0.9rem;
 .main {
     position: relative;
     padding: $header-h ($article-date-width - $spacing) 0 $spacing;
-    margin-right: $spacing;
     z-index: 1;
     border-left: $spacing solid $brand;
+    @include portrait-sm() {
+        padding: $header-h $spacing 0 $spacing;
+        border-left-width: 2px;
+    };
     @include landscape() {
+        margin-right: $spacing;
         padding-top: 0;
         flex: 0 1 $main-max;
         min-height: 100vh;
@@ -397,14 +404,7 @@ $nav-font: 0.9rem;
             }
         };
         .textwidget {
-            padding: $spacing * 1.5;
-            background: #fff;
-            > :first-child {
-                margin-top: 0 !important;
-            }
-            > :last-child {
-                margin-bottom: 0 !important;
-            }
+            @include long-content();
         }
     }
 }
@@ -434,6 +434,12 @@ $nav-font: 0.9rem;
 
         background: $grey-dark;
         color: #fff;
+        @include portrait-sm() {
+            position: relative;
+            width: auto;
+            height: auto;
+            text-align: left;
+        };
     }
     &__author {
         font-size: $font-smaller;
@@ -451,6 +457,13 @@ $nav-font: 0.9rem;
             padding: $spacing;
             margin: $spacing 0 $spacing ($r + $spacing);
             background: $grey-light;
+            @include keep-flow();
+            @include portrait-sm() {
+                float: none;
+                right: auto;
+                width: auto;
+                margin: $spacing 0;
+            };
         }
         blockquote {
             font-style: italic;
@@ -476,7 +489,6 @@ $nav-font: 0.9rem;
             fill: $brand;
         }
     }
-
 }
 // --------------------------- Footer
 .footer {
@@ -615,7 +627,6 @@ $nav-font: 0.9rem;
     .icon {
         position: relative; 
         bottom: -0.1rem;
-        margin-right: ($spacing / 2);
     }
 }
 
