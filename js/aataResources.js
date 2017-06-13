@@ -1,6 +1,5 @@
 import saKnife from './libs/saKnife.js';
 import Immutable from '../node_modules/immutable/dist/immutable.js';
-
 import find from '../node_modules/lodash.find/index.js';
 import debounce from '../node_modules/lodash.debounce/index.js';
 import defer from '../node_modules/lodash.defer/index.js';
@@ -326,6 +325,7 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
             scope.lang = lang;
 
             // Scope functions
+            scope.fetch = fetch;
             scope.getCategoryName = () => '';
 
             $q.when(allCategoriesDef).then((categories) => {
@@ -509,7 +509,6 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
 
                         if (append !== true) jqLite(main).empty();
                         jqLite(main).append(el);
-                        debugger;
                         _.defer(function() {
                             scope.$digest();
                             resolve();

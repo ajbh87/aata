@@ -27,7 +27,7 @@ $max-font: $max-width * ($font-to-width / 100);
 $weight: 400;
 $family: 'Playfair Display', "adobe-garamond-pro", "Garamond", "Book Antiqua", Palatino, serif;
 $ss-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-$font-smaller: .75rem;
+$font-smaller: 0.75rem;
 $main-title: 1.2rem;
 
 $banner-height: 6rem;
@@ -37,9 +37,10 @@ $spacing: 1.3rem;
 $header-h: $spacing * 3;
 $side: $spacing * 13;
 $article-date-width: $spacing * 3;
-$main-max: 100rem - ($side * 2) - ($spacing * 2) - $article-date-width;
+//$main-max: 100rem - ($side * 2) - ($spacing * 2) - $article-date-width;
+$main-max: 50rem;
 
-$footer-f-size: .7rem;
+$footer-f-size: 0.7rem;
 $footer-h: ($footer-f-size * $base-line) + $spacing;
 
 @mixin sans-serif() {

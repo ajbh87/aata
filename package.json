@@ -6,8 +6,8 @@
   "scripts": {
     "uglifyjs": "uglifyjs ./js/*.js -b -o ./js-bundles/scripts.js",
     "uglifyjs-min": "uglifyjs ./js/*.js --compress -o ./js-bundles/scripts.js",
-    "webpack": "webpack --config ./webpack.config.js",
-    "webpack-min": "webpack --config ./webpack.config.min.js"
+    "webpack-dev": "cross-env NODE_ENV=dev webpack --config ./webpack.config.js",
+    "webpack-prod": "cross-env NODE_ENV=production webpack --config ./webpack.config.js"
   },
   "author": "Alfredo J. Bermudez",
   "license": "ISC",
@@ -32,6 +32,13 @@
     "babel-preset-es2017": "^6.24.1",
     "babel-preset-latest": "^6.24.1",
     "compression-webpack-plugin": "^0.4.0",
+    "cross-env": "^5.0.1",
+    "css-loader": "^0.28.4",
+    "extract-text-webpack-plugin": "^2.1.2",
+    "node-sass": "^4.5.3",
+    "postcss-loader": "^2.0.5",
+    "sass-loader": "^6.0.5",
+    "style-loader": "^0.18.2",
     "uglifyjs-webpack-plugin": "^0.4.3",
     "webpack": "^2.6.1"
   }

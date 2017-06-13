@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 11);
+/******/ 	return __webpack_require__(__webpack_require__.s = 13);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -95,6 +95,70 @@ module.exports = g;
 
 /***/ }),
 /* 1 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+function whichTransitionEvent() {
+  var el = document.createElement('fakeelement'),
+      transitions = {
+    transition: 'transitionend',
+    OTransition: 'oTransitionEnd',
+    MozTransition: 'transitionend',
+    WebkitTransition: 'webkitTransitionEnd'
+  };
+  var t = void 0;
+
+  for (t in transitions) {
+    if (el.style[t] !== undefined) {
+      return transitions[t];
+    }
+  }
+}
+var saKnife = {
+  transitionEvent: whichTransitionEvent(),
+  offset: function offset(el) {
+    var rect = el.getBoundingClientRect(),
+        body = document.body.getBoundingClientRect();
+
+    return {
+      top: Math.abs(body.top) + rect.top,
+      left: Math.abs(body.left) + rect.left
+    };
+  },
+  winSize: function winSize() {
+    var e = document.documentElement,
+        g = document.querySelector('body'),
+        width = e.clientWidth || g.clientWidth,
+        height = e.clientHeight || g.clientHeight;
+    return {
+      width: width,
+      height: height,
+      vCenter: height / 2,
+      hCenter: width / 2,
+      documentHeight: g.offsetHeight,
+      documentWidth: g.offsetWidth
+    };
+  },
+  hasClass: function hasClass(el, className) {
+    var response = false;
+
+    if (el.classList) response = el.classList.contains(className);else response = new RegExp('(^| )' + className + '( |$)', 'gi').test(el.className);
+
+    return response;
+  },
+  round: function round(value, decimals) {
+    return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
+  }
+};
+exports.default = saKnife;
+
+/***/ }),
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /**
@@ -5078,7 +5142,7 @@ module.exports = g;
 }));
 
 /***/ }),
-/* 2 */
+/* 3 */
 /***/ (function(module, exports) {
 
 /**
@@ -5721,7 +5785,7 @@ module.exports = assign;
 
 
 /***/ }),
-/* 3 */
+/* 4 */
 /***/ (function(module, exports) {
 
 module.exports = function(module) {
@@ -5749,31 +5813,31 @@ module.exports = function(module) {
 
 
 /***/ }),
-/* 4 */
-/***/ (function(module, exports, __webpack_require__) {
-
-__webpack_require__(8);
-module.exports = 'ngMessages';
-
-
-/***/ }),
 /* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(9);
-module.exports = 'ngResource';
+__webpack_require__(10);
+module.exports = 'ngMessages';
 
 
 /***/ }),
 /* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(10);
-module.exports = angular;
+__webpack_require__(11);
+module.exports = 'ngResource';
 
 
 /***/ }),
 /* 7 */
+/***/ (function(module, exports, __webpack_require__) {
+
+__webpack_require__(12);
+module.exports = angular;
+
+
+/***/ }),
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -5783,15 +5847,15 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _aataResources = __webpack_require__(13);
+var _aataResources = __webpack_require__(15);
 
 var _aataResources2 = _interopRequireDefault(_aataResources);
 
-var _aataForm = __webpack_require__(12);
+var _aataForm = __webpack_require__(14);
 
 var _aataForm2 = _interopRequireDefault(_aataForm);
 
-var _saKnife = __webpack_require__(14);
+var _saKnife = __webpack_require__(1);
 
 var _saKnife2 = _interopRequireDefault(_saKnife);
 
@@ -5865,13 +5929,14 @@ var initComponents = function initComponents(angular) {
                 var selector = attr.aataTransfer,
                     jqEl = jqLite($document[0].querySelector(selector)),
                     dad = elem.parent(),
-                    transferBreak = parseFloat(attr.aataTransferBreak);
+                    transferBreak = parseFloat(attr.aataTransferBreak) - 1;
                 var transfered = false;
                 transfer();
                 jqLite(window).on('resize', transfer);
                 function transfer() {
-                    var winSize = _saKnife2.default.winSize();
-                    if (winSize.width < transferBreak) {
+                    var winSize = _saKnife2.default.winSize(),
+                        o = winSize.documentHeight > winSize.height ? 15 : 0;
+                    if (winSize.width + o < transferBreak) {
                         if (transfered === false) {
                             elem.detach();
                             jqEl.prepend(elem);
@@ -5892,7 +5957,13 @@ var initComponents = function initComponents(angular) {
 exports.default = initComponents;
 
 /***/ }),
-/* 8 */
+/* 9 */
+/***/ (function(module, exports) {
+
+// removed by extract-text-webpack-plugin
+
+/***/ }),
+/* 10 */
 /***/ (function(module, exports) {
 
 /**
@@ -6638,7 +6709,7 @@ function ngMessageDirectiveFactory() {
 
 
 /***/ }),
-/* 9 */
+/* 11 */
 /***/ (function(module, exports) {
 
 /**
@@ -7502,7 +7573,7 @@ angular.module('ngResource', ['ng']).
 
 
 /***/ }),
-/* 10 */
+/* 12 */
 /***/ (function(module, exports) {
 
 /**
@@ -40879,29 +40950,32 @@ $provide.value("$locale", {
 !window.angular.$$csp().noInlineStyle && window.angular.element(document.head).prepend('<style type="text/css">@charset "UTF-8";[ng\\:cloak],[ng-cloak],[data-ng-cloak],[x-ng-cloak],.ng-cloak,.x-ng-cloak,.ng-hide:not(.ng-hide-animate){display:none !important;}ng\\:form{display:block;}.ng-animate-shim{visibility:hidden;}.ng-anchor{position:absolute;}</style>');
 
 /***/ }),
-/* 11 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var _index = __webpack_require__(6);
+var _index = __webpack_require__(7);
 
 var _index2 = _interopRequireDefault(_index);
 
-var _index3 = __webpack_require__(5);
+var _index3 = __webpack_require__(6);
 
 var _index4 = _interopRequireDefault(_index3);
 
-var _index5 = __webpack_require__(4);
+var _index5 = __webpack_require__(5);
 
 var _index6 = _interopRequireDefault(_index5);
 
-var _components = __webpack_require__(7);
+var _components = __webpack_require__(8);
 
 var _components2 = _interopRequireDefault(_components);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+__webpack_require__(9);
+
 
 _index2.default.module('aata', ['components']).controller('MenuController', ['$scope', '$timeout', function ($scope, $timeout) {
     $scope.hideMenu = true;
@@ -40920,7 +40994,7 @@ _index2.default.module('aata', ['components']).controller('MenuController', ['$s
 }]);
 
 /***/ }),
-/* 12 */
+/* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -40931,11 +41005,11 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = aataForm;
 
-var _immutable = __webpack_require__(1);
+var _immutable = __webpack_require__(2);
 
 var _immutable2 = _interopRequireDefault(_immutable);
 
-var _index = __webpack_require__(2);
+var _index = __webpack_require__(3);
 
 var _index2 = _interopRequireDefault(_index);
 
@@ -41077,7 +41151,7 @@ function aataForm($http, $timeout) {
 }
 
 /***/ }),
-/* 13 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -41091,35 +41165,35 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 exports.default = aataResources;
 
-var _saKnife = __webpack_require__(14);
+var _saKnife = __webpack_require__(1);
 
 var _saKnife2 = _interopRequireDefault(_saKnife);
 
-var _immutable = __webpack_require__(1);
+var _immutable = __webpack_require__(2);
 
 var _immutable2 = _interopRequireDefault(_immutable);
 
-var _index = __webpack_require__(17);
+var _index = __webpack_require__(18);
 
 var _index2 = _interopRequireDefault(_index);
 
-var _index3 = __webpack_require__(15);
+var _index3 = __webpack_require__(16);
 
 var _index4 = _interopRequireDefault(_index3);
 
-var _index5 = __webpack_require__(16);
+var _index5 = __webpack_require__(17);
 
 var _index6 = _interopRequireDefault(_index5);
 
-var _index7 = __webpack_require__(19);
+var _index7 = __webpack_require__(20);
 
 var _index8 = _interopRequireDefault(_index7);
 
-var _index9 = __webpack_require__(2);
+var _index9 = __webpack_require__(3);
 
 var _index10 = _interopRequireDefault(_index9);
 
-var _index11 = __webpack_require__(18);
+var _index11 = __webpack_require__(19);
 
 var _index12 = _interopRequireDefault(_index11);
 
@@ -41475,6 +41549,7 @@ function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, 
             scope.lang = lang;
 
             // Scope functions
+            scope.fetch = fetch;
             scope.getCategoryName = function () {
                 return '';
             };
@@ -41671,7 +41746,6 @@ function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, 
 
                         if (append !== true) jqLite(main).empty();
                         jqLite(main).append(el);
-                        debugger;
                         _.defer(function () {
                             scope.$digest();
                             resolve();
@@ -41813,71 +41887,7 @@ function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, 
 }
 
 /***/ }),
-/* 14 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-Object.defineProperty(exports, "__esModule", {
-  value: true
-});
-function whichTransitionEvent() {
-  var el = document.createElement('fakeelement'),
-      transitions = {
-    transition: 'transitionend',
-    OTransition: 'oTransitionEnd',
-    MozTransition: 'transitionend',
-    WebkitTransition: 'webkitTransitionEnd'
-  };
-  var t = void 0;
-
-  for (t in transitions) {
-    if (el.style[t] !== undefined) {
-      return transitions[t];
-    }
-  }
-}
-var saKnife = {
-  transitionEvent: whichTransitionEvent(),
-  offset: function offset(el) {
-    var rect = el.getBoundingClientRect(),
-        body = document.body.getBoundingClientRect();
-
-    return {
-      top: Math.abs(body.top) + rect.top,
-      left: Math.abs(body.left) + rect.left
-    };
-  },
-  winSize: function winSize() {
-    var e = document.documentElement,
-        g = document.querySelector('body'),
-        width = e.clientWidth || g.clientWidth,
-        height = e.clientHeight || g.clientHeight;
-    return {
-      width: width,
-      height: height,
-      vCenter: height / 2,
-      hCenter: width / 2,
-      documentHeight: g.offsetHeight,
-      documentWidth: g.offsetWidth
-    };
-  },
-  hasClass: function hasClass(el, className) {
-    var response = false;
-
-    if (el.classList) response = el.classList.contains(className);else response = new RegExp('(^| )' + className + '( |$)', 'gi').test(el.className);
-
-    return response;
-  },
-  round: function round(value, decimals) {
-    return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
-  }
-};
-exports.default = saKnife;
-
-/***/ }),
-/* 15 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/**
@@ -42261,7 +42271,7 @@ module.exports = debounce;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 16 */
+/* 17 */
 /***/ (function(module, exports) {
 
 /**
@@ -42371,7 +42381,7 @@ module.exports = defer;
 
 
 /***/ }),
-/* 17 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, module) {/**
@@ -44828,10 +44838,10 @@ function property(path) {
 
 module.exports = find;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(3)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(4)(module)))
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global, module) {/**
@@ -46683,10 +46693,10 @@ function stubFalse() {
 
 module.exports = isEqual;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(3)(module)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0), __webpack_require__(4)(module)))
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 /* WEBPACK VAR INJECTION */(function(global) {/**
@@ -47903,3 +47913,4 @@ module.exports = unionWith;
 
 /***/ })
 /******/ ]);
+//# sourceMappingURL=scripts.js.map

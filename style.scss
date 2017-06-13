@@ -373,16 +373,17 @@ $nav-font: 0.9rem;
     padding: $header-h ($article-date-width - $spacing) 0 $spacing;
     z-index: 1;
     border-left: $spacing solid $brand;
+    min-height: 100vh;
+    min-height: calc(100vh - #{$footer-h});
+    margin-right: $spacing;
     @include portrait-sm() {
+        margin-right: 0;
         padding: $header-h $spacing 0 $spacing;
-        border-left-width: 2px;
+        border-left-width: 0;
     };
     @include landscape() {
-        margin-right: $spacing;
         padding-top: 0;
         flex: 0 1 $main-max;
-        min-height: 100vh;
-        min-height: calc(100vh - #{$footer-h});
     }
     &__title {
         text-align: center;

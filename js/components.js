@@ -75,13 +75,14 @@ const initComponents = (function initComponents(angular) {
                 const selector = attr.aataTransfer,
                     jqEl = jqLite($document[0].querySelector(selector)),
                     dad = elem.parent(),
-                    transferBreak = parseFloat(attr.aataTransferBreak);
+                    transferBreak = parseFloat(attr.aataTransferBreak) - 1;
                 let transfered = false;
                 transfer();
                 jqLite(window).on('resize', transfer);
                 function transfer() {
-                    let winSize = saKnife.winSize();
-                    if (winSize.width < transferBreak) {
+                    let winSize = saKnife.winSize(),
+                        o = winSize.documentHeight > winSize.height ? 15 : 0;
+                    if ((winSize.width + o) < transferBreak) {
                         if (transfered === false) {
                             elem.detach();
                             jqEl.prepend(elem);
