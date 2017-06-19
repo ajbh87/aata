@@ -198,7 +198,7 @@ $nav-font: 0.9rem;
     padding: 0;
     width: 100%;
     background: #fff;
-    padding-bottom: $spacing * 2;
+    padding-bottom: $spacing * 4;
     @include portrait() {
         height: 100vh;
         height: calc(100vh - #{$header-h});

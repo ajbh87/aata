@@ -86,6 +86,7 @@ input, textarea {
 input {
     &[type="search"] {
         box-sizing: border-box;
+        border-radius: 0 !important;
     }
 
     &[type="checkbox"] {

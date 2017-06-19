@@ -119,8 +119,11 @@ function html5blank_styles()
     wp_register_style('normalize', get_template_directory_uri() . '/normalize.css', array(), '1.0', 'all');
     wp_enqueue_style('normalize'); // Enqueue it!
 
-    wp_register_style('aataStyle', get_template_directory_uri() . '/style.css', array(), '1.0', 'all');
+    wp_register_style('aataStyle', get_template_directory_uri() . '/style.css', array(), '1.0.1', 'all');
     wp_enqueue_style('aataStyle'); // Enqueue it!
+
+    //wp_register_style('aataStyleMin', get_template_directory_uri() . '/style.min.css', array(), '1.0.1', 'all');
+    //wp_enqueue_style('aataStyleMin'); // Enqueue it!
 }
 
 // Register HTML5 Blank Navigation

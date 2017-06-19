@@ -7,7 +7,7 @@ const ENV = process.env.NODE_ENV;
     isDev = ENV === 'dev',
     isProd = ENV === 'production';
 const devPlugins = [
-    new ExtractTextPlugin('style.css'),
+    new ExtractTextPlugin(isDev ? 'style.css' : 'style.min.css'),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': JSON.stringify(ENV)
     })

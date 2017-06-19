@@ -6,7 +6,7 @@
 		<?php get_template_part('searchform'); ?>
 	</div>
 	<div class="sidebar__content">
-		<h5>Para información, consultas o citas: </h5>
+		<h5>Para consultas o citas: </h5>
 		<ul class="sidebar__link-list">
 			<li>
 				<a href="<?php echo home_url(); ?>/contacto" class="sidebar__link">
