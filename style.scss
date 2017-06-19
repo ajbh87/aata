@@ -261,15 +261,16 @@ $nav-font: 0.9rem;
 }
 .expand {
     $s: 1rem * $base-line;
+    $p: 0.3rem;
     position: absolute;
-    top: 0.2rem;
-    height: ($s + $spacing) - 0.4rem;
-    width: ($s + $spacing) - 0.4rem;
-    right: 0.2rem;
+    top: $p;
+    height: ($s + $spacing) - ($p * 2);
+    width: ($s + $spacing) - ($p * 2);
+    right: $p;
     margin: 0;
     @include landscape() {
-        height: ($s + ($spacing / 2))  - 0.4rem;
-        width: ($s + ($spacing / 2))  - 0.4rem;
+        height: ($s + ($spacing / 2))  - ($p * 2);
+        width: ($s + ($spacing / 2))  - ($p * 2);
     }
     padding: 0.4rem;
     text-align: center;

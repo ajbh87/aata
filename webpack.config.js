@@ -65,10 +65,17 @@ module.exports = {
                     }, {
                         loader: 'postcss-loader',
                         options: { 
-                             sourceMap: 'inline', 
-                             plugins: function() { 
-                                  return [ require('autoprefixer') ] 
-                             } 
+                            sourceMap: 'inline', 
+                            plugins: function() {
+                                if (isDev) {
+                                    return;
+                                } else {
+                                    return [ 
+                                        require('autoprefixer'),
+                                        require('cssnano')
+                                    ] 
+                                }
+                            } 
                         }
                     }, {
                         loader: 'sass-loader',
