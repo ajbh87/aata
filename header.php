@@ -30,8 +30,12 @@
                 </a>
             </div>
             <button class="menu-button" ng-click="menuToggle()" aria-expanded="{{showMenu}}">
-                <span class="sr-only">Abrir Menú</span>
-                <?php get_template_part('img/icons/menuicon'); ?>
+                <span class="sr-only">Menú</span>
+                <div class="menu-icon">
+                    <div class="menu-icon__line menu-icon__line--1"></div>
+                    <div class="menu-icon__line menu-icon__line--2"></div>
+                    <div class="menu-icon__line menu-icon__line--3"></div>
+                </div>
             </button>
             <!-- /logo -->
             <!-- nav -->

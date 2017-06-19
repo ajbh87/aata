@@ -94,12 +94,12 @@ function html5blank_nav()
 function html5blank_header_scripts()
 {
     if ($GLOBALS['pagenow'] != 'wp-login.php' && !is_admin()) {
-        // Dev
-        wp_register_script('dev', get_template_directory_uri() . '/js-bundles/scripts.js', array(), '1.0.1');
+        //Dev
+        wp_register_script('dev', get_template_directory_uri() . '/js-bundles/scripts.js', array(), '1.0.2');
         wp_enqueue_script('dev');
         
         //Production
-        // wp_register_script('production', get_template_directory_uri() . '/js-bundles/scripts.min.js', array(), '1.0.1');
+        // wp_register_script('production', get_template_directory_uri() . '/js-bundles/scripts.min.js', array(), '1.0.2');
         // wp_enqueue_script('production');
     }
 }

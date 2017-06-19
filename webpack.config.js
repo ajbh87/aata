@@ -2,8 +2,15 @@ const webpack = require('webpack');
 const path = require('path');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const CompressionPlugin = require("compression-webpack-plugin");
+
+const ENV = process.env.NODE_ENV;
+    isDev = ENV === 'dev',
+    isProd = ENV === 'production';
 const devPlugins = [
-    new ExtractTextPlugin('style.css')
+    new ExtractTextPlugin('style.css'),
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify(ENV)
+    })
 ];
 const productionPlugins = devPlugins.concat([
     new webpack.optimize.UglifyJsPlugin({
@@ -11,16 +18,8 @@ const productionPlugins = devPlugins.concat([
             except: [
             'angular',
             'ngResource',
-            '$document',
             'exports',
-            'require',
-            '$compile',
-            '$sce',
-            '$q',
-            '$resource',
-            '$templateCache',
-            '$timeout',
-            '$document']
+            'require']
          },
         sourceMap: true
     }),
@@ -32,16 +31,14 @@ const productionPlugins = devPlugins.concat([
         minRatio: 0.8
     })
 ]);
-const isDev = process.env.NODE_ENV === 'dev',
-    isProd = process.env.NODE_ENV === 'production';
 
 
 module.exports = {
     entry: {
-        main: './init.js'
+        scripts: './init.js'
     },
     output: {
-        filename: './js-bundles/scripts.js',
+        filename: isDev ? './js-bundles/[name].js' : './js-bundles/[name].min.js',
         path: path.resolve(__dirname)
     },
     module: {

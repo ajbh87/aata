@@ -101,7 +101,10 @@
             ng-click="showChildren = !showChildren"
             aria-expanded="{{showChildren}}">
                 <span class="sr-only">Expandir</span>
-                <?php get_template_part('img/icons/add'); ?>
+                <div class="expand-icon">
+                    <div class="expand-icon__line expand-icon__line--h"></div>
+                    <div class="expand-icon__line expand-icon__line--v"></div>
+                </div>
         </button>
     </script>
     <script type="text/ng-template" id="error-messages">

@@ -90,37 +90,69 @@ body {
         border: 0;
     }
 }
+
 .menu-button {
     float: right;
     height: 100%;
     width: $header-h;
     @include button(#fff, $brand);
+    text-align: center;
     &:hover, &:focus {
         @include button-style($grey-light, $brand);
     }
     &[aria-expanded="true"]{
-        @include button-style($brand, #fff);
+        background: $brand;
+        color: #fff;
+        .menu-icon__line {
+            background: #fff;
+        }
         &:hover, &:focus {
-            @include button-style($brand-light, #fff);
+            background: $brand-light;
+            color: #fff;
+            .menu-icon__line {
+                background: #fff;
+            }
         }
-        .icon--line-1 {
-            //transform: translate(0, 5px) rotate(45deg);
-            transform: translate(0, 5px);
+        .menu-icon__line--1 {
+            transform: translate(0, 0.7rem) rotate(45deg);
+            //transform: translate(0, 5px);
         }
-        .icon--line-3 {
-            //transform: translate(0, -5px) rotate(-45deg);
-            transform: translate(0, -5px);
+        .menu-icon__line--3 {
+            transform: translate(0, -0.7rem) rotate(-45deg);
+            //transform: translate(0, -5px);
         }
-        .icon--line-2 {
-            //opacity: 0;
+        .menu-icon__line--2 {
+            opacity: 0;
         }
-    }
-    .icon--line-1, .icon--line-3 {
-        transform-origin: center center;
     }
     @include landscape() {
         display: none;
     };
+}
+.menu-icon {
+    position: relative;
+    width: 2rem;
+    height: 1.6rem;
+    //margin-left: : (($header-h - 2rem) / 2) 0.5rem;
+    display: inline-block;
+    &__line {
+        width: 100%;
+        height: 0.2rem;
+        background: $brand;
+        transform-origin: center center;
+        transition: all .2s ease-in-out;
+        &--1 {
+            
+        }
+        &--2 {
+            position: relative;
+            top: 0.5rem;
+        }
+        &--3 {
+            position: relative;
+            top: 1rem;
+        }
+    }
 }
 // --------------------------- logo 
 .logo {
@@ -163,10 +195,10 @@ $nav-font: 0.9rem;
 .nav {
     position: relative;
     clear: both;
-    font-size: $nav-font;
     padding: 0;
     width: 100%;
     background: #fff;
+    padding-bottom: $spacing * 2;
     @include portrait() {
         height: 100vh;
         height: calc(100vh - #{$header-h});
@@ -228,41 +260,71 @@ $nav-font: 0.9rem;
     }
 }
 .expand {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
+    $s: 1rem * $base-line;
     position: absolute;
-    top: ($spacing / 4);
-    right: ($spacing / 2);
-    width: ($nav-font * $base-line) + ($spacing / 2) ;
-    height: ($nav-font * $base-line) + ($spacing / 2);
-    padding: 0;
+    top: 0.2rem;
+    height: ($s + $spacing) - 0.4rem;
+    width: ($s + $spacing) - 0.4rem;
+    right: 0.2rem;
     margin: 0;
     @include landscape() {
-        width: $nav-font * $base-line;
-        height: $nav-font * $base-line;
-        right: ($spacing / 4);
+        height: ($s + ($spacing / 2))  - 0.4rem;
+        width: ($s + ($spacing / 2))  - 0.4rem;
     }
+    padding: 0.4rem;
+    text-align: center;
     @include button($grey-base, $grey-dark, 'round');
-    font-weight: 700;
-
+    .expand-icon__line {
+        background: $grey-dark;
+    }
     &:hover, &:focus {
-        //@include button-raise();
-        @include button-style($grey-light, $brand);
+        background: $grey-light;
+        .expand-icon__line {
+            background: $brand;
+        }
     }
     &[aria-expanded="true"]{
-        @include button-style($brand, #fff);
-        &:hover, &:focus {
-            @include button-style($brand-light, #fff);
+        background: $brand;
+        .expand-icon__line {
+            background: #fff;
         }
-        .add__v {
+        &:hover, &:focus {
+            background: $brand-light;
+            .expand-icon__line {
+                background: #fff;
+            }
+        }
+        .expand-icon__line--v {
             transform: rotate(90deg);
         }
     }
-    .add__v {
-        transform-origin: center center;    
+}
+.expand-icon {
+    $w: 2px;
+    position: relative;
+    width: 100%;
+    height: 100%;
+    &__line {
+        transition: all 0.2s ease-out;
+        transform-origin: center center;
+        position: absolute;
+        &--v {
+            height: 100%;
+            width: $w;
+            top: 0;
+            left: 50%;
+            left: calc(50% - #{$w / 2});
+        }
+        &--h {
+            width: 100%;
+            height: $w;
+            left: 0;
+            top: 50%;
+            top: calc(50% - #{$w / 2});
+        }
     }
 }
+
 // --------------------------- Sidebar
 .sidebar {
     background: $grey-light;
@@ -516,31 +578,53 @@ $nav-font: 0.9rem;
         transform: rotate(360deg);
     }
 }
-.loader {
-    @include loader;
+@keyframes moveLoader {
+    0% {
+        transform: translateX(-50%);
+    }
+    50% {
+        transform: translateX(50%);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
 }
 .screen {
     position: fixed;
-    top: $header-h;
-    bottom: 0;
+    top: 0;
     left: 0;
     right: 0;
-    
+    height: 3px;
+    background: #fff;
     transition: all .2s ease-out;
     opacity: 0;
     visibility: hidden;
 
     z-index: 500;
-    
-    @include bg;
+
     &.show {
         opacity: 1;
         visibility: visible;
+        .loader {
+            animation-name: moveLoader;
+        }
     }
     @include landscape() {
-        top: 0;
-        left: $side;
+        // top: 0;
+        // left: $side;
     }
+}
+.loader {
+    //@include loader;
+    $t-color: transparentize($grey-dark, 1);
+    position: relative; 
+    width: 100%;
+    height: 100%;
+    transform: translateX(-50%);
+    background: linear-gradient(to right, $t-color, $grey-dark, $t-color);
+    animation-duration: 3s;
+    animation-iteration-count: infinite;
+    animation-timing-function: ease-in-out;
 }
 .screen-sm {
     position: fixed;

@@ -5921,7 +5921,6 @@ var initComponents = function initComponents(angular) {
             }
         };
     }
-
     function aataTransfer($document) {
         return {
             scope: false,
@@ -41221,16 +41220,19 @@ function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, 
                 if (this.keyDispatchers[key] != null) {
                     this.keyDispatchers[key](value, this.s.toObject());
                 }
+                return this;
             }
         }, {
             key: 'setDispatch',
             value: function setDispatch(fn) {
                 this.dispatcher = fn;
+                return this;
             }
         }, {
             key: 'dispatch',
             value: function dispatch() {
                 this.dispatcher(this.s.toObject());
+                return this;
             }
         }, {
             key: 'setKeyDispatcher',
@@ -41243,16 +41245,19 @@ function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, 
                         return false;
                     }
                 });
+                return this;
             }
         }, {
             key: 'setMultiple',
             value: function setMultiple(obj) {
                 this.s = this.s.concat(obj);
+                return this;
             }
         }, {
             key: 'new',
             value: function _new(obj) {
                 this.s = this.pristine.concat(obj);
+                return this;
             }
         }]);
 
@@ -41542,8 +41547,7 @@ function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, 
                     });
                 }
             };
-            state.setDispatch(dispatcher);
-            state.setKeyDispatcher('pastBottom', loopDispatcher);
+            state.setDispatch(dispatcher).setKeyDispatcher('pastBottom', loopDispatcher);
 
             scope.hidePagination = true;
             scope.lang = lang;
@@ -41685,8 +41689,7 @@ function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, 
                     obj.currentPage = 1;
                     obj.lastPage = false;
                 }
-                state.new(obj);
-                state.dispatch();
+                state.new(obj).dispatch();
             }
             function dispatcher(s) {
                 var def = setContent(s);
@@ -41703,12 +41706,11 @@ function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, 
                     state.set('scrolled', window.scrollY);
 
                     if (small === true) scope.showScreenSm = true;else scope.showScreen = true;
+
                     requestAnimationFrame(function () {
                         scope.$digest();
-                        $timeout(function () {
-                            if (append !== true) goTo(0);
-                            resolve();
-                        }, 200);
+                        //if (append !== true) goTo(0);
+                        resolve();
                     });
                 });
             }
@@ -41748,6 +41750,7 @@ function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, 
                         jqLite(main).append(el);
                         _.defer(function () {
                             scope.$digest();
+                            if (append !== true) goTo(0);
                             resolve();
                             bindLinks();
                             if (s.requestType === 'loop') {
@@ -41853,7 +41856,6 @@ function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, 
         }
     }
     function bindLoop() {
-        var padding = 200;
         var mainEnd = void 0,
             pastBottom = false;
         state.set('pastBottom', pastBottom);
@@ -41866,7 +41868,7 @@ function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, 
             mainEnd = _saKnife2.default.offset(main).top + main.offsetHeight - _saKnife2.default.winSize().height;
         }
         function scrollBind(event) {
-            if (window.scrollY + padding >= mainEnd) {
+            if (window.scrollY + scrollPad >= mainEnd) {
                 if (pastBottom === false) {
                     pastBottom = true;
                     state.set('pastBottom', pastBottom);

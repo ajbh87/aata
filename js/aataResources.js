@@ -20,12 +20,15 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
             if (this.keyDispatchers[key] != null) {
                 this.keyDispatchers[key](value, this.s.toObject());
             }
+            return this;
         }
         setDispatch(fn) {
             this.dispatcher = fn;
+            return this;
         }
         dispatch() {
             this.dispatcher(this.s.toObject());
+            return this;
         }
         setKeyDispatcher(key1, fn) {
             this.s.forEach((val, key2) => {
@@ -34,12 +37,15 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
                     return false; 
                 }
             });
+            return this;
         };
         setMultiple(obj) {
             this.s = this.s.concat(obj);
+            return this;
         }
         new(obj){
             this.s = this.pristine.concat(obj);
+            return this;
         }
     };
     let _ = {
@@ -318,8 +324,7 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
                     });
                 }
             }
-            state.setDispatch(dispatcher);
-            state.setKeyDispatcher('pastBottom', loopDispatcher);
+            state.setDispatch(dispatcher).setKeyDispatcher('pastBottom', loopDispatcher);
 
             scope.hidePagination = true;
             scope.lang = lang;
@@ -450,8 +455,7 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
                     obj.currentPage = 1;
                     obj.lastPage = false;
                 } 
-                state.new(obj);
-                state.dispatch();
+                state.new(obj).dispatch();
             }
             function dispatcher(s) {
                 const def = setContent(s);
@@ -469,13 +473,12 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
 
                     if (small === true) scope.showScreenSm = true;
                     else scope.showScreen = true;
-                        requestAnimationFrame(function() {
-                            scope.$digest();
-                            $timeout(() => {
-                                if (append !== true) goTo(0);
-                                resolve();
-                            }, 200);
-                        });
+
+                    requestAnimationFrame(function() {
+                        scope.$digest();
+                        //if (append !== true) goTo(0);
+                        resolve();
+                    });
                 });
             }
             function setContent(s, append) {                
@@ -511,6 +514,7 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
                         jqLite(main).append(el);
                         _.defer(function() {
                             scope.$digest();
+                            if (append !== true) goTo(0);
                             resolve();
                             bindLinks();
                             if (s.requestType === 'loop') {
@@ -616,7 +620,6 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
         }
     }
     function bindLoop() {
-        const padding = 200;
         let mainEnd, 
             pastBottom = false;
         state.set('pastBottom', pastBottom);
@@ -629,7 +632,7 @@ export default function aataResources($compile, $q, $sce, $resource, $templateCa
             mainEnd = saKnife.offset(main).top + main.offsetHeight - saKnife.winSize().height;
         }
         function scrollBind(event) {
-            if ((window.scrollY + padding) >= mainEnd) {
+            if ((window.scrollY + scrollPad) >= mainEnd) {
                 if (pastBottom === false) {
                     pastBottom = true;
                     state.set('pastBottom', pastBottom);

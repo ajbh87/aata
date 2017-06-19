@@ -15,7 +15,15 @@ const initComponents = (function initComponents(angular) {
     aataTransfer.$inject = ['$document'];
     aataMenu.$inject = ['$document', '$compile', '$templateCache'];
     aataForm.$inject = ['$http', '$timeout'];
-    aataResources.$inject = [ '$compile', '$q', '$sce', '$resource', '$templateCache', '$timeout', '$document' ];
+    aataResources.$inject = [ 
+        '$compile',
+        '$q',
+        '$sce',
+        '$resource',
+        '$templateCache',
+        '$timeout',
+        '$document'
+    ];
 
     return 'initComponents';
     
@@ -67,9 +75,8 @@ const initComponents = (function initComponents(angular) {
             }
         };
     }
-
     function aataTransfer($document) {
-          return {
+        return {
             scope: false,
             link: function(scope, elem, attr) {
                 const selector = attr.aataTransfer,
