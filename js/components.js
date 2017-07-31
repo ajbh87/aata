@@ -1,110 +1,113 @@
+/* global angular */
 import aataResources from './aataResources.js';
 import aataForm from './aataForm.js';
 import saKnife from './libs/saKnife.js';
 
 const initComponents = (function initComponents(angular) {
-    let jqLite = angular.element;
+  let jqLite = angular.element;
 
-    angular.module('components', ['ngResource', 'ngMessages'])
-        .directive('aataScript', aataScript)
-        .directive('aataForm', aataForm)
-        .directive('aataResources', aataResources)
-        .directive('aataMenu', aataMenu)
-        .directive('aataTransfer', aataTransfer);
+  angular
+    .module('components', ['ngResource', 'ngMessages'])
+    .directive('aataScript', aataScript)
+    .directive('aataForm', aataForm)
+    .directive('aataResources', aataResources)
+    .directive('aataMenu', aataMenu)
+    .directive('aataTransfer', aataTransfer);
 
-    aataTransfer.$inject = ['$document'];
-    aataMenu.$inject = ['$document', '$compile', '$templateCache'];
-    aataForm.$inject = ['$http', '$timeout'];
-    aataResources.$inject = [ 
-        '$compile',
-        '$q',
-        '$sce',
-        '$resource',
-        '$templateCache',
-        '$timeout',
-        '$document'
-    ];
+  aataTransfer.$inject = ['$document'];
+  aataMenu.$inject = ['$document', '$compile', '$templateCache'];
+  aataForm.$inject = ['$http', '$timeout'];
+  aataResources.$inject = [
+    '$compile',
+    '$q',
+    '$sce',
+    '$resource',
+    '$templateCache',
+    '$timeout',
+    '$document'
+  ];
 
-    return 'initComponents';
-    
-    function aataMenu($document, $compile, $templateCache) {
-        return {
-            link: (scope, element, attrs) => {
-                const selector = attrs.aataMenu,
-                    menu = element.find('div');
-                let items, index = 0;
-                menu.detach();
-                items = menu[0].querySelectorAll(selector);
-                element.addClass('js');
-                for (index = 0; index < items.length; index++) {
-                    items[index].innerHtml = insertExpand(items[index]);
-                }
-                element.append(menu);
+  return 'initComponents';
 
-                function insertExpand(item) {
-                    let subScope = scope.$new(),
-                        compiled = '';
-                    const expand =  $templateCache.get('expand.html');;
-                    const ulChildren = jqLite(item).find('ul');
-                    subScope.showChildren = false;
-                    ulChildren.attr('ng-class', "{'is-active': showChildren}");
-                    jqLite(item).prepend(expand);
-                    return $compile(item)(subScope);
-                }
-            }
-        };
-    }
-    function aataScript() {
-        return {
-            scope: false,
-            link: function(scope, elem, attr) {
-                if (attr.type==='text/javascript-lazy') 
-                {
-                    var s = document.createElement("script");
-                    var src = elem.attr('src');
-                    s.type = "text/javascript";                
-                    if(src!==undefined) {
-                        s.src = src;
-                    } else {
-                        var code = elem.text();
-                        s.text = code;
-                    }
-                    document.head.appendChild(s);
-                    elem.remove();
-                }
-            }
-        };
-    }
-    function aataTransfer($document) {
-        return {
-            scope: false,
-            link: function(scope, elem, attr) {
-                const selector = attr.aataTransfer,
-                    jqEl = jqLite($document[0].querySelector(selector)),
-                    dad = elem.parent(),
-                    transferBreak = parseFloat(attr.aataTransferBreak) - 1;
-                let transfered = false;
-                transfer();
-                jqLite(window).on('resize', transfer);
-                function transfer() {
-                    let winSize = saKnife.winSize(),
-                        o = winSize.documentHeight > winSize.height ? 15 : 0;
-                    if ((winSize.width + o) < transferBreak) {
-                        if (transfered === false) {
-                            elem.detach();
-                            jqEl.prepend(elem);
-                            transfered = true;
-                        }
-                    } else {
-                        if (transfered === true) {
-                            elem.detach();
-                            dad.append(elem);
-                            transfered = false;
-                        }
-                    }
-                }
-            }
+  function aataMenu($document, $compile, $templateCache) {
+    return {
+      link: (scope, element, attrs) => {
+        const SELECTOR = attrs.aataMenu,
+          MENU = element.find('div'),
+          EXPAND = $templateCache.get('expand.html');
+        let items,
+          index = 0;
+
+        MENU.detach();
+        items = MENU[0].querySelectorAll(SELECTOR);
+        element.addClass('js');
+        for (index = 0; index < items.length; index++) {
+          items[index].innerHtml = insertExpand(items[index]);
         }
-    }
+        element.append(MENU);
+
+        function insertExpand(item) {
+          let subScope = scope.$new();
+
+          subScope.showChildren = false;
+          jqLite(item).find('ul').attr('ng-class', `{'is-active': showChildren}`);
+          jqLite(item).prepend(EXPAND);
+          
+          return $compile(item)(subScope);
+        }
+      }
+    };
+  }
+  function aataScript() {
+    return {
+      scope: false,
+      link: function(scope, elem, attr) {
+        if (attr.type === 'text/javascript-lazy') {
+          var s = document.createElement('script');
+          var src = elem.attr('src');
+          s.type = 'text/javascript';
+          if (src !== undefined) {
+            s.src = src;
+          } else {
+            var code = elem.text();
+            s.text = code;
+          }
+          document.head.appendChild(s);
+          elem.remove();
+        }
+      }
+    };
+  }
+  function aataTransfer($document) {
+    return {
+      scope: false,
+      link: function(scope, elem, attr) {
+        const selector = attr.aataTransfer,
+          jqEl = jqLite($document[0].querySelector(selector)),
+          dad = elem.parent(),
+          transferBreak = parseFloat(attr.aataTransferBreak) - 1;
+        let transfered = false;
+        transfer();
+        jqLite(window).on('resize', transfer);
+        function transfer() {
+          let winSize = saKnife.winSize(),
+            o = winSize.documentHeight > winSize.height ? 15 : 0;
+          if (winSize.width + o < transferBreak) {
+            if (transfered === false) {
+              elem.detach();
+              jqEl.prepend(elem);
+              transfered = true;
+            }
+          } else {
+            if (transfered === true) {
+              elem.detach();
+              dad.append(elem);
+              transfered = false;
+            }
+          }
+        }
+      }
+    };
+  }
 })(angular);
 export default initComponents;

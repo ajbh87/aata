@@ -4,8 +4,6 @@
   "description": "Abogados a tu alcance - webpage",
   "main": "index.js",
   "scripts": {
-    "uglifyjs": "uglifyjs ./js/*.js -b -o ./js-bundles/scripts.js",
-    "uglifyjs-min": "uglifyjs ./js/*.js --compress -o ./js-bundles/scripts.js",
     "webpack-dev": "cross-env NODE_ENV=dev webpack --config ./webpack.config.js",
     "webpack-prod": "cross-env NODE_ENV=production webpack --config ./webpack.config.js"
   },
@@ -42,5 +40,38 @@
     "style-loader": "^0.18.2",
     "uglifyjs-webpack-plugin": "^0.4.3",
     "webpack": "^2.6.1"
+  },
+  "eslintConfig": {
+    "env": {
+      "browser": true,
+      "commonjs": true,
+      "es6": true
+    },
+    "extends": "eslint:recommended",
+    "parserOptions": {
+      "sourceType": "module"
+    },
+    "rules": {
+      "indent": [
+        "error",
+        2,
+        {
+          "SwitchCase": 1
+        }
+      ],
+      "linebreak-style": [
+        0,
+        "windows"
+      ],
+      "quotes": [
+        "error",
+        "single",
+        { "allowTemplateLiterals": true }
+      ],
+      "semi": [
+        "error",
+        "always"
+      ]
+    }
   }
 }

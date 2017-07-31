@@ -67,6 +67,11 @@ $footer-h: ($footer-f-size * $base-line) + $spacing;
         @content;
     }   
 }
+@mixin portraitLandscape() {
+    @media only screen and (min-width: #{$portrait-sm + 1}) {
+        @content;
+    }
+}
 @mixin loader($s: 2rem) {
     position: absolute;
     top: 50%;

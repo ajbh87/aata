@@ -5844,7 +5844,7 @@ module.exports = angular;
 
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
 var _aataResources = __webpack_require__(15);
@@ -5862,97 +5862,98 @@ var _saKnife2 = _interopRequireDefault(_saKnife);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var initComponents = function initComponents(angular) {
-    var jqLite = angular.element;
+  var jqLite = angular.element;
 
-    angular.module('components', ['ngResource', 'ngMessages']).directive('aataScript', aataScript).directive('aataForm', _aataForm2.default).directive('aataResources', _aataResources2.default).directive('aataMenu', aataMenu).directive('aataTransfer', aataTransfer);
+  angular.module('components', ['ngResource', 'ngMessages']).directive('aataScript', aataScript).directive('aataForm', _aataForm2.default).directive('aataResources', _aataResources2.default).directive('aataMenu', aataMenu).directive('aataTransfer', aataTransfer);
 
-    aataTransfer.$inject = ['$document'];
-    aataMenu.$inject = ['$document', '$compile', '$templateCache'];
-    _aataForm2.default.$inject = ['$http', '$timeout'];
-    _aataResources2.default.$inject = ['$compile', '$q', '$sce', '$resource', '$templateCache', '$timeout', '$document'];
+  aataTransfer.$inject = ['$document'];
+  aataMenu.$inject = ['$document', '$compile', '$templateCache'];
+  _aataForm2.default.$inject = ['$http', '$timeout'];
+  _aataResources2.default.$inject = ['$compile', '$q', '$sce', '$resource', '$templateCache', '$timeout', '$document'];
 
-    return 'initComponents';
+  return 'initComponents';
 
-    function aataMenu($document, $compile, $templateCache) {
-        return {
-            link: function link(scope, element, attrs) {
-                var selector = attrs.aataMenu,
-                    menu = element.find('div');
-                var items = void 0,
-                    index = 0;
-                menu.detach();
-                items = menu[0].querySelectorAll(selector);
-                element.addClass('js');
-                for (index = 0; index < items.length; index++) {
-                    items[index].innerHtml = insertExpand(items[index]);
-                }
-                element.append(menu);
+  function aataMenu($document, $compile, $templateCache) {
+    return {
+      link: function link(scope, element, attrs) {
+        var SELECTOR = attrs.aataMenu,
+            MENU = element.find('div'),
+            EXPAND = $templateCache.get('expand.html');
+        var items = void 0,
+            index = 0;
 
-                function insertExpand(item) {
-                    var subScope = scope.$new(),
-                        compiled = '';
-                    var expand = $templateCache.get('expand.html');;
-                    var ulChildren = jqLite(item).find('ul');
-                    subScope.showChildren = false;
-                    ulChildren.attr('ng-class', "{'is-active': showChildren}");
-                    jqLite(item).prepend(expand);
-                    return $compile(item)(subScope);
-                }
+        MENU.detach();
+        items = MENU[0].querySelectorAll(SELECTOR);
+        element.addClass('js');
+        for (index = 0; index < items.length; index++) {
+          items[index].innerHtml = insertExpand(items[index]);
+        }
+        element.append(MENU);
+
+        function insertExpand(item) {
+          var subScope = scope.$new();
+
+          subScope.showChildren = false;
+          jqLite(item).find('ul').attr('ng-class', '{\'is-active\': showChildren}');
+          jqLite(item).prepend(EXPAND);
+
+          return $compile(item)(subScope);
+        }
+      }
+    };
+  }
+  function aataScript() {
+    return {
+      scope: false,
+      link: function link(scope, elem, attr) {
+        if (attr.type === 'text/javascript-lazy') {
+          var s = document.createElement('script');
+          var src = elem.attr('src');
+          s.type = 'text/javascript';
+          if (src !== undefined) {
+            s.src = src;
+          } else {
+            var code = elem.text();
+            s.text = code;
+          }
+          document.head.appendChild(s);
+          elem.remove();
+        }
+      }
+    };
+  }
+  function aataTransfer($document) {
+    return {
+      scope: false,
+      link: function link(scope, elem, attr) {
+        var selector = attr.aataTransfer,
+            jqEl = jqLite($document[0].querySelector(selector)),
+            dad = elem.parent(),
+            transferBreak = parseFloat(attr.aataTransferBreak) - 1;
+        var transfered = false;
+        transfer();
+        jqLite(window).on('resize', transfer);
+        function transfer() {
+          var winSize = _saKnife2.default.winSize(),
+              o = winSize.documentHeight > winSize.height ? 15 : 0;
+          if (winSize.width + o < transferBreak) {
+            if (transfered === false) {
+              elem.detach();
+              jqEl.prepend(elem);
+              transfered = true;
             }
-        };
-    }
-    function aataScript() {
-        return {
-            scope: false,
-            link: function link(scope, elem, attr) {
-                if (attr.type === 'text/javascript-lazy') {
-                    var s = document.createElement("script");
-                    var src = elem.attr('src');
-                    s.type = "text/javascript";
-                    if (src !== undefined) {
-                        s.src = src;
-                    } else {
-                        var code = elem.text();
-                        s.text = code;
-                    }
-                    document.head.appendChild(s);
-                    elem.remove();
-                }
+          } else {
+            if (transfered === true) {
+              elem.detach();
+              dad.append(elem);
+              transfered = false;
             }
-        };
-    }
-    function aataTransfer($document) {
-        return {
-            scope: false,
-            link: function link(scope, elem, attr) {
-                var selector = attr.aataTransfer,
-                    jqEl = jqLite($document[0].querySelector(selector)),
-                    dad = elem.parent(),
-                    transferBreak = parseFloat(attr.aataTransferBreak) - 1;
-                var transfered = false;
-                transfer();
-                jqLite(window).on('resize', transfer);
-                function transfer() {
-                    var winSize = _saKnife2.default.winSize(),
-                        o = winSize.documentHeight > winSize.height ? 15 : 0;
-                    if (winSize.width + o < transferBreak) {
-                        if (transfered === false) {
-                            elem.detach();
-                            jqEl.prepend(elem);
-                            transfered = true;
-                        }
-                    } else {
-                        if (transfered === true) {
-                            elem.detach();
-                            dad.append(elem);
-                            transfered = false;
-                        }
-                    }
-                }
-            }
-        };
-    }
-}(angular);
+          }
+        }
+      }
+    };
+  }
+}(angular); /* global angular */
 exports.default = initComponents;
 
 /***/ }),
@@ -40959,17 +40960,11 @@ var _index = __webpack_require__(7);
 
 var _index2 = _interopRequireDefault(_index);
 
-var _index3 = __webpack_require__(6);
+__webpack_require__(6);
 
-var _index4 = _interopRequireDefault(_index3);
+__webpack_require__(5);
 
-var _index5 = __webpack_require__(5);
-
-var _index6 = _interopRequireDefault(_index5);
-
-var _components = __webpack_require__(8);
-
-var _components2 = _interopRequireDefault(_components);
+__webpack_require__(8);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -40977,19 +40972,19 @@ __webpack_require__(9);
 
 
 _index2.default.module('aata', ['components']).controller('MenuController', ['$scope', '$timeout', function ($scope, $timeout) {
-    $scope.hideMenu = true;
-    $scope.menuToggle = function (show) {
-        var action = show == null ? $scope.hideMenu : show;
+  $scope.hideMenu = true;
+  $scope.menuToggle = function (show) {
+    var action = show == null ? $scope.hideMenu : show;
 
-        if (action) {
-            $scope.hideMenu = false;
-        } else {
-            $timeout(function () {
-                $scope.hideMenu = true;
-            }, 250);
-        }
-        $scope.showMenu = action;
-    };
+    if (action) {
+      $scope.hideMenu = false;
+    } else {
+      $timeout(function () {
+        $scope.hideMenu = true;
+      }, 250);
+    }
+    $scope.showMenu = action;
+  };
 }]);
 
 /***/ }),
@@ -41000,7 +40995,7 @@ _index2.default.module('aata', ['components']).controller('MenuController', ['$s
 
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 exports.default = aataForm;
 
@@ -41014,139 +41009,143 @@ var _index2 = _interopRequireDefault(_index);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-// aataForm.js
+/* global grecaptcha */
 function aataForm($http, $timeout) {
-    var _ = { assign: _index2.default },
-        jqLite = angular.element;
-    var url = 'https://script.google.com/macros/s/AKfycbzpv61xrCS11gcp-vy_7f_pKdlY1QaPc6OD0iazGY6rQpZoho6h/exec';
-    return {
-        templateUrl: 'form.html',
-        scope: true,
-        link: function link(scope, element, attrs) {
-            var message = attrs.aataMessage,
-                defs = _immutable2.default.Map({
-                telRegex: /([\+\.\-\)\(]*[0-9]{1,4})+/,
-                name: '',
-                lastName: '',
-                email: '',
-                tel: '',
-                asunto: {
-                    adopcion: {
-                        text: 'Adopción',
-                        selected: false
-                    },
-                    capitul: {
-                        text: 'Capitulaciones Matrimoniales',
-                        selected: false
-                    },
-                    custodia: {
-                        text: 'Custodia',
-                        selected: false
-                    },
-                    decla: {
-                        text: 'Declaratoria de Herederos',
-                        selected: false
-                    },
-                    divi: {
-                        text: 'División de Bienes Gananciales',
-                        selected: false
-                    },
-                    divorcio: {
-                        text: 'Divorcio',
-                        selected: false
-                    },
-                    herencia: {
-                        text: 'Herencia',
-                        selected: false
-                    },
-                    patriaPot: {
-                        text: 'Patria Potestad',
-                        selected: false
-                    },
-                    pension: {
-                        text: 'Pensión Alimentaria',
-                        selected: false
-                    },
-                    otro: {
-                        text: 'Otro',
-                        selected: false
-                    }
-                },
-                comments: '',
-                showFormScreen: false,
-                message: message
-            });
-            scope = _.assign(scope, defs.toObject());
+  var _ = { assign: _index2.default };
+  var url = 'https://script.google.com/macros/s/AKfycbzpv61xrCS11gcp-vy_7f_pKdlY1QaPc6OD0iazGY6rQpZoho6h/exec';
+  return {
+    templateUrl: 'form.html',
+    scope: true,
+    link: function link(scope, element, attrs) {
+      var message = attrs.aataMessage,
+          defs = _immutable2.default.Map({
+        telRegex: /([+.\-)(]*[0-9]{1,4})+/,
+        name: '',
+        lastName: '',
+        email: '',
+        tel: '',
+        asunto: {
+          adopcion: {
+            text: 'Adopción',
+            selected: false
+          },
+          capitul: {
+            text: 'Capitulaciones Matrimoniales',
+            selected: false
+          },
+          custodia: {
+            text: 'Custodia',
+            selected: false
+          },
+          decla: {
+            text: 'Declaratoria de Herederos',
+            selected: false
+          },
+          divi: {
+            text: 'División de Bienes Gananciales',
+            selected: false
+          },
+          divorcio: {
+            text: 'Divorcio',
+            selected: false
+          },
+          herencia: {
+            text: 'Herencia',
+            selected: false
+          },
+          patriaPot: {
+            text: 'Patria Potestad',
+            selected: false
+          },
+          pension: {
+            text: 'Pensión Alimentaria',
+            selected: false
+          },
+          otro: {
+            text: 'Otro',
+            selected: false
+          }
+        },
+        comments: '',
+        showFormScreen: false,
+        message: message
+      });
+      scope = _.assign(scope, defs.toObject());
 
-            scope.submitForm = function () {
-                if (scope.contact.$valid) {
-                    scope.showFormScreen = true;
-                    //postForm(0); // for error testing
-                    grecaptcha.execute();
-                }
-            };
-            window.postForm = postForm;
-            function postForm(token) {
-                var formData = {
-                    Nombre: scope.name,
-                    Apellidos: scope.lastName,
-                    Email: scope.email,
-                    Telefono: scope.tel,
-                    Asunto: generateList(scope.asunto),
-                    Pregunta: scope.comments,
-                    'g-recaptcha-response': token
-                },
-                    encoded = getEncoded(formData);
-                $http({
-                    method: 'POST',
-                    url: url,
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    data: encoded
-                }).then(success, error);
-            }
-            function success(response) {
-                var recaptchaResponse = response.data.content.recaptcha;
-                console.log(recaptchaResponse);
-                grecaptcha.reset();
-                if (recaptchaResponse.success === true) {
-                    scope.hideForm = true;
-                    scope.showSuccessMessage = true;
-                } else {
-                    showErrorMessage();
-                }
-                scope.showFormScreen = false;
-            }
-            function error(response) {
-                grecaptcha.reset();
-                showErrorMessage();
-                scope.showFormScreen = false;
-            }
-            function showErrorMessage() {
-                scope.showErrorMessage = true;
+      scope.submitForm = function () {
+        if (scope.contact.$valid) {
+          scope.showFormScreen = true;
+          //postForm(0); // for error testing
+          grecaptcha.execute();
+        }
+      };
+      // Assign postForm to global scope so that recaptcha can find it.
+      window.postForm = postForm;
+      /**
+       * Function is called as a callback to grecaptcha.execute()
+       * @async
+       * @param {string} token - recaptcha token 
+       */
+      function postForm(token) {
+        var formData = {
+          Nombre: scope.name,
+          Apellidos: scope.lastName,
+          Email: scope.email,
+          Telefono: scope.tel,
+          Asunto: generateList(scope.asunto),
+          Pregunta: scope.comments,
+          'g-recaptcha-response': token
+        },
+            encoded = getEncoded(formData);
+        $http({
+          method: 'POST',
+          url: url,
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded'
+          },
+          data: encoded
+        }).then(success, error);
+      }
+      function success(response) {
+        var recaptchaResponse = response.data.content.recaptcha;
+        grecaptcha.reset();
+        if (recaptchaResponse.success === true) {
+          scope.hideForm = true;
+          scope.showSuccessMessage = true;
+        } else {
+          showErrorMessage();
+        }
+        scope.showFormScreen = false;
+      }
+      function error() {
+        grecaptcha.reset();
+        showErrorMessage();
+        scope.showFormScreen = false;
+      }
+      function showErrorMessage() {
+        scope.showErrorMessage = true;
 
-                $timeout(function () {
-                    scope.showErrorMessage = false;
-                }, 3000);
-            }
-        }
-    };
-    function generateList(items) {
-        var list = '',
-            key = void 0;
-        for (key in items) {
-            if (items[key].selected) {
-                list += ' - ' + items[key].text;
-            }
-        }
-        return list;
+        $timeout(function () {
+          scope.showErrorMessage = false;
+        }, 3000);
+      }
     }
-    function getEncoded(data) {
-        return Object.keys(data).map(function (k) {
-            return encodeURIComponent(k) + '=' + encodeURIComponent(data[k]);
-        }).join('&');
+  };
+  function generateList(items) {
+    var list = '',
+        key = void 0;
+    for (key in items) {
+      if (items[key].selected) {
+        list += ' - ' + items[key].text;
+      }
     }
+    return list;
+  }
+  function getEncoded(data) {
+    return Object.keys(data).map(function (k) {
+      return encodeURIComponent(k) + '=' + encodeURIComponent(data[k]);
+    }).join('&');
+  }
 }
 
 /***/ }),
@@ -41157,10 +41156,11 @@ function aataForm($http, $timeout) {
 
 
 Object.defineProperty(exports, "__esModule", {
-    value: true
+  value: true
 });
 
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }(); /* global angular */
+
 
 exports.default = aataResources;
 
@@ -41201,691 +41201,706 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, $document) {
-    var stateConstructor = function () {
-        function stateConstructor() {
-            var def = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var stateConstructor = function () {
+    function stateConstructor() {
+      var def = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
 
-            _classCallCheck(this, stateConstructor);
+      _classCallCheck(this, stateConstructor);
 
-            this.s = _immutable2.default.Map(def);
-            this.pristine = this.s;
-            this.dispatcher = function (s) {};
-            this.keyDispatchers = {};
+      this.s = _immutable2.default.Map(def);
+      this.pristine = this.s;
+      this.dispatcher; // Function
+      this.keyDispatchers = {};
+    }
+
+    _createClass(stateConstructor, [{
+      key: 'set',
+      value: function set(key, value) {
+        this.s = this.s.set(key, value);
+        if (this.keyDispatchers[key] != null) {
+          this.keyDispatchers[key](value, this.s.toObject());
         }
+        return this;
+      }
+    }, {
+      key: 'setDispatch',
+      value: function setDispatch(fn) {
+        this.dispatcher = fn;
+        return this;
+      }
+    }, {
+      key: 'dispatch',
+      value: function dispatch() {
+        this.dispatcher(this.s.toObject());
+        return this;
+      }
+    }, {
+      key: 'setKeyDispatcher',
+      value: function setKeyDispatcher(key1, fn) {
+        var _this = this;
 
-        _createClass(stateConstructor, [{
-            key: 'set',
-            value: function set(key, value) {
-                this.s = this.s.set(key, value);
-                if (this.keyDispatchers[key] != null) {
-                    this.keyDispatchers[key](value, this.s.toObject());
-                }
-                return this;
-            }
-        }, {
-            key: 'setDispatch',
-            value: function setDispatch(fn) {
-                this.dispatcher = fn;
-                return this;
-            }
-        }, {
-            key: 'dispatch',
-            value: function dispatch() {
-                this.dispatcher(this.s.toObject());
-                return this;
-            }
-        }, {
-            key: 'setKeyDispatcher',
-            value: function setKeyDispatcher(key1, fn) {
-                var _this = this;
-
-                this.s.forEach(function (val, key2) {
-                    if (key1 === key2) {
-                        _this.keyDispatchers[key1] = fn;
-                        return false;
-                    }
-                });
-                return this;
-            }
-        }, {
-            key: 'setMultiple',
-            value: function setMultiple(obj) {
-                this.s = this.s.concat(obj);
-                return this;
-            }
-        }, {
-            key: 'new',
-            value: function _new(obj) {
-                this.s = this.pristine.concat(obj);
-                return this;
-            }
-        }]);
-
-        return stateConstructor;
-    }();
-
-    ;
-    var _ = {
-        assign: _index10.default,
-        debounce: _index4.default,
-        defer: _index6.default,
-        find: _index2.default,
-        isEqual: _index12.default,
-        unionWith: _index8.default
-    },
-        jqLite = angular.element;
-    var main = $document[0].querySelector('.main'),
-        lang = getLang(),
-        base = lang.url,
-        restUrl = base + '/wp-json/wp/v2',
-        cache = {
-        posts: [],
-        tags: []
-    },
-        defaultResourceOptions = {
-        get: { method: 'GET', cache: true },
-        query: { method: 'GET', cache: true, isArray: true }
-    },
-        rest = {
-        allPosts: $resource(restUrl + '/:type?page=:page', {
-            type: 'posts',
-            page: '@pageNum'
-        }, defaultResourceOptions),
-        byFilter: $resource(restUrl + '/:type?:filter=:slug&page=:page', {
-            type: '@type',
-            filter: '@filter',
-            slug: '@slug',
-            page: 1
-        }, defaultResourceOptions),
-        byId: $resource(restUrl + '/:type/:id', {
-            type: '@type',
-            id: '@id'
-        }, defaultResourceOptions),
-        all: $resource(restUrl + '/:type?per_page=:perPage', {
-            type: '@type',
-            perPage: 10
-        }, defaultResourceOptions)
-    },
-        get = {
-        postsPage: function postsPage(page) {
-            var request = rest.allPosts.query({ page: page }, function (val) {
-                cache.posts = _.unionWith(cache.posts, val, _.isEqual);
-            });
-            return request.$promise;
-        },
-        byFilter: function byFilter(slug, type, filter) {
-            var page = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 1;
-
-            var request = rest.byFilter.query({ type: type, filter: filter, slug: slug, page: page }, function (val) {
-                if (type === 'posts' && filter === 'tags') {
-                    cache.tags = cache.tags.concat(val);
-                }
-            });
-            return request.$promise;
-        },
-        byId: function byId(type, id) {
-            return rest.byId.get({ type: type, id: id }).$promise;
-        },
-        all: function all(type, perPage) {
-            return rest.all.query({ type: type, perPage: perPage }).$promise;
-        }
-    },
-        comeOnDude = [base],
-        // strings
-    youShallNotPass = ['php', 'feed', 'wp-admin'],
-        // strings
-    state = new stateConstructor({
-        animated: null, // promise
-        currentPage: 1,
-        hash: false,
-        loopType: '', // posts | tags
-        lastPage: false,
-        meta: {}, // tag archive meta - obj
-        pastBottom: false,
-        replace: false, // replace history - bool
-        requestType: '', // posts | pages | loop
-        scrolled: 0,
-        url: '',
-        val: {}
-    }),
-        allUsersDef = reallyGetAll('users'),
-        allTagsDef = reallyGetAll('tags'),
-        allCategoriesDef = reallyGetAll('categories'),
-        scrollPad = 150;
-    var unbindLoop = function unbindLoop() {},
-        comingFromHash = false;
-    jqLite(window).on('scroll', _.debounce(checkScrollPosition, 50));
-
-    (function checkCurrentPage() {
-        var slug = window.location.href.replace(base, ''),
-            processed = processSlug(slug),
-            def = $q.defer();
-        var requestType = '';
-        processed.then(function (url) {
-            if (url.isTag || url.isAuthor || url.isSearch || url === false) {
-                if (url.isTag) {
-                    $q.when(allTagsDef).then(function (tags) {
-                        var tagMeta = _.find(tags, function (tag) {
-                            return tag.link === window.location.href;
-                        });
-                        state.new({
-                            loopType: 'tags',
-                            meta: tagMeta,
-                            requestType: 'loop',
-                            url: window.location.href
-                        });
-                        get.byFilter(tagMeta.id, 'posts', 'tags').then(function (val) {
-                            state.set('val', val);
-                        });
-                        def.resolve(bindLoop());
-                    });
-                } else {
-                    // Post loop 
-                    state.new({
-                        url: window.location.href,
-                        requestType: 'loop',
-                        loopType: 'posts'
-                    });
-                    get.postsPage(1).then(function (val) {
-                        state.set('val', val);
-                    });
-                    def.resolve(bindLoop());
-                }
-            } else {
-                if (url.isPosts) {
-                    requestType = 'posts';
-                } else {
-                    requestType = 'pages';
-                }
-                state.new({
-                    loopType: null,
-                    meta: {},
-                    requestType: requestType,
-                    url: window.location.href
-                });
-                // url.slugArray[url.slugArray.length - 1] = last
-                get.byFilter(url.slugArray[url.slugArray.length - 1], requestType, 'slug').then(function (val) {
-                    state.set('val', val[0]);
-                });
-                def.resolve(function () {});
-            }
+        this.s.forEach(function (val, key2) {
+          if (key1 === key2) {
+            _this.keyDispatchers[key1] = fn;
+            return false;
+          }
         });
-        return def.promise;
-    })().then(function (fn) {
-        unbindLoop = fn;
+        return this;
+      }
+    }, {
+      key: 'setMultiple',
+      value: function setMultiple(obj) {
+        this.s = this.s.concat(obj);
+        return this;
+      }
+    }, {
+      key: 'new',
+      value: function _new(obj) {
+        this.s = this.pristine.concat(obj);
+        return this;
+      }
+    }]);
+
+    return stateConstructor;
+  }();
+
+  var _ = {
+    assign: _index10.default,
+    debounce: _index4.default,
+    defer: _index6.default,
+    find: _index2.default,
+    isEqual: _index12.default,
+    unionWith: _index8.default
+  },
+      jqLite = angular.element;
+  var main = $document[0].querySelector('.main'),
+      lang = getLang(),
+      base = lang.url,
+      restUrl = base + '/wp-json/wp/v2',
+      cache = {
+    posts: [],
+    tags: []
+  },
+      POSTS_PER_PAGE = 10,
+      defaultResourceOptions = {
+    get: { method: 'GET', cache: true },
+    query: { method: 'GET', cache: true, isArray: true }
+  },
+      rest = {
+    allPosts: $resource(restUrl + '/:type?page=:page&per_page=:perPage', {
+      type: 'posts',
+      page: '@pageNum',
+      per_page: POSTS_PER_PAGE
+    }, defaultResourceOptions),
+    byFilter: $resource(restUrl + '/:type?:filter=:slug&page=:page', {
+      type: '@type',
+      filter: '@filter',
+      slug: '@slug',
+      page: 1
+    }, defaultResourceOptions),
+    byId: $resource(restUrl + '/:type/:id', {
+      type: '@type',
+      id: '@id'
+    }, defaultResourceOptions),
+    all: $resource(restUrl + '/:type?per_page=:perPage', {
+      type: '@type',
+      perPage: POSTS_PER_PAGE
+    }, defaultResourceOptions)
+  },
+      get = {
+    postsPage: function postsPage(page) {
+      var request = rest.allPosts.query({ page: page }, function (val) {
+        cache.posts = _.unionWith(cache.posts, val, _.isEqual);
+      });
+      return request.$promise;
+    },
+    byFilter: function byFilter(slug, type, filter) {
+      var page = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : 1;
+
+      var request = rest.byFilter.query({ type: type, filter: filter, slug: slug, page: page }, function (val) {
+        if (type === 'posts' && filter === 'tags') {
+          cache.tags = cache.tags.concat(val);
+        }
+      });
+      return request.$promise;
+    },
+    byId: function byId(type, id) {
+      return rest.byId.get({ type: type, id: id }).$promise;
+    },
+    all: function all(type, perPage) {
+      return rest.all.query({ type: type, perPage: perPage }).$promise;
+    }
+  },
+      comeOnDude = [base],
+      // strings
+  youShallNotPass = ['php', 'feed', 'wp-admin'],
+      // strings
+  state = new stateConstructor({
+    animated: null, // promise
+    currentPage: 1,
+    hash: false,
+    loopType: '', // posts | tags
+    lastPage: false,
+    meta: {}, // tag archive meta - obj
+    pastBottom: false,
+    replace: false, // replace history - bool
+    requestType: '', // posts | pages | loop
+    scrolled: 0,
+    url: '',
+    val: {}
+  }),
+      allUsersDef = reallyGetAll('users'),
+      allTagsDef = reallyGetAll('tags'),
+      allCategoriesDef = reallyGetAll('categories'),
+      scrollPad = 300;
+  var unbindLoop = function unbindLoop() {},
+      comingFromHash = false;
+  jqLite(window).on('scroll', _.debounce(checkScrollPosition, 50));
+
+  (function checkCurrentPage() {
+    var slug = window.location.href.replace(base, ''),
+        processed = processSlug(slug),
+        def = $q.defer();
+    var requestType = '';
+    processed.then(function (url) {
+      if (url.isTag || url.isAuthor || url.isSearch || url === false) {
+        if (url.isTag) {
+          $q.when(allTagsDef).then(function (tags) {
+            var tagMeta = _.find(tags, function (tag) {
+              return tag.link === window.location.href;
+            });
+            state.new({
+              loopType: 'tags',
+              meta: tagMeta,
+              requestType: 'loop',
+              url: window.location.href
+            });
+            get.byFilter(tagMeta.id, 'posts', 'tags').then(function (val) {
+              state.set('val', val);
+              checkIfLastPage(state, val);
+            });
+            def.resolve(bindLoop());
+          });
+        } else {
+          // Post loop
+          state.new({
+            url: window.location.href,
+            requestType: 'loop',
+            loopType: 'posts'
+          });
+          get.postsPage(1).then(function (val) {
+            state.set('val', val);
+            checkIfLastPage(state, val);
+          });
+          def.resolve(bindLoop());
+        }
+      } else {
+        if (url.isPosts) {
+          requestType = 'posts';
+        } else {
+          requestType = 'pages';
+        }
+        state.new({
+          loopType: null,
+          meta: {},
+          requestType: requestType,
+          url: window.location.href
+        });
+
+        get.byFilter(url.slugArray[url.slugArray.length - 1], requestType, 'slug').then(function (val) {
+          state.set('val', val[0]);
+        });
+        def.resolve(function () {});
+      }
     });
+    return def.promise;
+  })().then(function (fn) {
+    unbindLoop = fn;
+  });
 
-    return {
-        link: function link(scope, element, attrs) {
-            var fetch = {
-                byId: function byId($event, type, id) {
-                    $event.preventDefault();
-                    var promise = get.byId(type, id),
-                        animated = prepareWindow();
+  return {
+    link: function link(scope, element) {
+      var fetch = {
+        byId: function byId($event, type, id) {
+          $event.preventDefault();
+          var promise = get.byId(type, id),
+              animated = prepareWindow();
 
-                    promise.then(function (val) {
-                        changeState({
-                            replace: false,
-                            animated: animated,
-                            requestType: type,
-                            url: val.link,
-                            val: val
-                        });
-                    });
-                },
-                allByTag: function allByTag($event, data) {
-                    $event.preventDefault();
-                    var promise = get.byFilter(data.id, 'posts', 'tags'),
-                        animated = prepareWindow();
-                    promise.then(function (val) {
-                        changeState({
-                            replace: false,
-                            animated: animated,
-                            loopType: 'tags',
-                            requestType: 'loop',
-                            url: data.link,
-                            val: val,
-                            meta: data
-                        });
-                    });
-                },
-                postOrPage: function postOrPage(slug, replace) {
-                    var processDef = processSlug(slug);
-                    $q.all([allTagsDef, allUsersDef, allCategoriesDef, processDef]).then(function (defValues) {
-                        var processed = defValues[3],
-                            slugArray = processed.slugArray,
-                            types = ['pages', 'posts'],
-                            allTags = defValues[0],
-                            allUsers = defValues[1],
-                            allCats = defValues[2];
-
-                        var deferred = $q.defer(),
-                            pageNum = null,
-                            slugIndex = 0,
-                            cleanSlug = '',
-                            requestType = '',
-                            animated = prepareWindow(),
-                            filter = '',
-                            loopType = '',
-                            meta = {};
-
-                        if (slugArray != null) {
-                            // Verify if it's a paging link
-                            if (processed.isPagingPage) {
-                                pageNum = parseInt(slugArray[1]);
-                                if (typeof pageNum === 'number') {
-                                    get.postsPage(pageNum).then(function (val) {
-                                        deferred.resolve(val);
-                                    });
-                                }
-                            } else if (processed.isPosts || processed.isAuthor || processed.isTag) {
-                                cleanSlug = slugArray[slugArray.length - 1];
-                                requestType = 'posts';
-                                if (processed.isAuthor || processed.isTag) {
-                                    if (processed.isTag) {
-                                        meta = _.find(allTags, function (tag) {
-                                            return tag.slug === cleanSlug;
-                                        });
-                                        cleanSlug = meta.id;
-                                        filter = loopType = 'tags';
-                                    } else {
-                                        meta = _.find(allUsers, function (user) {
-                                            return user.slug === cleanSlug;
-                                        });
-                                        cleanSlug = meta.id;
-                                        filter = loopType = 'author';
-                                    }
-
-                                    requestType = 'loop';
-                                    get.byFilter(cleanSlug, 'posts', filter).then(function (val) {
-                                        deferred.resolve(val);
-                                    });
-                                } else {
-                                    filter = 'slug';
-                                    get.byFilter(cleanSlug, 'posts', filter).then(function (val) {
-                                        deferred.resolve(val);
-                                    });
-                                }
-                            } else {
-                                cleanSlug = slugArray[slugArray.length - 1];
-                                requestType = 'pages';
-                                get.byFilter(cleanSlug, requestType, 'slug').then(function (val) {
-                                    deferred.resolve(val);
-                                });
-                            }
-                            deferred.promise.then(function (values) {
-                                var val = processed.isAuthor || processed.isTag || processed.isCat ? values : values[0];
-                                if (values.length > 0) {
-                                    changeState({
-                                        animated: animated,
-                                        loopType: loopType,
-                                        meta: meta,
-                                        replace: replace,
-                                        requestType: requestType,
-                                        url: base + slug,
-                                        val: val
-                                    });
-                                } else {
-                                    getHome(animated);
-                                }
-                            });
-                        } else {
-                            getHome(animated);
-                        }
-                        function getHome(animated) {
-                            get.postsPage(1).then(function (val) {
-                                changeState({
-                                    animated: animated,
-                                    replace: replace,
-                                    requestType: 'loop',
-                                    loopType: 'posts',
-                                    url: base,
-                                    val: val
-                                });
-                            });
-                        }
-                    });
-                }
-            };
-            state.setDispatch(dispatcher).setKeyDispatcher('pastBottom', loopDispatcher);
-
-            scope.hidePagination = true;
-            scope.lang = lang;
-
-            // Scope functions
-            scope.fetch = fetch;
-            scope.getCategoryName = function () {
-                return '';
-            };
-
-            $q.when(allCategoriesDef).then(function (categories) {
-                scope.getCategoryName = function (id) {
-                    return _.find(categories, function (cat) {
-                        return cat.id === id;
-                    }).name;
-                };
+          promise.then(function (val) {
+            changeState({
+              replace: false,
+              animated: animated,
+              requestType: type,
+              url: val.link,
+              val: val
             });
-
-            scope.findTagById = function (id, tags) {
-                return _.find(tags, function (o) {
-                    return o.id === id;
-                });
-            };
-            scope.formatDate = function (date) {
-                var monthsFull = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"],
-                    monthsAbbr = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
-                var theDay = new Date(date),
-                    monthName = monthsAbbr[theDay.getMonth()],
-                    formattedDate = '',
-                    amPM = '';
-                formattedDate = theDay.getDate() + ' de ' + monthName + ' de ' + theDay.getFullYear();
-                return formattedDate;
-            };
-            scope.trustHtml = function (html) {
-                return $sce.trustAsHtml(html);
-            };
-
-            _.defer(function () {
-                bindLinks();
-                // Bind AjaxLink to popstate (Back/Forward) event 
-                jqLite(window).on('popstate', function (event) {
-                    event.preventDefault();
-                    var eventState = event.state;
-
-                    // Verify if history item was loaded through ajax
-                    if (eventState != null) {
-                        if (location.href.indexOf('?s=') === -1) {
-                            if ((eventState.isHash === true || comingFromHash) && goTo(eventState.scrolled)) {
-                                comingFromHash = !comingFromHash;
-                            } else {
-                                eventState.animated = prepareWindow();
-                                state.new(eventState);
-                                if (eventState.requestType === 'loop' && eventState.currentPage > 1) {
-                                    loopPosts(state.s.toObject());
-                                } else {
-                                    setContent(eventState);
-                                }
-                            }
-                        } else location.href = location.href;
-                    } else {
-                        fetch.postOrPage(window.location.href.replace(base, ''), true);
-                    }
-                    function loopPosts(subState) {
-                        subState.val = cache[subState.loopType];
-                        $q.when(setContent(subState)).then(function () {
-                            var y = state.s.get('scrolled');
-                            goTo(y);
-                        });
-                    }
-                });
+          });
+        },
+        allByTag: function allByTag($event, data) {
+          $event.preventDefault();
+          var promise = get.byFilter(data.id, 'posts', 'tags'),
+              animated = prepareWindow();
+          promise.then(function (val) {
+            changeState({
+              replace: false,
+              animated: animated,
+              loopType: 'tags',
+              requestType: 'loop',
+              url: data.link,
+              val: val,
+              meta: data
             });
+            checkIfLastPage(state, val);
+          });
+        },
+        postOrPage: function postOrPage(slug, replace) {
+          var processDef = processSlug(slug);
+          $q.all([allTagsDef, allUsersDef, allCategoriesDef, processDef]).then(function (defValues) {
+            var processed = defValues[3],
+                slugArray = processed.slugArray,
+                allTags = defValues[0],
+                allUsers = defValues[1],
+                allCats = defValues[2];
 
-            function bindLinks() {
-                var links = element[0].querySelectorAll('a:not([resource-binded])');
-                var linkID = 0;
+            var deferred = $q.defer(),
+                pageNum = null,
+                cleanSlug = '',
+                requestType = '',
+                animated = prepareWindow(),
+                filter = '',
+                loopType = '',
+                meta = {};
 
-                for (linkID = 0; linkID < links.length; linkID++) {
-                    iterator(links[linkID]);
+            if (slugArray != null) {
+              // Verify if it's a paging link
+              if (processed.isPagingPage) {
+                pageNum = parseInt(slugArray[1]);
+                if (typeof pageNum === 'number') {
+                  get.postsPage(pageNum).then(function (val) {
+                    deferred.resolve(val);
+                  });
                 }
+              } else if (processed.isPosts || processed.isAuthor || processed.isTag) {
+                cleanSlug = slugArray[slugArray.length - 1];
+                requestType = 'posts';
+                if (processed.isAuthor || processed.isTag) {
+                  if (processed.isTag) {
+                    meta = _.find(allTags, function (tag) {
+                      return tag.slug === cleanSlug;
+                    });
+                    cleanSlug = meta.id;
+                    filter = loopType = 'tags';
+                  } else {
+                    meta = _.find(allUsers, function (user) {
+                      return user.slug === cleanSlug;
+                    });
+                    cleanSlug = meta.id;
+                    filter = loopType = 'author';
+                  }
 
-                function iterator(linkEl) {
-                    var link = jqLite(linkEl),
-                        href = link.attr('href'),
-                        ngClick = link.attr('ng-click'),
-                        binded = link.attr('resource-binded'),
-                        isHash = href.indexOf('#') !== -1;
-                    var fn = function fn() {};
-                    if (href != null && ngClick == null && binded == null) {
-                        if (isHash === false) {
-                            if (checkLists(href)) {
-                                link.attr('resource-binded', true);
-                                link.on('click', function (event) {
-                                    event.preventDefault();
-                                    fetch.postOrPage(href.replace(base, ''));
-                                });
-                            }
-                        } else {
-                            link.attr('resource-binded', true);
-                            link.on('click', function (event) {
-                                event.preventDefault();
-                                var id = href.replace(base, ''),
-                                    target = element[0].querySelector(id),
-                                    offset = _saKnife2.default.offset(target),
-                                    oldState = state.s.toObject(),
-                                    newState = _.assign(state.s.toObject(), {
-                                    scrolled: offset.top,
-                                    isHash: true
-                                });
-
-                                if (goTo(offset.top)) {
-                                    comingFromHash = true;
-                                    history.replaceState(oldState, '', location.href);
-                                    history.pushState(newState, '', location.href + id);
-                                }
-                            });
-                        }
-                    }
-                    function checkLists(href) {
-                        var checks = [];
-                        comeOnDude.forEach(function (item) {
-                            return checks.push(href.indexOf(item) !== -1);
-                        });
-                        youShallNotPass.forEach(function (item) {
-                            return checks.push(href.indexOf(item) === -1);
-                        });
-
-                        if (checks.indexOf(false) === -1) {
-                            return true;
-                        } else {
-                            return false;
-                        }
-                    }
+                  requestType = 'loop';
+                  get.byFilter(cleanSlug, 'posts', filter).then(function (val) {
+                    deferred.resolve(val);
+                  });
+                } else {
+                  filter = 'slug';
+                  get.byFilter(cleanSlug, 'posts', filter).then(function (val) {
+                    deferred.resolve(val);
+                  });
                 }
-            }
-            function changeState(obj) {
-                var oldState = state.s.toObject();
-                history.replaceState(oldState, '', oldState.url);
-                if (obj.requestType === 'loop') {
-                    obj.currentPage = 1;
-                    obj.lastPage = false;
-                }
-                state.new(obj).dispatch();
-            }
-            function dispatcher(s) {
-                var def = setContent(s);
-                $q.when(def).then(function () {
-                    var action = 'pushState';
-                    if (s.replace === true) {
-                        action = 'replaceState';
-                    }
-                    history[action](s, '', s.url);
+              } else {
+                cleanSlug = slugArray[slugArray.length - 1];
+                requestType = 'pages';
+                get.byFilter(cleanSlug, requestType, 'slug').then(function (val) {
+                  deferred.resolve(val);
                 });
-            }
-            function prepareWindow(append, small) {
-                return $q(function (resolve) {
-                    state.set('scrolled', window.scrollY);
-
-                    if (small === true) scope.showScreenSm = true;else scope.showScreen = true;
-
-                    requestAnimationFrame(function () {
-                        scope.$digest();
-                        //if (append !== true) goTo(0);
-                        resolve();
-                    });
-                });
-            }
-            function setContent(s, append) {
-                return $q(deferred);
-
-                function deferred(resolve, reject) {
-                    $q.all([allTagsDef, allUsersDef, allCategoriesDef, s.animated]).then(function (values) {
-                        var template = $templateCache.get(s.requestType + '-template.html');
-                        var el = void 0,
-                            subScope = scope.$new();
-                        if (s.requestType === 'posts') {
-                            s.meta = {
-                                author: _.find(values[1], function (author) {
-                                    return author.id === s.val.author;
-                                }),
-                                category: _.find(values[2], function (cat) {
-                                    return cat.id === s.val.categories[0];
-                                })
-                            };
-                        }
-                        subScope = _.assign(subScope, {
-                            loopType: s.loopType,
-                            meta: s.meta,
-                            data: s.val,
-                            tags: values[0],
-                            currentPage: s.currentPage,
-                            append: append
-                        });
-                        scope.showScreen = false;
-                        scope.showScreenSm = false;
-                        scope.menuToggle(false);
-
-                        el = $compile(template)(subScope);
-
-                        if (append !== true) jqLite(main).empty();
-                        jqLite(main).append(el);
-                        _.defer(function () {
-                            scope.$digest();
-                            if (append !== true) goTo(0);
-                            resolve();
-                            bindLinks();
-                            if (s.requestType === 'loop') {
-                                unbindLoop = bindLoop();
-                            } else {
-                                unbindLoop();
-                            }
-                        });
-                    }, function (val) {
-                        reject();
-                    });
+              }
+              deferred.promise.then(function (values) {
+                var val = processed.isAuthor || processed.isTag || processed.isCat ? values : values[0];
+                if (values.length > 0) {
+                  changeState({
+                    animated: animated,
+                    loopType: loopType,
+                    meta: meta,
+                    replace: replace,
+                    requestType: requestType,
+                    url: base + slug,
+                    val: val
+                  });
+                  checkIfLastPage(state, val);
+                } else {
+                  getHome(animated);
                 }
-            }
-            function loopDispatcher(val) {
-                var currentState = state.s.toObject(),
-                    nextPage = currentState.currentPage + 1;
-                var promise = void 0,
-                    animated = void 0;
-                if (val === true && currentState.requestType === 'loop' && currentState.lastPage !== true) {
-                    if (currentState.loopType === 'tags') {
-                        promise = get.byFilter(currentState.meta.id, 'posts', 'tags', nextPage);
-                    } else {
-                        promise = get.postsPage(nextPage);
-                    }
-                    animated = prepareWindow(true, true);
-                    promise.then(function (val) {
-                        if (val.length > 0) {
-                            state.setMultiple({
-                                animated: animated,
-                                currentPage: nextPage,
-                                val: val
-                            });
-                            setContent(state.s.toObject(), true);
-                        } else {
-                            state.setMultiple({
-                                lastPage: true
-                            });
-                            scope.showScreen = false;
-                            scope.showScreenSm = false;
-                        }
-                    });
-                }
-            }
-        }
-    };
-
-    function processSlug(slug) {
-        return $q(function (resolve) {
-            allCategoriesDef.then(function (cats) {
-                var slugArray = slug.replace(/#([a-zA-Z0-9\-\_])+/g, '').match(/(([a-zA-Z0-9\-\_?=]+)(?=\/*))/g);
-                if (slugArray != null) {
-                    var last = slugArray[slugArray.length - 1],
-                        isSearch = last.indexOf('?s=') !== -1,
-                        findCat = _.find(cats, function (cat) {
-                        return cat.slug === slugArray[0];
-                    });
-                    if (isSearch) {
-                        slugArray[slugArray.length - 1] = last.replace('?s=', '');
-                    }
-
-                    resolve({
-                        slugArray: slugArray,
-                        isSearch: isSearch,
-                        isCat: slugArray[0] === 'categories',
-                        isTag: slugArray[0] === 'tag',
-                        isAuthor: slugArray[0] === 'author',
-                        isPosts: findCat != null,
-                        isPagingPage: slugArray[1] === 'page',
-                        isPage: slugArray[0] === 'page'
-                    });
-                } else resolve(false); // isHome
-            });
-        });
-    }
-    function checkScrollPosition() {
-        state.s.set('scrolled', window.scrollY);
-    }
-    function goTo(pos) {
-        if (window.scrollTo != null) {
-            pos = pos > scrollPad ? pos - scrollPad : pos;
-            window.scrollTo(0, pos);
-            return true;
-        } else return false;
-    }
-    function reallyGetAll(name) {
-        var def = $q.defer();
-        var page = 1,
-            items = [];
-        get.all(name, 100, page).then(function (response) {
-            getNextPage(response, page);
-        });
-        return def.promise;
-        function getNextPage(val, activePage) {
-            activePage++;
-            items = items.concat(val);
-            if (val.length >= 100) {
-                get.all(name, 100, activePage).then(function (newVal) {
-                    getNextPage(newVal, activePage);
-                });
+              });
             } else {
-                def.resolve(items);
+              getHome(animated);
             }
-        }
-    }
-    function bindLoop() {
-        var mainEnd = void 0,
-            pastBottom = false;
-        state.set('pastBottom', pastBottom);
-
-        jqLite(window).on('resize', _.debounce(checkMainEnd, 100)).on('scroll', scrollBind);
-        jqLite(main).on('resize', _.debounce(checkMainEnd, 100));
-
-        checkMainEnd();
-        function checkMainEnd() {
-            mainEnd = _saKnife2.default.offset(main).top + main.offsetHeight - _saKnife2.default.winSize().height;
-        }
-        function scrollBind(event) {
-            if (window.scrollY + scrollPad >= mainEnd) {
-                if (pastBottom === false) {
-                    pastBottom = true;
-                    state.set('pastBottom', pastBottom);
-                }
+            function getHome(animated) {
+              get.postsPage(1).then(function (val) {
+                changeState({
+                  animated: animated,
+                  replace: replace,
+                  requestType: 'loop',
+                  loopType: 'posts',
+                  url: base,
+                  val: val
+                });
+              });
             }
+          });
         }
-        return function () {
-            jqLite(main).off('resize', checkMainEnd);
-            jqLite(window).off('resize', checkMainEnd).off('scroll', scrollBind);;
+      };
+      state.setDispatch(dispatcher).setKeyDispatcher('pastBottom', loopDispatcher);
+
+      scope.hidePagination = true;
+      scope.lang = lang;
+
+      // Scope functions
+      scope.fetch = fetch;
+      scope.getCategoryName = function () {
+        return '';
+      };
+
+      $q.when(allCategoriesDef).then(function (categories) {
+        scope.getCategoryName = function (id) {
+          return _.find(categories, function (cat) {
+            return cat.id === id;
+          }).name;
         };
-    }
-    function getLang() {
-        var titlesEl = jqLite($document[0].querySelector('#section-titles'));
-        var titles = 'titles = ';
+      });
 
-        return eval(titles + titlesEl.html());
+      scope.findTagById = function (id, tags) {
+        return _.find(tags, function (o) {
+          return o.id === id;
+        });
+      };
+      scope.formatDate = function (date) {
+        // const monthsFull = [
+        //   'Enero',
+        //   'Febrero',
+        //   'Marzo',
+        //   'Abril',
+        //   'Mayo',
+        //   'Junio',
+        //   'Julio',
+        //   'Agosto',
+        //   'Septiembre',
+        //   'Octubre',
+        //   'Noviembre',
+        //   'Diciembre'
+        // ];
+        var monthsAbbr = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+        var theDay = new Date(date),
+            monthName = monthsAbbr[theDay.getMonth()],
+            formattedDate = '';
+        formattedDate = theDay.getDate() + ' de ' + monthName + ' de ' + theDay.getFullYear();
+        return formattedDate;
+      };
+      scope.trustHtml = function (html) {
+        return $sce.trustAsHtml(html);
+      };
+
+      _.defer(function () {
+        bindLinks();
+        // Bind AjaxLink to popstate (Back/Forward) event
+        jqLite(window).on('popstate', function (event) {
+          event.preventDefault();
+          var eventState = event.state;
+
+          // Verify if history item was loaded through ajax
+          if (eventState != null) {
+            if (location.href.indexOf('?s=') === -1) {
+              if ((eventState.isHash === true || comingFromHash) && goTo(eventState.scrolled)) {
+                comingFromHash = !comingFromHash;
+              } else {
+                eventState.animated = prepareWindow();
+                state.new(eventState);
+                if (eventState.requestType === 'loop' && eventState.currentPage > 1) {
+                  loopPosts(state.s.toObject());
+                } else {
+                  setContent(eventState);
+                }
+              }
+            } else location.href = location.href;
+          } else {
+            fetch.postOrPage(window.location.href.replace(base, ''), true);
+          }
+          function loopPosts(subState) {
+            subState.val = cache[subState.loopType];
+            $q.when(setContent(subState)).then(function () {
+              var y = state.s.get('scrolled');
+              goTo(y);
+            });
+          }
+        });
+      });
+
+      function bindLinks() {
+        var links = element[0].querySelectorAll('a:not([resource-bound])');
+        var linkID = 0;
+
+        for (linkID = 0; linkID < links.length; linkID++) {
+          iterator(links[linkID]);
+        }
+
+        function iterator(linkEl) {
+          var link = jqLite(linkEl),
+              href = link.attr('href'),
+              ngClick = link.attr('ng-click'),
+              bound = link.attr('resource-bound'),
+              isHash = href.indexOf('#') !== -1;
+
+          if (href != null && ngClick == null && bound == null) {
+            if (isHash === false) {
+              if (checkLists(href)) {
+                link.attr('resource-bound', true);
+                link.on('click', function (event) {
+                  event.preventDefault();
+                  fetch.postOrPage(href.replace(base, ''));
+                });
+              }
+            } else {
+              link.attr('resource-bound', true);
+              link.on('click', function (event) {
+                event.preventDefault();
+                var id = href.replace(base, ''),
+                    target = element[0].querySelector(id),
+                    offset = _saKnife2.default.offset(target),
+                    oldState = state.s.toObject(),
+                    newState = _.assign(state.s.toObject(), {
+                  scrolled: offset.top,
+                  isHash: true
+                });
+
+                if (goTo(offset.top)) {
+                  comingFromHash = true;
+                  history.replaceState(oldState, '', location.href);
+                  history.pushState(newState, '', location.href + id);
+                }
+              });
+            }
+          }
+          function checkLists(href) {
+            var checks = [];
+            comeOnDude.forEach(function (item) {
+              return checks.push(href.indexOf(item) !== -1);
+            });
+            youShallNotPass.forEach(function (item) {
+              return checks.push(href.indexOf(item) === -1);
+            });
+
+            if (checks.indexOf(false) === -1) {
+              return true;
+            } else {
+              return false;
+            }
+          }
+        }
+      }
+      function changeState(obj) {
+        var oldState = state.s.toObject();
+        history.replaceState(oldState, '', oldState.url);
+        if (obj.requestType === 'loop') {
+          obj.currentPage = 1;
+          obj.lastPage = false;
+        }
+        state.new(obj).dispatch();
+      }
+      function dispatcher(s) {
+        var def = setContent(s);
+        $q.when(def).then(function () {
+          var action = 'pushState';
+          if (s.replace === true) {
+            action = 'replaceState';
+          }
+          history[action](s, '', s.url);
+        });
+      }
+      function prepareWindow(append, small) {
+        return $q(function (resolve) {
+          state.set('scrolled', window.scrollY);
+
+          if (small === true) scope.showScreenSm = true;else scope.showScreen = true;
+
+          requestAnimationFrame(function () {
+            scope.$digest();
+            resolve();
+          });
+        });
+      }
+      function setContent(s, append) {
+        return $q(deferred);
+
+        function deferred(resolve, reject) {
+          $q.all([allTagsDef, allUsersDef, allCategoriesDef, s.animated]).then(function (values) {
+            var template = $templateCache.get(s.requestType + '-template.html');
+            var el = void 0,
+                subScope = scope.$new();
+            if (s.requestType === 'posts') {
+              s.meta = {
+                author: _.find(values[1], function (author) {
+                  return author.id === s.val.author;
+                }),
+                category: _.find(values[2], function (cat) {
+                  return cat.id === s.val.categories[0];
+                })
+              };
+            }
+            subScope = _.assign(subScope, {
+              loopType: s.loopType,
+              meta: s.meta,
+              data: s.val,
+              tags: values[0],
+              currentPage: s.currentPage,
+              append: append
+            });
+            scope.showScreen = false;
+            scope.showScreenSm = false;
+            scope.menuToggle(false);
+
+            el = $compile(template)(subScope);
+
+            if (append !== true) jqLite(main).empty();
+            jqLite(main).append(el);
+            _.defer(function () {
+              scope.$digest();
+              if (append !== true) goTo(0);
+              resolve();
+              bindLinks();
+              if (s.requestType === 'loop') {
+                unbindLoop = bindLoop();
+              } else {
+                unbindLoop();
+              }
+            });
+          }, function () {
+            return reject();
+          });
+        }
+      }
+      function loopDispatcher(val) {
+        var currentState = state.s.toObject(),
+            nextPage = currentState.currentPage + 1;
+        var promise = void 0,
+            animated = void 0;
+        if (val === true && currentState.requestType === 'loop' && currentState.lastPage !== true) {
+          if (currentState.loopType === 'tags') {
+            promise = get.byFilter(currentState.meta.id, 'posts', 'tags', nextPage);
+          } else {
+            promise = get.postsPage(nextPage);
+          }
+          animated = prepareWindow(true, true);
+          promise.then(function (val) {
+            if (val.length > 0) {
+              state.setMultiple({
+                animated: animated,
+                currentPage: nextPage,
+                val: val
+              });
+              setContent(state.s.toObject(), true);
+            }
+            if (val.length < 10) {
+              state.set('lastPage', true);
+            }
+          });
+        }
+      }
     }
+  };
+  function checkIfLastPage(state, val) {
+    if (val.length < POSTS_PER_PAGE) {
+      state.set('lastPage', true);
+    }
+  }
+  function processSlug(slug) {
+    return $q(function (resolve) {
+      allCategoriesDef.then(function (cats) {
+        var slugArray = slug.replace(/#([a-zA-Z0-9\-_])+/g, '').match(/(([a-zA-Z0-9\-_?=]+)(?=\/*))/g);
+        if (slugArray != null) {
+          var last = slugArray[slugArray.length - 1],
+              isSearch = last.indexOf('?s=') !== -1,
+              findCat = _.find(cats, function (cat) {
+            return cat.slug === slugArray[0];
+          });
+          if (isSearch) {
+            slugArray[slugArray.length - 1] = last.replace('?s=', '');
+          }
+
+          resolve({
+            slugArray: slugArray,
+            isSearch: isSearch,
+            isCat: slugArray[0] === 'categories',
+            isTag: slugArray[0] === 'tag',
+            isAuthor: slugArray[0] === 'author',
+            isPosts: findCat != null,
+            isPagingPage: slugArray[1] === 'page',
+            isPage: slugArray[0] === 'page'
+          });
+        } else resolve(false); // isHome
+      });
+    });
+  }
+  function checkScrollPosition() {
+    state.s.set('scrolled', window.scrollY);
+  }
+  function goTo(pos) {
+    if (window.scrollTo != null) {
+      pos = pos > scrollPad ? pos - scrollPad : pos;
+      window.scrollTo(0, pos);
+      return true;
+    } else return false;
+  }
+  function reallyGetAll(name) {
+    var def = $q.defer();
+    var page = 1,
+        items = [];
+    get.all(name, 100, page).then(function (response) {
+      getNextPage(response, page);
+    });
+    return def.promise;
+    function getNextPage(val, activePage) {
+      activePage++;
+      items = items.concat(val);
+      if (val.length >= 100) {
+        get.all(name, 100, activePage).then(function (newVal) {
+          getNextPage(newVal, activePage);
+        });
+      } else {
+        def.resolve(items);
+      }
+    }
+  }
+  function bindLoop() {
+    var mainEnd = void 0,
+        pastBottom = false;
+    state.set('pastBottom', pastBottom);
+
+    jqLite(window).on('resize', _.debounce(checkMainEnd, 100)).on('scroll', scrollBind);
+    jqLite(main).on('resize', _.debounce(checkMainEnd, 100));
+
+    checkMainEnd();
+    function checkMainEnd() {
+      mainEnd = _saKnife2.default.offset(main).top + main.offsetHeight - _saKnife2.default.winSize().height;
+    }
+    function scrollBind() {
+      if (window.scrollY + scrollPad >= mainEnd) {
+        if (pastBottom === false) {
+          pastBottom = true;
+          state.set('pastBottom', pastBottom);
+        }
+      }
+    }
+    return function () {
+      jqLite(main).off('resize', checkMainEnd);
+      jqLite(window).off('resize', checkMainEnd).off('scroll', scrollBind);
+    };
+  }
+  function getLang() {
+    var titlesEl = jqLite($document[0].querySelector('#section-titles'));
+    var titles = 'titles = ';
+
+    return eval(titles + titlesEl.html());
+  }
 }
 
 /***/ }),

@@ -12,718 +12,706 @@
 */
 @import 'partials/vars';
 html {
-	font-size: $min-font;
-    line-height: $base-line;
-    font-weight: $weight;
-    font-family: $family;
-	color: $text-color;
-    margin: 0;
-    padding: 0;
-    
-    @media only screen and (min-width: $min-width) {
-        font-size: $base-font;
-    }
-    @media only screen and (min-width: $max-width) {
-        font-size: $max-font;
-    }
+  font-size: $min-font;
+  line-height: $base-line;
+  font-weight: $weight;
+  font-family: $family;
+  color: $text-color;
+  margin: 0;
+  padding: 0;
+
+  @media only screen and (min-width: $min-width) {
+    font-size: $base-font;
+  }
+  @media only screen and (min-width: $max-width) {
+    font-size: $max-font;
+  }
 }
 body {
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    margin: 0;
-    padding: 0;
-    
-    @include bg;
-    @include portrait() {
-        &.menu-is-active {
-            overflow: hidden;
-        }
-    };
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  margin: 0;
+  padding: 0;
+
+  @include bg;
+  @include portrait() {
+    &.menu-is-active {
+      overflow: hidden;
+    }
+  }
 }
-@import 
-    'partials/defaults',
-    'partials/buttons';
+@import 'partials/defaults', 'partials/buttons';
 
 // --------------------------- Wrapper
 .wrapper {
-    position: relative;
-    width:100%;
-    min-height: 100vh;
-    min-height: calc(100vh - #{$footer-h});
-    display: flex;
-    justify-content: space-between;
-    flex-direction: column;
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  min-height: calc(100vh - #{$footer-h});
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
 
-    @include landscape() {
-        flex-direction: row;
-        padding: 0 0 0 $side;
-        &:before {
-            content: ' ';
-            display: block;
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: $banner-height;
-            z-index: 0;
-            background: $brand;
-        }
+  @include landscape() {
+    flex-direction: row;
+    padding: 0 0 0 $side;
+    &:before {
+      content: ' ';
+      display: block;
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: $banner-height;
+      z-index: 0;
+      background: $brand;
     }
+  }
 }
 // --------------------------- Header
 .header {
-    position: fixed;
-    height: $header-h;
-    width: 100%;
-    flex: 1 0 auto;
-    z-index: 20;
-    background: #fff;
-    border-bottom: 1px solid $grey-base;
-    @include landscape() {
-        left: 0;
-        top: 0;
-        bottom: 0;
-        width: $side;
-        height: 100vh;
-        overflow: auto;
-        border: 0;
-    }
+  position: fixed;
+  height: $header-h;
+  width: 100%;
+  flex: 1 0 auto;
+  z-index: 20;
+  background: #fff;
+  border-bottom: 1px solid $grey-base;
+  @include landscape() {
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: $side;
+    height: 100vh;
+    overflow: auto;
+    border: 0;
+  }
 }
 
 .menu-button {
-    float: right;
-    height: 100%;
-    width: $header-h;
-    @include button(#fff, $brand);
-    text-align: center;
-    &:hover, &:focus {
-        @include button-style($grey-light, $brand);
+  float: right;
+  height: 100%;
+  width: $header-h;
+  @include button(#fff, $brand);
+  text-align: center;
+  &:hover,
+  &:focus {
+    @include button-style($grey-light, $brand);
+  }
+  &[aria-expanded="true"] {
+    background: $brand;
+    color: #fff;
+    .menu-icon__line {
+      background: #fff;
     }
-    &[aria-expanded="true"]{
-        background: $brand;
-        color: #fff;
-        .menu-icon__line {
-            background: #fff;
-        }
-        &:hover, &:focus {
-            background: $brand-light;
-            color: #fff;
-            .menu-icon__line {
-                background: #fff;
-            }
-        }
-        .menu-icon__line--1 {
-            transform: translate(0, 0.7rem) rotate(45deg);
-            //transform: translate(0, 5px);
-        }
-        .menu-icon__line--3 {
-            transform: translate(0, -0.7rem) rotate(-45deg);
-            //transform: translate(0, -5px);
-        }
-        .menu-icon__line--2 {
-            opacity: 0;
-        }
+    &:hover,
+    &:focus {
+      background: $brand-light;
+      color: #fff;
+      .menu-icon__line {
+        background: #fff;
+      }
     }
-    @include landscape() {
-        display: none;
-    };
+    .menu-icon__line--1 {
+      transform: translate(0, 0.7rem) rotate(45deg);
+      //transform: translate(0, 5px);
+    }
+    .menu-icon__line--3 {
+      transform: translate(0, -0.7rem) rotate(-45deg);
+      //transform: translate(0, -5px);
+    }
+    .menu-icon__line--2 {
+      opacity: 0;
+    }
+  }
+  @include landscape() {
+    display: none;
+  }
 }
 .menu-icon {
-    position: relative;
-    width: 2rem;
-    height: 1.6rem;
-    //margin-left: : (($header-h - 2rem) / 2) 0.5rem;
-    display: inline-block;
-    &__line {
-        width: 100%;
-        height: 0.2rem;
-        background: $brand;
-        transform-origin: center center;
-        transition: all .2s ease-in-out;
-        &--1 {
-            
-        }
-        &--2 {
-            position: relative;
-            top: 0.5rem;
-        }
-        &--3 {
-            position: relative;
-            top: 1rem;
-        }
+  position: relative;
+  width: 2rem;
+  height: 1.6rem;
+  //margin-left: : (($header-h - 2rem) / 2) 0.5rem;
+  display: inline-block;
+  &__line {
+    width: 100%;
+    height: 0.2rem;
+    background: $brand;
+    transform-origin: center center;
+    transition: all .2s ease-in-out;
+
+    &--2 {
+      position: relative;
+      top: 0.5rem;
     }
+    &--3 {
+      position: relative;
+      top: 1rem;
+    }
+  }
 }
-// --------------------------- logo 
+// --------------------------- logo
 .logo {
+  height: 100%;
+  width: auto;
+  float: left;
+  @include landscape() {
+    float: none;
+    position: sticky;
+    top: 0;
+    height: $banner-height;
+    z-index: 50;
+  }
+
+  &__link {
+    display: block;
     height: 100%;
     width: auto;
-    float: left;
+    padding: ($spacing / 2);
+    background: #fff;
+    border-bottom: 0;
+    &:hover {
+      background: $grey-lighter;
+    }
     @include landscape() {
-        float: none;
-        position: sticky;
-        top: 0;
-        height: $banner-height;
-        z-index: 50;
+      border-bottom: 3px solid $brand;
+      display: flex;
+      align-items: center;
     }
-    
-    &__link {
-        display: block;
-        height: 100%;
-        width: auto;
-        padding: ($spacing / 2);
-        background: #fff;
-        border-bottom: 0;
-        &:hover {
-            background: $grey-lighter;
-        }
-        @include landscape() {
-            border-bottom: 3px solid $brand;
-            display: flex;
-            align-items: center;
-        }
-    }
-    &__image {
-        height: 100%;
-        width: auto;
-        max-width: 100%;
-        flex: 1 1 auto;
-    }
+  }
+  &__image {
+    height: 100%;
+    width: auto;
+    max-width: 100%;
+    flex: 1 1 auto;
+  }
 }
 // --------------------------- Nav
 $nav-font: 0.9rem;
 .nav {
-    position: relative;
-    clear: both;
-    padding: 0;
-    width: 100%;
-    background: #fff;
-    padding-bottom: $spacing * 4;
-    @include portrait() {
-        height: 100vh;
-        height: calc(100vh - #{$header-h});
-        overflow: auto;
-        transition: 
-            opacity .2s ease-out
-            visibility .2s ease-out;
-        opacity: 0;
-        visibility: hidden;
-        z-index: 500;
+  position: relative;
+  clear: both;
+  padding: 0;
+  width: 100%;
+  background: #fff;
+  padding-bottom: $spacing * 4;
+  @include portrait() {
+    height: 100vh;
+    height: calc(100vh - #{$header-h});
+    overflow: auto;
+    transition: opacity .2s ease-out visibility .2s ease-out;
+    opacity: 0;
+    visibility: hidden;
+    z-index: 500;
 
-        &.is-active {
-            opacity: 1;
-            visibility: visible;
-        }
-        &.is-hidden {
-            display: none;
-        }
-    };
-    ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
+    &.is-active {
+      opacity: 1;
+      visibility: visible;
     }
-    a {
-        display: block;
-        padding: ($spacing / 2) $spacing;
-        @include landscape() {
-            padding: ($spacing / 4) ($spacing / 2);
-        }
+    &.is-hidden {
+      display: none;
     }
-    .children {
-        position: relative;
-        border-right: 3px dotted $brand;
-        
-        > li a {
-            padding-left: $spacing;
-        }
+  }
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  a {
+    display: block;
+    padding: ($spacing / 2) $spacing;
+    @include landscape() {
+      padding: ($spacing / 4) ($spacing / 2);
     }
-    &.js {
-        .page_item_has_children {
-            position: relative;
-            > a {
-                padding-right: $spacing * 2;
-            }
-        }
-        .children {
-            overflow: hidden;
-            visibility: hidden;
-            max-height: 0;
-            transition:
-                max-height .2s ease-in-out,
-                visibility .2s ease-in-out;
-            &.is-active {
-                visibility: visible;
-                max-height: 100vh;;
-            }
-        }
+  }
+  .children,
+  .sub-menu {
+    position: relative;
+    border-right: 3px dotted $brand;
+
+    > li a {
+      padding-left: $spacing;
     }
+  }
+  &.js {
+    .menu-item-has-children,
+    .page_item_has_children {
+      position: relative;
+      > a {
+        padding-right: $spacing * 2;
+      }
+    }
+    .children,
+    .sub-menu {
+      overflow: hidden;
+      visibility: hidden;
+      max-height: 0;
+      transition: max-height .2s ease-in-out, visibility .2s ease-in-out;
+      &.is-active {
+        visibility: visible;
+        max-height: 100vh;
+      }
+    }
+  }
 }
 .expand {
-    $s: 1rem * $base-line;
-    $p: 0.3rem;
-    position: absolute;
-    top: $p;
-    height: ($s + $spacing) - ($p * 2);
-    width: ($s + $spacing) - ($p * 2);
-    right: $p;
-    margin: 0;
-    @include landscape() {
-        height: ($s + ($spacing / 2))  - ($p * 2);
-        width: ($s + ($spacing / 2))  - ($p * 2);
-    }
-    padding: 0.4rem;
-    text-align: center;
-    @include button($grey-base, $grey-dark, 'round');
+  $s: 1rem * $base-line;
+  $p: 0.3rem;
+  position: absolute;
+  top: $p;
+  height: ($s + $spacing) - ($p * 2);
+  width: ($s + $spacing) - ($p * 2);
+  right: $p;
+  margin: 0;
+  @include landscape() {
+    height: ($s + ($spacing / 2)) - ($p * 2);
+    width: ($s + ($spacing / 2)) - ($p * 2);
+  }
+  padding: 0.4rem;
+  text-align: center;
+  @include button($grey-base, $grey-dark, 'round');
+  .expand-icon__line {
+    background: $grey-dark;
+  }
+  &:hover,
+  &:focus {
+    background: $grey-light;
     .expand-icon__line {
-        background: $grey-dark;
+      background: $brand;
     }
-    &:hover, &:focus {
-        background: $grey-light;
-        .expand-icon__line {
-            background: $brand;
-        }
+  }
+  &[aria-expanded="true"] {
+    background: $brand;
+    .expand-icon__line {
+      background: #fff;
     }
-    &[aria-expanded="true"]{
-        background: $brand;
-        .expand-icon__line {
-            background: #fff;
-        }
-        &:hover, &:focus {
-            background: $brand-light;
-            .expand-icon__line {
-                background: #fff;
-            }
-        }
-        .expand-icon__line--v {
-            transform: rotate(90deg);
-        }
+    &:hover,
+    &:focus {
+      background: $brand-light;
+      .expand-icon__line {
+        background: #fff;
+      }
     }
+    .expand-icon__line--v {
+      transform: rotate(90deg);
+    }
+  }
 }
 .expand-icon {
-    $w: 2px;
-    position: relative;
-    width: 100%;
-    height: 100%;
-    &__line {
-        transition: all 0.2s ease-out;
-        transform-origin: center center;
-        position: absolute;
-        &--v {
-            height: 100%;
-            width: $w;
-            top: 0;
-            left: 50%;
-            left: calc(50% - #{$w / 2});
-        }
-        &--h {
-            width: 100%;
-            height: $w;
-            left: 0;
-            top: 50%;
-            top: calc(50% - #{$w / 2});
-        }
+  $w: 2px;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  &__line {
+    transition: all 0.2s ease-out;
+    transform-origin: center center;
+    position: absolute;
+    &--v {
+      height: 100%;
+      width: $w;
+      top: 0;
+      left: 50%;
+      left: calc(50% - #{$w / 2});
     }
+    &--h {
+      width: 100%;
+      height: $w;
+      left: 0;
+      top: 50%;
+      top: calc(50% - #{$w / 2});
+    }
+  }
 }
 
 // --------------------------- Sidebar
 .sidebar {
-    background: $grey-light;
-    position: relative;
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    @include portrait-sm() {
-        display: block;
-    };
+  background: $grey-light;
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  @include portrait-sm() {
+    display: block;
+  }
+  @include landscape() {
+    display: block;
+    flex: 0 1 auto;
+    width: $side;
+  }
+  &__search {
+    display: flex;
+    align-items: center;
+    background: $grey-dark;
+    padding: $spacing;
     @include landscape() {
-        display: block;
-        flex: 0 1 auto;
-        width: $side;
+      //display: block;
+      width: 100%;
+      height: $banner-height;
+      //background: $brand-light;
     }
-    &__search {
-        display: flex;
-        align-items: center;
-        background: $grey-dark;
-        padding: $spacing;
-        @include landscape() {
-            //display: block;
-            width: 100%;
-            height: $banner-height;
-            //background: $brand-light;
-        }
+  }
+  &__content {
+    //text-align: center;
+    padding: $spacing;
+    @include keep-flow();
+    @include landscape() {
+      position: sticky;
+      top: 0;
+      width: 100%;
     }
-    &__content {
-        //text-align: center;
-        padding: $spacing;
-        @include keep-flow();
-        @include landscape() {
-            position: sticky;
-            top: 0;
-            width: 100%;
-        }
+  }
+  &__link-list {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 $spacing 0;
+  }
+  &__link {
+    //text-align: center;
+    display: block;
+    margin-bottom: $spacing / 4;
+    font-size: 1rem;
 
-    }
-    &__link-list {
-        list-style: none;
-        padding: 0;
-        margin: 0 0 $spacing 0;
-    }
-    &__link {
-        //text-align: center;
-        display: block;
-        margin-bottom: $spacing / 4;
-        font-size: 1rem;
+    .icon {
+      $s: (($base-line * 1rem) - $spacing) / 2;
+      display: block;
+      float: left;
+      height: $spacing;
+      width: $spacing;
+      padding: 0.15rem;
+      background: $brand;
+      margin-top: $s;
+      margin-right: 0.5rem;
+      //border-radius: 50%;
+      fill: #fff;
 
-        .icon {
-            $s: (($base-line * 1rem) - $spacing) / 2;
-            display: block;
-            float: left;
-            height: $spacing;
-            width: $spacing;
-            padding: 0.15rem;
-            background: $brand;
-            margin-top: $s;
-            margin-right: 0.5rem;
-            //border-radius: 50%;
-            fill: #fff;
-
-            @include landscape() {
-                position: absolute;
-                left: $spacing / -2;
-            };
-            
-            
-        }
+      @include landscape() {
+        position: absolute;
+        left: $spacing / -2;
+      }
     }
+  }
 }
 .search {
-    $s: 2rem;
-    position: relative;
-    display: flex;
-    width: 100%;
+  $s: 2rem;
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: $s;
+  font-size: $font-smaller;
+  &__input,
+  &__submit {
+    display: block;
+    height: 100%;
+    width: 75%;
+  }
+  &__input {
+    box-sizing: border-box;
+    flex: 1 1 auto;
+    border: 0;
+    border-bottom: 3px solid $grey-base;
+    &:focus {
+      border: 0;
+      border-bottom: 3px solid $brand;
+    }
+  }
+  &__submit {
+    flex: 0 0 auto;
+    width: $s;
     height: $s;
-    font-size: $font-smaller;
-    &__input, &__submit {
-        display: block;
-        height: 100%;
-        width: 75%;
+    @include button($brand, #fff);
+    padding: .25rem;
+    margin: 0;
+    &:hover,
+    &:focus {
+      @include button-style($brand-light, #fff);
     }
-    &__input {
-        box-sizing: border-box;
-        flex: 1 1 auto;
-        border: 0;
-        border-bottom: 3px solid $grey-base;
-        &:focus {
-            border: 0;
-            border-bottom: 3px solid $brand;
-        }
-    }
-    &__submit {
-        flex: 0 0 auto;
-        width: $s;
-        height: $s;
-        @include button($brand, #fff);
-        padding: .25rem;
-        margin: 0;
-        &:hover, &:focus {
-            @include button-style($brand-light, #fff);
-        }
-    }
+  }
 }
 // --------------------------- Main
 .main {
-    position: relative;
-    padding: $header-h ($article-date-width - $spacing) 0 $spacing;
-    z-index: 1;
-    border-left: $spacing solid $brand;
-    min-height: 100vh;
-    min-height: calc(100vh - #{$footer-h});
-    margin-right: $spacing;
-    @include portrait-sm() {
-        margin-right: 0;
-        padding: $header-h $spacing 0 $spacing;
-        border-left-width: 0;
-    };
+  position: relative;
+  padding: $header-h ($article-date-width - $spacing) 0 $spacing;
+  z-index: 1;
+  border-left: $spacing solid $brand;
+  min-height: 100vh;
+  min-height: calc(100vh - #{$footer-h});
+  margin-right: $spacing;
+  @include portrait-sm() {
+    margin-right: 0;
+    padding: $header-h $spacing 0 $spacing;
+    border-left-width: 0;
+  }
+  @include landscape() {
+    padding-top: 0;
+    flex: 0 1 $main-max;
+  }
+  &__title {
+    text-align: center;
     @include landscape() {
-        padding-top: 0;
-        flex: 0 1 $main-max;
+      @include main-title();
+      .label {
+        color: #fff;
+      }
     }
-    &__title {
-        text-align: center;
-        @include landscape() {
-            @include main-title();
-            .label {
-                color: #fff;
-            }
-        }
-    }
+  }
 
-    .widget_text {
-        margin: ($spacing * 2) 0;
-        
-        @include landscape() {
-            margin-top: 0;
-            h3 {
-                @include main-title();
-            }
-        };
-        .textwidget {
-            @include long-content();
-        }
+  .widget_text {
+    margin: ($spacing * 2) 0;
+
+    @include landscape() {
+      margin-top: 0;
+      h3 {
+        @include main-title();
+      }
     }
+    .textwidget {
+      @include long-content();
+    }
+  }
 }
 // --------------------------- Article
 .article {
-    margin: ($spacing * 2) 0;
-    @include landscape() {
-        margin-top: 0;
-    };
-    &__title {
-        font-size: 1.2rem;
-        margin: 0 0 ($spacing / 2) 0;
-    }
-    &__date {
-        $w: $article-date-width;
+  margin: ($spacing * 2) 0;
+  @include landscape() {
+    margin-top: 0;
+  }
+  &__title {
+    font-size: 1.2rem;
+    margin: 0 0 ($spacing / 2) 0;
+  }
+  &__date {
+    $w: $article-date-width;
 
-        display: block;
-        position: absolute;
-        width: $w;
-        right: 0;
-        margin-top: $spacing;
-        padding: ($spacing / 2);
-        
-        text-align: center;
-        font-size: $font-smaller;
-        line-height: 1.25;
+    display: block;
+    position: absolute;
+    width: $w;
+    right: 0;
+    margin-top: $spacing;
+    padding: ($spacing / 2);
 
-        background: $grey-dark;
-        color: #fff;
-        @include portrait-sm() {
-            position: relative;
-            width: auto;
-            height: auto;
-            text-align: left;
-        };
+    text-align: center;
+    font-size: $font-smaller;
+    line-height: 1.25;
+
+    background: $grey-dark;
+    color: #fff;
+    @include portrait-sm() {
+      position: relative;
+      width: auto;
+      height: auto;
+      text-align: left;
     }
-    &__author {
-        font-size: $font-smaller;
-        font-style: italic;
+  }
+  &__author {
+    font-size: $font-smaller;
+    font-style: italic;
+  }
+  &__content {
+    @include long-content();
+    aside {
+      $r: ($spacing * -1.5) - ($article-date-width - $spacing);
+      display: block;
+      position: relative;
+      float: right;
+      right: $r;
+      width: 45%;
+      padding: $spacing;
+      margin: $spacing 0 $spacing ($r + $spacing);
+      background: $grey-light;
+      @include keep-flow();
+      @include portrait-sm() {
+        float: none;
+        right: auto;
+        width: auto;
+        margin: $spacing 0;
+      }
     }
-    &__content {
-        @include long-content();
-        aside {
-            $r: ($spacing * -1.5) - ($article-date-width - $spacing);
-            display: block;
-            position: relative;
-            float: right;
-            right: $r;
-            width: 45%;
-            padding: $spacing;
-            margin: $spacing 0 $spacing ($r + $spacing);
-            background: $grey-light;
-            @include keep-flow();
-            @include portrait-sm() {
-                float: none;
-                right: auto;
-                width: auto;
-                margin: $spacing 0;
-            };
-        }
-        blockquote {
-            font-style: italic;
-            border: 0px dotted $grey-light;
-            border-width: 3px 0;
-            margin: $spacing;
-        }
+    blockquote {
+      font-style: italic;
+      border: 0 dotted $grey-light;
+      border-width: 3px 0;
+      margin: $spacing;
     }
-    &__excerpt {
-        @include long-content();
-        flex: 1 1 auto;
+  }
+  &__excerpt {
+    @include long-content();
+    flex: 1 1 auto;
+  }
+  &__tags {
+    margin: ($spacing / 2) 0;
+    .icon {
+      display: block;
+      float: left;
+      height: 1.4rem;
+      width: 1.4rem;
+      margin: 0.3rem 0.5rem 0 0;
     }
-    &__tags {
-        margin: ($spacing / 2) 0;
-        .icon {
-            display: block;
-            float: left;
-            height: 1.4rem;
-            width: 1.4rem;
-            margin: 0.3rem 0.5rem 0 0;
-        }
-        .icon--tag {
-            fill: $brand;
-        }
+    .icon--tag {
+      fill: $brand;
     }
+  }
 }
 // --------------------------- Footer
 .footer {
-    font-size: .7rem;
+  font-size: .7rem;
+  color: #fff;
+  background: $grey-dark;
+  padding: 0 $spacing;
+  overflow: hidden;
+  a {
     color: #fff;
-    background: $grey-dark;
-    padding: 0 $spacing;
-    overflow: hidden;
-    a {
-        color: #fff;
-        &:hover {
-            color: $grey-dark;
-        }
+    &:hover {
+      color: $grey-dark;
     }
-    @include landscape() {
-        margin-left: $side;
-    }
+  }
+  @include landscape() {
+    margin-left: $side;
+  }
 }
 @keyframes rotateLoader {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 @keyframes moveLoader {
-    0% {
-        transform: translateX(-50%);
-    }
-    50% {
-        transform: translateX(50%);
-    }
-    100% {
-        transform: translateX(-50%);
-    }
+  0% {
+    transform: translateX(-50%);
+  }
+  50% {
+    transform: translateX(50%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
 }
 .screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: #fff;
-    transition: all .2s ease-out;
-    opacity: 0;
-    visibility: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #fff;
+  transition: all .2s ease-out;
+  opacity: 0;
+  visibility: hidden;
 
-    z-index: 500;
+  z-index: 500;
 
-    &.show {
-        opacity: 1;
-        visibility: visible;
-        .loader {
-            animation-name: moveLoader;
-        }
+  &.show {
+    opacity: 1;
+    visibility: visible;
+    .loader {
+      animation-name: moveLoader;
     }
-    @include landscape() {
-        // top: 0;
-        // left: $side;
-    }
+  }
+  @include landscape() {
+    // top: 0;
+    // left: $side;
+  }
 }
 .loader {
-    //@include loader;
-    $t-color: transparentize($grey-dark, 1);
-    position: relative; 
-    width: 100%;
-    height: 100%;
-    transform: translateX(-50%);
-    background: linear-gradient(to right, $t-color, $grey-dark, $t-color);
-    animation-duration: 3s;
-    animation-iteration-count: infinite;
-    animation-timing-function: ease-in-out;
+  //@include loader;
+  $t-color: transparentize($grey-dark, 1);
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform: translateX(-50%);
+  background: linear-gradient(to right, $t-color, $grey-dark, $t-color);
+  animation-duration: 3s;
+  animation-iteration-count: infinite;
+  animation-timing-function: ease-in-out;
 }
 .screen-sm {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: $footer-h;
-    
-    transition: all .2s ease-out;
-    opacity: 0;
-    visibility: hidden;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: $footer-h;
 
-    z-index: 500;
+  transition: all .2s ease-out;
+  opacity: 0;
+  visibility: hidden;
 
-    background: $grey-dark;
-    &.show {
-        opacity: 1;
-        visibility: visible;
-    }
+  z-index: 500;
 
-    .loader {
-        @include loader(1rem);
-        //border-color: #fff;
-    }
+  background: $grey-dark;
+  &.show {
+    opacity: 1;
+    visibility: visible;
+  }
 
-    @include landscape() {
-        left: $side;
-        //right: $side;
-    }
+  .loader {
+    @include loader(1rem);
+    //border-color: #fff;
+  }
+
+  @include landscape() {
+    left: $side;
+    //right: $side;
+  }
 }
 
 // --------------------------- MISC
 .alert {
-    //padding: $spacing;
-    font-size: 1.25rem;
-    margin: ($spacing * 2) 0;
-    display: flex;
-    align-items: center;
-    &__icon {
-        margin: $spacing 0 $spacing $spacing;
-        width: 4rem;
-        height: 4rem;
-        flex: 0 0 auto;
+  //padding: $spacing;
+  font-size: 1.25rem;
+  margin: ($spacing * 2) 0;
+  display: flex;
+  align-items: center;
+  &__icon {
+    margin: $spacing 0 $spacing $spacing;
+    width: 4rem;
+    height: 4rem;
+    flex: 0 0 auto;
+  }
+  &__content {
+    float: left;
+    width: 90%;
+    flex: 1 1 auto;
+    padding: $spacing;
+  }
+  &--success {
+    border: 2px dotted $brand;
+    .alert__icon {
+      fill: $brand;
     }
-    &__content {
-        float: left;
-        width: 90%;
-        flex: 1 1 auto;
-        padding: $spacing;
+  }
+  &--error {
+    border: 2px dotted $danger;
+    .alert__icon {
+      fill: $danger;
     }
-    &--success {
-        border: 2px dotted $brand;
-        .alert__icon {
-            fill: $brand;
-        }
-    }
-    &--error {
-        border: 2px dotted $danger;
-        .alert__icon {
-            fill: $danger;
-        }
-    }
-    &--floating {
-        position: absolute;
-        top: 50%;
-        z-index: 500;
-        background: #fff;
+  }
+  &--floating {
+    position: absolute;
+    top: 50%;
+    z-index: 500;
+    background: #fff;
 
-        transition: all .2s ease-out;
+    transition: all .2s ease-out;
 
-        visibility: hidden;
-        opacity: 0;
-        &.show {
-            visibility: visible;
-            opacity: 1;
-        }
+    visibility: hidden;
+    opacity: 0;
+    &.show {
+      visibility: visible;
+      opacity: 1;
     }
+  }
 }
 .label {
-    display: inline-block;
-    font-family: $ss-family;
-    font-size: 0.9rem;
-    margin-left: ($spacing / 2);
-    color: $brand;
-    .icon {
-        position: relative; 
-        bottom: -0.1rem;
-    }
+  display: inline-block;
+  font-family: $ss-family;
+  font-size: 0.9rem;
+  margin-left: ($spacing / 2);
+  color: $brand;
+  .icon {
+    position: relative;
+    bottom: -0.1rem;
+  }
 }
 
-
-::selection {
-	// background: $brand;
-	// color:#FFF;
-	// text-shadow:none;
-}
-
-@import 
-    'partials/aata-form',
-    'partials/wordpress',
-    'partials/print';
+@import 'partials/aata-form', 'partials/wordpress', 'partials/print';

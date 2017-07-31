@@ -4,8 +4,7 @@
 .sass-cache/
 img/
 node_modules/
-
-sass-watch.cmd
+.vscode/
 
 /.htaccess
 /license.txt

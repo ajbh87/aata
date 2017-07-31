@@ -237,7 +237,6 @@
             <svg class="alert__icon" aria-hidden="true">
                 <use xlink:href="#checkCircleIcon" />
             </svg>
-            
             <div class="alert__content">
                 Gracias por comunicarte con Abogados a Tu Alcance, Tus Abogados en Puerto Rico, te enviaremos por correo electrónico la contestación a tu consulta a la brevedad posible. 
             </div>
@@ -246,12 +245,11 @@
             <svg class="alert__icon" aria-hidden="true">
                 <use xlink:href="#errorIcon" />
             </svg>
-
             <div class="alert__content">
-                ¡Oops! Algo ha ocurrido y tu solicitud no ha sido procesada. Te agradecemos que trates más tarde o te comuniques al 787-200-6474.                
+                ¡Oops! Algo ha ocurrido y tu solicitud no ha sido procesada. Te agradecemos que trates más tarde o te comuniques al 787-200-6474.
             </div>
         </div>
-        <div class="aata-form__screen" aria-hidden="true" ng-class="{'show': showFormScreen == true}">
+        <div class="screen-sm" aria-hidden="true" ng-class="{'show': showFormScreen == true}">
             <div class="loader screen-sm__loader"></div>
         </div>
     </script>

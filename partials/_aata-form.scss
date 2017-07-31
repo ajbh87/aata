@@ -1,155 +1,158 @@
-.g-recaptcha { position: absolute; }
+.g-recaptcha {
+  position: absolute;
+}
 [aata-form] {
-    position: relative;
+  position: relative;
 }
 .aata-form {
+  position: relative;
+  margin-bottom: $spacing;
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  grid-gap: $spacing 0;
+  
+  &__disclaimer {
+    font-size: $font-smaller;
+    grid-column: span 16;
+    @include landscape() {
+      grid-column: 3 / span 12;
+    }
+  }
+  &__input-group {
     position: relative;
-    margin-bottom: $spacing;
+    margin-bottom: $spacing / 2;
     @supports (display: grid) {
-        display: grid;
-        grid-template-columns: repeat(16, 1fr);
-        grid-gap: $spacing 0;
-    }
-    &__disclaimer {
-        font-size: $font-smaller;
-        grid-column: span 16;
-        @include landscape() {
-            grid-column: 3 / span 12;
-        }
-    }
-    &__input-group {
-        position: relative;
-        margin-bottom: $spacing / 2;
-        @supports (display: grid) {
-            margin-bottom: 0;
-            grid-column: span 8;
-            &:nth-child(2n) {
-                > .aata-form__input {
-                    position: relative;
-                    z-index: 1;
-                    border-right-color: $grey-base;
-                    &:focus {
-                        border-right-color: $brand;
-                    }
-                }
-            }
-            &:nth-child(2n + 1) {
-                > .aata-form__input {
-                    position: relative;
-                    left: -2px;
-                    &:focus {
-                        z-index: 2;
-                    }
-                }
-            }
-            @include landscape() {
-                grid-column: span 6;
-                &:nth-child(2n) {
-                    grid-column: 3 / span 6;
-                }
-            }
-        }
-        .aata-form__label--bottom- {
+      margin-bottom: 0;
+      grid-column: span 16;
+      @include portraitLandscape() {
+        grid-column: span 8;
+        &:nth-child(2n) {
+          > .aata-form__input {
             position: relative;
-            bottom: -0.2rem;
-        }
-    }
-    &__label {
-        display: block;
-        padding-left: .5rem;
-    }
-    &__input {
-        width: 100%;
-        &.ng-invalid.ng-dirty:not(:focus) {
-            border-bottom-color: $danger;
-        }
-    }
-    &__fieldset {
-        margin-bottom: $spacing / 2;
-        @supports (display: grid) {
-            margin-bottom: 0;
-            grid-column: span 16;
-            @include landscape() {
-                grid-column: 3 / span 12;
+            z-index: 1;
+            border-right-color: $grey-base;
+            &:focus {
+              border-right-color: $brand;
             }
+          }
         }
-        &-grid {
-            grid-template-columns: repeat(2, 1fr);
-            grid-gap: ($spacing / 4);
-            @include landscape() {
-                display: grid;
-            };
+        &:nth-child(2n + 1) {
+          > .aata-form__input {
+            position: relative;
+            left: -2px;
+            &:focus {
+              z-index: 2;
+            }
+          }
         }
+      }
+      @include landscape() {
+        grid-column: span 6;
+        &:nth-child(2n) {
+          grid-column: 3 / span 6;
+        }
+      }
     }
-    &__checkbox-container {
+    .aata-form__label--bottom- {
+      position: relative;
+      bottom: -0.2rem;
+    }
+  }
+  &__label {
+    display: block;
+    padding-left: .5rem;
+  }
+  &__input {
+    width: 100%;
+    &.ng-invalid.ng-dirty:not(:focus) {
+      border-bottom-color: $danger;
+    }
+  }
+  &__fieldset {
+    margin-bottom: $spacing / 2;
+    @supports (display: grid) {
+      margin-bottom: 0;
+      grid-column: span 16;
+      @include landscape() {
+        grid-column: 3 / span 12;
+      }
+    }
+    &-grid {
+      grid-template-columns: repeat(2, 1fr);
+      grid-gap: ($spacing / 4);
+      @include landscape() {
+        display: grid;
+      }
+    }
+  }
+  &__checkbox-container {
     //     display: flex;
     //     align-items: center;
-    }
-    // &__checkbox {
-    //     flex: 0 0 auto;
-    // }
-    &__checkbox-label {
-        cursor: pointer;
-    }
-    &__textarea {
-        &-group {
-            @supports (display: grid) {
-                grid-column: span 16;
-                @include landscape() {
-                    grid-column: 3 / span 12;
-                }
-            }
+  }
+  // &__checkbox {
+  //     flex: 0 0 auto;
+  // }
+  &__checkbox-label {
+    cursor: pointer;
+  }
+  &__textarea {
+    &-group {
+      @supports (display: grid) {
+        grid-column: span 16;
+        @include landscape() {
+          grid-column: 3 / span 12;
         }
-        width: 100%;
-        min-height: $base-line * 4rem;
+      }
     }
-    &__button-container {
-        text-align: center;
-        @supports (display: grid) {
-            grid-column: span 16;
-        }
+    width: 100%;
+    min-height: $base-line * 4rem;
+  }
+  &__button-container {
+    text-align: center;
+    @supports (display: grid) {
+      grid-column: span 16;
     }
-    &__button {
-        display: inline-block;
-        width: 10rem;
+  }
+  &__button {
+    display: inline-block;
+    width: 10rem;
+  }
+  &__message {
+    color: $danger;
+    position: absolute;
+    font-size: $font-smaller;
+    line-height: 1.1;
+    font-weight: 700;
+    left: 0;
+    > div {
     }
-    &__message {
-        color: $danger;
-        position: absolute;
-        font-size: $font-smaller;
-        line-height: 1.1;
-        font-weight: 700;
-        left: 0;
-        > div {
+  }
+  &__screen {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
 
-        }
-    }
-    &__screen {
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
+    transition: all .2s ease-out;
+    opacity: 0;
+    visibility: hidden;
 
-        transition: all .2s ease-out;
-        opacity: 0;
-        visibility: hidden;
+    z-index: 10;
 
-        z-index: 10;
-        
-        background: #fff;
-        &.show {
-            opacity: 1;
-            visibility: visible;
-        }
+    background: #fff;
+    &.show {
+      opacity: 1;
+      visibility: visible;
     }
+  }
 }
 
 .required-message {
-    margin: ($spacing / 2) 0;
-    color: $danger;
-    font-weight: 700;
+  margin: ($spacing / 2) 0;
+  color: $danger;
+  font-weight: 700;
 }
 .required {
-    color: $danger;
+  color: $danger;
 }

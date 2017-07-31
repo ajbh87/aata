@@ -1,15 +1,9 @@
 <?php
 /*
- *  Author: Todd Motto | @toddmotto
- *  URL: html5blank.com | @html5blank
+ *  Author: Alfredo Bermúdez | @alfredo-xyz
+ *  URL: alfredo.xyz
  *  Custom functions, support, custom post types and more.
  */
-
-/*------------------------------------*\
-	External Modules/Files
-\*------------------------------------*/
-
-// Load any external files you have here
 
 /*------------------------------------*\
 	Theme Support
@@ -31,12 +25,6 @@ if (function_exists('add_theme_support'))
     add_image_size('medium', 250, '', true); // Medium Thumbnail
     add_image_size('small', 120, '', true); // Small Thumbnail
     add_image_size('custom-size', 700, 200, true); // Custom Thumbnail Size call using the_post_thumbnail('custom-size');
-
-    // Add Support for Custom Backgrounds - Uncomment below if you're going to use
-    /*add_theme_support('custom-background', array(
-	'default-color' => 'FFF',
-	'default-image' => get_template_directory_uri() . '/img/bg.jpg'
-    ));*/
 
     // Add Support for Custom Header - Uncomment below if you're going to use
     /*add_theme_support('custom-header', array(
@@ -62,7 +50,7 @@ if (function_exists('add_theme_support'))
 	Functions
 \*------------------------------------*/
 function get_special_cat() {
-    $catID = 34; //38
+    $catID = 38; //34
     return $catID;
 }
 // HTML5 Blank navigation
@@ -83,7 +71,7 @@ function html5blank_nav()
 		'after'           => '',
 		'link_before'     => '',
 		'link_after'      => '',
-		'items_wrap'      => '<ul>%3$s</ul>',
+		'items_wrap'      => '<ul class="%2$s"><li ng-click="">%3$s</li></ul>',
 		'depth'           => 0,
 		'walker'          => ''
 		)
@@ -119,7 +107,7 @@ function html5blank_styles()
     wp_register_style('normalize', get_template_directory_uri() . '/normalize.css', array(), '1.0', 'all');
     wp_enqueue_style('normalize'); // Enqueue it!
 
-    wp_register_style('aataStyle', get_template_directory_uri() . '/style.css', array(), '1.0.1', 'all');
+    wp_register_style('aataStyle', get_template_directory_uri() . '/style.css', array(), '1.0.2', 'all');
     wp_enqueue_style('aataStyle'); // Enqueue it!
 
     //wp_register_style('aataStyleMin', get_template_directory_uri() . '/style.min.css', array(), '1.0.1', 'all');
