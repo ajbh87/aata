@@ -32,13 +32,16 @@ body {
   height: 100%;
   overflow: auto;
   margin: 0;
-  padding: 0;
+  padding: 0 0 $mobile-h 0;
 
   @include bg;
   @include portrait() {
     &.menu-is-active {
       overflow: hidden;
     }
+  }
+  @include landscape() {
+    padding: 0;
   }
 }
 @import 'partials/defaults', 'partials/buttons';
@@ -225,6 +228,10 @@ $nav-font: 0.9rem;
     @include landscape() {
       padding: ($spacing / 4) ($spacing / 2);
     }
+    &.active {
+      background: $brand;
+      color: #fff;
+    }
   }
   .children,
   .sub-menu {
@@ -232,7 +239,10 @@ $nav-font: 0.9rem;
     border-right: 3px dotted $brand;
 
     > li a {
-      padding-left: $spacing;
+      padding-left: $spacing * 2;
+      @include landscape() {
+        padding-left: $spacing;
+      }
     }
   }
   &.js {
@@ -552,6 +562,95 @@ $nav-font: 0.9rem;
     }
   }
 }
+// --------------------------- Mobile
+@keyframes growShrink{
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1.2);
+    opacity: 0;
+  }
+}
+.mobile {
+  box-sizing: border-box;
+  position: fixed;
+  height: $mobile-h;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: $grey-dark;
+  z-index: 50;
+  display: flex;
+  font-size: 1rem;
+  border-top: 1px solid lighten($grey-dark, 10);
+
+  @include portrait-sm() {
+    font-size: 1.3rem;
+  }
+  @include landscape() {
+    display: none;
+  }
+
+  &__link {
+    position: relative;
+    width: 33.33%;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 0;
+    overflow: hidden;
+    &:before {
+      content: " ";
+      position: absolute;
+      width: 100%;
+      padding-bottom: 100%;
+      background: $brand;
+      z-index: -1;
+      border-radius: 50%;
+      transform: scale(0);
+    }
+    &:after {
+      content: " ";
+      position: absolute;
+      width: 100%;
+      top: 0;
+      height: 3px;
+      background-color: $brand;
+      transform-origin: center center;
+      transform: scaleX(0);
+      transition: transform 0.3s ease(out-sine);
+    }
+    &:hover, &:focus {
+      background: transparent;
+      &:after {
+        transform: scaleX(1);
+      }
+    }
+    &.animate:before{
+      animation-name: growShrink;
+      animation-timing-function: ease(in-cubic);
+      animation-duration: 0.4s;
+      animation-iteration-count: 1;
+    }
+  }
+  &__icon {
+    margin: 1px 0.25rem 0 0;
+    @include portrait-sm() {
+      margin: 0;
+    }
+  }
+  &__text {
+    @include portrait-sm() {
+      display: none;
+    }
+  }
+}
 // --------------------------- Footer
 .footer {
   font-size: .7rem;
@@ -651,7 +750,6 @@ $nav-font: 0.9rem;
 
   @include landscape() {
     left: $side;
-    //right: $side;
   }
 }
 

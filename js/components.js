@@ -1,6 +1,7 @@
 /* global angular */
 import aataResources from './aataResources.js';
 import aataForm from './aataForm.js';
+//import aataCache from './aataCache.js';
 import saKnife from './libs/saKnife.js';
 
 const initComponents = (function initComponents(angular) {
@@ -8,14 +9,16 @@ const initComponents = (function initComponents(angular) {
 
   angular
     .module('components', ['ngResource', 'ngMessages'])
+    //.factory('aataCache', aataCache)
     .directive('aataScript', aataScript)
     .directive('aataForm', aataForm)
     .directive('aataResources', aataResources)
     .directive('aataMenu', aataMenu)
+    .directive('aataButton', aataButton)
     .directive('aataTransfer', aataTransfer);
 
   aataTransfer.$inject = ['$document'];
-  aataMenu.$inject = ['$document', '$compile', '$templateCache'];
+  aataMenu.$inject = ['$document', '$compile', '$templateCache', '$rootScope'];
   aataForm.$inject = ['$http', '$timeout'];
   aataResources.$inject = [
     '$compile',
@@ -24,35 +27,50 @@ const initComponents = (function initComponents(angular) {
     '$resource',
     '$templateCache',
     '$timeout',
-    '$document'
+    '$document',
+    '$rootScope'
   ];
 
   return 'initComponents';
 
-  function aataMenu($document, $compile, $templateCache) {
+  function aataMenu($document, $compile, $templateCache, $rootScope) {
+    $rootScope.activeLink = window.location.href
+      .replace(/(https?:\/\/)/g, '')
+      .replace(/\/+$/g, '');
     return {
       link: (scope, element, attrs) => {
         const SELECTOR = attrs.aataMenu,
           MENU = element.find('div'),
           EXPAND = $templateCache.get('expand.html');
-        let items,
-          index = 0;
 
-        MENU.detach();
-        items = MENU[0].querySelectorAll(SELECTOR);
         element.addClass('js');
-        for (index = 0; index < items.length; index++) {
-          items[index].innerHtml = insertExpand(items[index]);
-        }
+        MENU.detach();
+        // List items with submenu
+        MENU[0].querySelectorAll(SELECTOR).forEach(listItem => {
+          listItem.innerHtml = insertExpand(listItem);
+        });
+        MENU[0].querySelectorAll('a').forEach(anchorItem => {
+          let href = jqLite(anchorItem)
+            .attr('href')
+            .replace(/(https?:\/\/)/g, '')
+            .replace(/\/+$/g, '');
+          jqLite(anchorItem).attr(
+            'ng-class',
+            `{"active": activeLink == "${href}"}`
+          );
+          anchorItem.outerHtml = $compile(anchorItem)(scope.$new());
+        });
         element.append(MENU);
 
         function insertExpand(item) {
           let subScope = scope.$new();
 
           subScope.showChildren = false;
-          jqLite(item).find('ul').attr('ng-class', `{'is-active': showChildren}`);
+          jqLite(item)
+            .find('ul')
+            .attr('ng-class', `{'is-active': showChildren}`);
           jqLite(item).prepend(EXPAND);
-          
+
           return $compile(item)(subScope);
         }
       }
@@ -108,6 +126,26 @@ const initComponents = (function initComponents(angular) {
         }
       }
     };
+  }
+  function aataButton() {
+    return {
+      link: function(scope, elem) {
+        elem[0].addEventListener('click', gs);
+      }
+    };
+    function gs() {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          jqLite(this).addClass('animate');
+        });
+      });
+      this.addEventListener('animationend', function() {
+        jqLite(this).removeClass('animate');
+      });
+      this.addEventListener('webkitAnimationEnd', function() {
+        jqLite(this).removeClass('animate');
+      });
+    }
   }
 })(angular);
 export default initComponents;

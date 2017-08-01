@@ -4,6 +4,7 @@
  *  URL: alfredo.xyz
  *  Custom functions, support, custom post types and more.
  */
+$isDev = false;
 
 /*------------------------------------*\
 	Theme Support
@@ -43,7 +44,7 @@ if (function_exists('add_theme_support'))
     add_theme_support('automatic-feed-links');
 
     // Localisation Support
-    load_theme_textdomain('html5blank', get_template_directory() . '/languages');
+    load_theme_textdomain('aata', get_template_directory() . '/languages');
 }
 
 /*------------------------------------*\
@@ -53,8 +54,8 @@ function get_special_cat() {
     $catID = 38; //34
     return $catID;
 }
-// HTML5 Blank navigation
-function html5blank_nav()
+// AATA navigation
+function aata_nav()
 {
 	wp_nav_menu(
 	array(
@@ -71,29 +72,30 @@ function html5blank_nav()
 		'after'           => '',
 		'link_before'     => '',
 		'link_after'      => '',
-		'items_wrap'      => '<ul class="%2$s"><li ng-click="">%3$s</li></ul>',
+		'items_wrap'      => '<ul class="%2$s">%3$s</ul>',
 		'depth'           => 0,
 		'walker'          => ''
 		)
 	);
 }
 
-// Load HTML5 Blank scripts (header.php)
-function html5blank_header_scripts()
+// Load AATA scripts (header.php)
+function aata_header_scripts()
 {
     if ($GLOBALS['pagenow'] != 'wp-login.php' && !is_admin()) {
-        //Dev
-        wp_register_script('dev', get_template_directory_uri() . '/js-bundles/scripts.js', array(), '1.0.2');
-        wp_enqueue_script('dev');
-        
-        //Production
-        // wp_register_script('production', get_template_directory_uri() . '/js-bundles/scripts.min.js', array(), '1.0.2');
-        // wp_enqueue_script('production');
+        if ($isDev == true) {
+            // Dev
+            wp_register_script('scripts', get_template_directory_uri() . '/js-bundles/scripts.js', array(), '1.0.2');
+        } else {
+            // Production
+            wp_register_script('scripts', get_template_directory_uri() . '/js-bundles/scripts.min.js.gz', array(), '1.0.2');
+        }
+        wp_enqueue_script('scripts');
     }
 }
 
-// Load HTML5 Blank conditional scripts
-function html5blank_conditional_scripts()
+// Load AATA conditional scripts
+function aata_conditional_scripts()
 {
     if (is_page('pagenamehere')) {
         wp_register_script('scriptname', get_template_directory_uri() . '/js/scriptname.js', array('jquery'), '1.0.0'); // Conditional script(s)
@@ -101,26 +103,28 @@ function html5blank_conditional_scripts()
     }
 }
 
-// Load HTML5 Blank styles
-function html5blank_styles()
+// Load AATA styles
+function aata_styles()
 {
-    wp_register_style('normalize', get_template_directory_uri() . '/normalize.css', array(), '1.0', 'all');
+    wp_register_style('normalize', get_template_directory_uri() . '/normalize.min.css', array(), '1.0', 'all');
     wp_enqueue_style('normalize'); // Enqueue it!
-
-    wp_register_style('aataStyle', get_template_directory_uri() . '/style.css', array(), '1.0.2', 'all');
-    wp_enqueue_style('aataStyle'); // Enqueue it!
-
-    //wp_register_style('aataStyleMin', get_template_directory_uri() . '/style.min.css', array(), '1.0.1', 'all');
-    //wp_enqueue_style('aataStyleMin'); // Enqueue it!
+    if ($isDev == true) {
+        // Dev
+        wp_register_style('aataStyle', get_template_directory_uri() . '/style.css', array(), '1.0.2', 'all');
+    } else {
+        // Production
+        wp_register_style('aataStyle', get_template_directory_uri() . '/style.min.css', array(), '1.0.2', 'all');
+    }
+    wp_enqueue_style('aataStyle');
 }
 
-// Register HTML5 Blank Navigation
+// Register AATA Navigation
 function register_html5_menu()
 {
     register_nav_menus(array( // Using array to specify more menus if needed
-        'header-menu' => __('Header Menu', 'html5blank'), // Main Navigation
-        'sidebar-menu' => __('Sidebar Menu', 'html5blank'), // Sidebar Navigation
-        'extra-menu' => __('Extra Menu', 'html5blank') // Extra Navigation if needed (duplicate as many as you need!)
+        'header-menu' => __('Header Menu', 'aata'), // Main Navigation
+        'sidebar-menu' => __('Sidebar Menu', 'aata'), // Sidebar Navigation
+        'extra-menu' => __('Extra Menu', 'aata') // Extra Navigation if needed (duplicate as many as you need!)
     ));
 }
 
@@ -166,8 +170,8 @@ if (function_exists('register_sidebar'))
 {
     // Define Sidebar Widget Area 1
     register_sidebar(array(
-        'name' => __('Widget Area 1', 'html5blank'),
-        'description' => __('Description for this widget-area...', 'html5blank'),
+        'name' => __('Widget Area 1', 'aata'),
+        'description' => __('Description for this widget-area...', 'aata'),
         'id' => 'widget-area-1',
         'before_widget' => '<div id="%1$s" class="%2$s">',
         'after_widget' => '</div>',
@@ -177,8 +181,8 @@ if (function_exists('register_sidebar'))
 
     // Define Sidebar Widget Area 2
     register_sidebar(array(
-        'name' => __('Widget Area 2', 'html5blank'),
-        'description' => __('Description for this widget-area...', 'html5blank'),
+        'name' => __('Widget Area 2', 'aata'),
+        'description' => __('Description for this widget-area...', 'aata'),
         'id' => 'widget-area-2',
         'before_widget' => '<div id="%1$s" class="%2$s">',
         'after_widget' => '</div>',
@@ -243,7 +247,7 @@ function html5wp_excerpt($length_callback = '', $more_callback = '')
 function html5_blank_view_article($more)
 {
     global $post;
-    return '... <a class="view-article" href="' . get_permalink($post->ID) . '">' . __('View Article', 'html5blank') . '</a>';
+    return '... <a class="view-article" href="' . get_permalink($post->ID) . '">' . __('View Article', 'aata') . '</a>';
 }
 
 // Remove Admin bar
@@ -270,11 +274,11 @@ function remove_thumbnail_dimensions( $html )
 \*------------------------------------*/
 
 // Add Actions
-add_action('init', 'html5blank_header_scripts'); // Add Custom Scripts to wp_head
-add_action('wp_print_scripts', 'html5blank_conditional_scripts'); // Add Conditional Page Scripts
-add_action('wp_enqueue_scripts', 'html5blank_styles'); // Add Theme Stylesheet
-add_action('init', 'register_html5_menu'); // Add HTML5 Blank Menu
-add_action('init', 'create_post_type_html5'); // Add our HTML5 Blank Custom Post Type
+add_action('init', 'aata_header_scripts'); // Add Custom Scripts to wp_head
+add_action('wp_print_scripts', 'aata_conditional_scripts'); // Add Conditional Page Scripts
+add_action('wp_enqueue_scripts', 'aata_styles'); // Add Theme Stylesheet
+add_action('init', 'register_html5_menu'); // Add AATA Menu
+add_action('init', 'create_post_type_html5'); // Add our AATA Custom Post Type
 add_action('widgets_init', 'my_remove_recent_comments_style'); // Remove inline Recent Comment Styles from wp_head()
 add_action('init', 'html5wp_pagination'); // Add our HTML5 Pagination
 
@@ -328,18 +332,18 @@ function create_post_type_html5()
     register_post_type('html5-blank', // Register Custom Post Type
         array(
         'labels' => array(
-            'name' => __('HTML5 Blank Custom Post', 'html5blank'), // Rename these to suit
-            'singular_name' => __('HTML5 Blank Custom Post', 'html5blank'),
-            'add_new' => __('Add New', 'html5blank'),
-            'add_new_item' => __('Add New HTML5 Blank Custom Post', 'html5blank'),
-            'edit' => __('Edit', 'html5blank'),
-            'edit_item' => __('Edit HTML5 Blank Custom Post', 'html5blank'),
-            'new_item' => __('New HTML5 Blank Custom Post', 'html5blank'),
-            'view' => __('View HTML5 Blank Custom Post', 'html5blank'),
-            'view_item' => __('View HTML5 Blank Custom Post', 'html5blank'),
-            'search_items' => __('Search HTML5 Blank Custom Post', 'html5blank'),
-            'not_found' => __('No HTML5 Blank Custom Posts found', 'html5blank'),
-            'not_found_in_trash' => __('No HTML5 Blank Custom Posts found in Trash', 'html5blank')
+            'name' => __('AATA Custom Post', 'aata'), // Rename these to suit
+            'singular_name' => __('AATA Custom Post', 'aata'),
+            'add_new' => __('Add New', 'aata'),
+            'add_new_item' => __('Add New AATA Custom Post', 'aata'),
+            'edit' => __('Edit', 'aata'),
+            'edit_item' => __('Edit AATA Custom Post', 'aata'),
+            'new_item' => __('New AATA Custom Post', 'aata'),
+            'view' => __('View AATA Custom Post', 'aata'),
+            'view_item' => __('View AATA Custom Post', 'aata'),
+            'search_items' => __('Search AATA Custom Post', 'aata'),
+            'not_found' => __('No AATA Custom Posts found', 'aata'),
+            'not_found_in_trash' => __('No AATA Custom Posts found in Trash', 'aata')
         ),
         'public' => true,
         'hierarchical' => true, // Allows your posts to behave like Hierarchy Pages
@@ -349,7 +353,7 @@ function create_post_type_html5()
             'editor',
             'excerpt',
             'thumbnail'
-        ), // Go to Dashboard Custom HTML5 Blank post for supports
+        ), // Go to Dashboard Custom AATA post for supports
         'can_export' => true, // Allows export in Tools > Export
         'taxonomies' => array(
             'post_tag',

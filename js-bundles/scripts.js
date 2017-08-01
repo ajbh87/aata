@@ -103,58 +103,170 @@ module.exports = g;
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
-function whichTransitionEvent() {
-  var el = document.createElement('fakeelement'),
-      transitions = {
-    transition: 'transitionend',
-    OTransition: 'oTransitionEnd',
-    MozTransition: 'transitionend',
-    WebkitTransition: 'webkitTransitionEnd'
-  };
-  var t = void 0;
 
-  for (t in transitions) {
-    if (el.style[t] !== undefined) {
-      return transitions[t];
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+ * HTMLElement offset. Every property is in pixels
+ * @typedef {object} offsetObject
+ * @property {number} top - 'top' position relative to 'body'
+ * @property {number} left - 'left' position relative to 'body'
+ */
+
+/**
+ * Basic utilities for the Vanilla JS toolbox
+ * @class saKnife
+ */
+var saKnife = function () {
+  function saKnife() {
+    _classCallCheck(this, saKnife);
+  }
+
+  _createClass(saKnife, null, [{
+    key: 'whichTransitionEvent',
+
+    /**
+     * Check the name of CSS transitionEnd Event
+     * @copyright Modernizr - via {@link https://davidwalsh.name/css-animation-callbackdavidwalsh}
+     * @return {string} CSS transitionEnd Event name
+     */
+    value: function whichTransitionEvent() {
+      var el = document.createElement('fakeelement'),
+          transitions = {
+        transition: 'transitionend',
+        OTransition: 'oTransitionEnd',
+        MozTransition: 'transitionend',
+        WebkitTransition: 'webkitTransitionEnd'
+      };
+      var t = void 0;
+
+      for (t in transitions) {
+        if (el.style[t] !== undefined) {
+          return transitions[t];
+        }
+      }
     }
-  }
+    /**
+       * Iterate through NodeList
+       * @param {NodeList} elements - a NodeList of Elements.
+       * @param {function} fn - function to run for each element.
+       * @example
+       * const elements = document.querySelectorAll('.some-class');
+       * saKnife.forEach(elements, function(el, index) {
+       *     doSometing(el);
+       * });
+       */
+
+  }, {
+    key: 'forEach',
+    value: function forEach(elements, fn) {
+      var total = elements.length;
+      var index = 0;
+      for (index = 0; index < total; index++) {
+        fn(elements[index], index);
+      }
+    }
+    /**
+       * Check if 'element' has specified 'class'
+       * @param {HTMLElement} el - HTMLElement
+       * @param {string} className - CSS class name
+       * @return {boolean} true/false if 'el' has class 'className'
+       * @example
+       * const element = document.querySelector('.some-class');
+       * saKnife.hasClass(element, 'some-class');
+       * // returns true
+       */
+
+  }, {
+    key: 'hasClass',
+    value: function hasClass(el, className) {
+      if (el.classList) return el.classList.contains(className);else return new RegExp('(^| )' + className + '( |$)', 'gi').test(el.className);
+    }
+
+    /**
+     * Check 'element' position relative to 'body'
+     * @param {HTMLElement} el - HTMLElement
+     * @return {offsetObject} - Offset information [offsetObject]{@link offsetObject} 
+     */
+
+  }, {
+    key: 'offset',
+    value: function offset(el) {
+      var rect = el.getBoundingClientRect(),
+          body = document.body.getBoundingClientRect();
+
+      return {
+        top: Math.abs(body.top) + rect.top,
+        left: Math.abs(body.left) + rect.left
+      };
+    }
+
+    /**
+     * Check 'window' size
+     * @example
+     * saKnife.winSize();
+     * // returns {width: 1920, height: 1080, ...}
+     * @return {winSizeObject}
+        {@link module:src/saKnife~winSizeObject winSizeObject} - Windows size information
+     */
+
+  }, {
+    key: 'winSize',
+    value: function winSize() {
+      var e = document.documentElement,
+          g = document.querySelector('body'),
+          width = window.innerWidth || e.clientWidth || g.clientWidth,
+          height = window.innerHeight || e.clientHeight || g.clientHeight;
+      return {
+        width: width,
+        height: height,
+        vCenter: height / 2,
+        hCenter: width / 2,
+        documentHeight: g.offsetHeight,
+        documentWidth: g.offsetWidth
+      };
+    }
+    /**
+     * Round a number to specified decimals
+     * @param {number} value
+     * @param {number} decimals
+     * @return {number}
+     */
+
+  }, {
+    key: 'round',
+    value: function round(value, decimals) {
+      return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
+    }
+  }]);
+
+  return saKnife;
+}();
+
+if (NodeList.forEach == null) {
+  NodeList.prototype.forEach = function (fn) {
+    saKnife.forEach(this, fn);
+  };
 }
-var saKnife = {
-  transitionEvent: whichTransitionEvent(),
-  offset: function offset(el) {
-    var rect = el.getBoundingClientRect(),
-        body = document.body.getBoundingClientRect();
+if (HTMLElement.hasClass == null) {
+  HTMLElement.prototype.hasClass = function (className) {
+    return saKnife.hasClass(this, className);
+  };
+}
+if (HTMLElement.getOffset == null) {
+  HTMLElement.prototype.getOffset = function () {
+    return saKnife.offset(this);
+  };
+}
 
-    return {
-      top: Math.abs(body.top) + rect.top,
-      left: Math.abs(body.left) + rect.left
-    };
-  },
-  winSize: function winSize() {
-    var e = document.documentElement,
-        g = document.querySelector('body'),
-        width = e.clientWidth || g.clientWidth,
-        height = e.clientHeight || g.clientHeight;
-    return {
-      width: width,
-      height: height,
-      vCenter: height / 2,
-      hCenter: width / 2,
-      documentHeight: g.offsetHeight,
-      documentWidth: g.offsetWidth
-    };
-  },
-  hasClass: function hasClass(el, className) {
-    var response = false;
-
-    if (el.classList) response = el.classList.contains(className);else response = new RegExp('(^| )' + className + '( |$)', 'gi').test(el.className);
-
-    return response;
-  },
-  round: function round(value, decimals) {
-    return Number(Math.round(value + 'e' + decimals) + 'e-' + decimals);
-  }
-};
+/**
+ * Exports class [saKnife]{@link saKnife}
+ * - Polyfills NodeList.forEach
+ * - Extends HTMLElement with getOffset and hasClass
+ * @module src/saKnife
+ */
 exports.default = saKnife;
 
 /***/ }),
@@ -5864,30 +5976,36 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var initComponents = function initComponents(angular) {
   var jqLite = angular.element;
 
-  angular.module('components', ['ngResource', 'ngMessages']).directive('aataScript', aataScript).directive('aataForm', _aataForm2.default).directive('aataResources', _aataResources2.default).directive('aataMenu', aataMenu).directive('aataTransfer', aataTransfer);
+  angular.module('components', ['ngResource', 'ngMessages'])
+  //.factory('aataCache', aataCache)
+  .directive('aataScript', aataScript).directive('aataForm', _aataForm2.default).directive('aataResources', _aataResources2.default).directive('aataMenu', aataMenu).directive('aataButton', aataButton).directive('aataTransfer', aataTransfer);
 
   aataTransfer.$inject = ['$document'];
-  aataMenu.$inject = ['$document', '$compile', '$templateCache'];
+  aataMenu.$inject = ['$document', '$compile', '$templateCache', '$rootScope'];
   _aataForm2.default.$inject = ['$http', '$timeout'];
-  _aataResources2.default.$inject = ['$compile', '$q', '$sce', '$resource', '$templateCache', '$timeout', '$document'];
+  _aataResources2.default.$inject = ['$compile', '$q', '$sce', '$resource', '$templateCache', '$timeout', '$document', '$rootScope'];
 
   return 'initComponents';
 
-  function aataMenu($document, $compile, $templateCache) {
+  function aataMenu($document, $compile, $templateCache, $rootScope) {
+    $rootScope.activeLink = window.location.href.replace(/(https?:\/\/)/g, '').replace(/\/+$/g, '');
     return {
       link: function link(scope, element, attrs) {
         var SELECTOR = attrs.aataMenu,
             MENU = element.find('div'),
             EXPAND = $templateCache.get('expand.html');
-        var items = void 0,
-            index = 0;
 
-        MENU.detach();
-        items = MENU[0].querySelectorAll(SELECTOR);
         element.addClass('js');
-        for (index = 0; index < items.length; index++) {
-          items[index].innerHtml = insertExpand(items[index]);
-        }
+        MENU.detach();
+        // List items with submenu
+        MENU[0].querySelectorAll(SELECTOR).forEach(function (listItem) {
+          listItem.innerHtml = insertExpand(listItem);
+        });
+        MENU[0].querySelectorAll('a').forEach(function (anchorItem) {
+          var href = jqLite(anchorItem).attr('href').replace(/(https?:\/\/)/g, '').replace(/\/+$/g, '');
+          jqLite(anchorItem).attr('ng-class', '{"active": activeLink == "' + href + '"}');
+          anchorItem.outerHtml = $compile(anchorItem)(scope.$new());
+        });
         element.append(MENU);
 
         function insertExpand(item) {
@@ -5953,7 +6071,31 @@ var initComponents = function initComponents(angular) {
       }
     };
   }
-}(angular); /* global angular */
+  function aataButton() {
+    return {
+      link: function link(scope, elem) {
+        elem[0].addEventListener('click', gs);
+      }
+    };
+    function gs() {
+      var _this = this;
+
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          jqLite(_this).addClass('animate');
+        });
+      });
+      this.addEventListener('animationend', function () {
+        jqLite(this).removeClass('animate');
+      });
+      this.addEventListener('webkitAnimationEnd', function () {
+        jqLite(this).removeClass('animate');
+      });
+    }
+  }
+}(angular);
+//import aataCache from './aataCache.js';
+/* global angular */
 exports.default = initComponents;
 
 /***/ }),
@@ -41200,7 +41342,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, $document) {
+function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, $document, $rootScope) {
   var stateConstructor = function () {
     function stateConstructor() {
       var def = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
@@ -41273,7 +41415,9 @@ function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, 
     unionWith: _index8.default
   },
       jqLite = angular.element;
-  var main = $document[0].querySelector('.main'),
+  var SCROLL_PAD = 500,
+      POSTS_PER_PAGE = 10,
+      main = $document[0].querySelector('.main'),
       lang = getLang(),
       base = lang.url,
       restUrl = base + '/wp-json/wp/v2',
@@ -41281,7 +41425,6 @@ function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, 
     posts: [],
     tags: []
   },
-      POSTS_PER_PAGE = 10,
       defaultResourceOptions = {
     get: { method: 'GET', cache: true },
     query: { method: 'GET', cache: true, isArray: true }
@@ -41351,8 +41494,7 @@ function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, 
   }),
       allUsersDef = reallyGetAll('users'),
       allTagsDef = reallyGetAll('tags'),
-      allCategoriesDef = reallyGetAll('categories'),
-      scrollPad = 300;
+      allCategoriesDef = reallyGetAll('categories');
   var unbindLoop = function unbindLoop() {},
       comingFromHash = false;
   jqLite(window).on('scroll', _.debounce(checkScrollPosition, 50));
@@ -41713,6 +41855,7 @@ function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, 
           if (s.replace === true) {
             action = 'replaceState';
           }
+          $rootScope.activeLink = s.url.replace(/(https?:\/\/)/g, '').replace(/\/+$/g, '');
           history[action](s, '', s.url);
         });
       }
@@ -41845,7 +41988,7 @@ function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, 
   }
   function goTo(pos) {
     if (window.scrollTo != null) {
-      pos = pos > scrollPad ? pos - scrollPad : pos;
+      pos = pos > SCROLL_PAD ? pos - SCROLL_PAD : pos;
       window.scrollTo(0, pos);
       return true;
     } else return false;
@@ -41883,7 +42026,7 @@ function aataResources($compile, $q, $sce, $resource, $templateCache, $timeout, 
       mainEnd = _saKnife2.default.offset(main).top + main.offsetHeight - _saKnife2.default.winSize().height;
     }
     function scrollBind() {
-      if (window.scrollY + scrollPad >= mainEnd) {
+      if (window.scrollY + SCROLL_PAD >= mainEnd) {
         if (pastBottom === false) {
           pastBottom = true;
           state.set('pastBottom', pastBottom);

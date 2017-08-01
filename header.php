@@ -43,7 +43,7 @@
                 ng-class="{'is-active': showMenu == true, 'is-hidden': hideMenu }"
                 aata-menu=".menu-item-has-children">
                 <div>
-                    <?php html5blank_nav(); ?>
+                    <?php aata_nav(); ?>
                 </div>
             </nav>
             <!-- /nav -->

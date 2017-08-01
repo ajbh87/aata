@@ -4,7 +4,7 @@
     <!-- section -->
     <section>
 
-        <h1 class="main__title"><?php _e( 'Archives', 'html5blank' ); ?></h1>
+        <h1 class="main__title"><?php _e( 'Archives', 'aata' ); ?></h1>
 
         <?php get_template_part('loop'); ?>
 

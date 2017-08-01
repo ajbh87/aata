@@ -4,7 +4,7 @@
 	<?php if(!function_exists('dynamic_sidebar') || !dynamic_sidebar('widget-area-1')) ?>
 	<section class="">
 
-<!--         <h1 class="main__title"><?php _e( 'Latest Posts', 'html5blank' ); ?></h1>
+<!--         <h1 class="main__title"><?php _e( 'Latest Posts', 'aata' ); ?></h1>
  -->
         <?php get_template_part('loop'); ?>
 

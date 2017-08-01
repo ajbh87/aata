@@ -1,5 +1,8 @@
 .g-recaptcha {
   position: absolute;
+  .grecaptcha-badge {
+    bottom: 5rem !important;
+  }
 }
 [aata-form] {
   position: relative;
@@ -85,13 +88,6 @@
       }
     }
   }
-  &__checkbox-container {
-    //     display: flex;
-    //     align-items: center;
-  }
-  // &__checkbox {
-  //     flex: 0 0 auto;
-  // }
   &__checkbox-label {
     cursor: pointer;
   }

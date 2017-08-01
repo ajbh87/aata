@@ -58,7 +58,7 @@
 				?>
             </div>
 
-            <p class="hidden"><?php _e( 'Categorised in: ', 'html5blank' ); the_category(', '); // Separated by commas ?></p>
+            <p class="hidden"><?php _e( 'Categorised in: ', 'aata' ); the_category(', '); // Separated by commas ?></p>
 		</article>
 		<!-- /article -->
 
@@ -69,7 +69,7 @@
 		<!-- article -->
 		<article>
 
-			<h1><?php _e( 'Sorry, nothing to display.', 'html5blank' ); ?></h1>
+			<h1><?php _e( 'Sorry, nothing to display.', 'aata' ); ?></h1>
 
 		</article>
 		<!-- /article -->

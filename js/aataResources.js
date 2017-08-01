@@ -15,7 +15,8 @@ export default function aataResources(
   $resource,
   $templateCache,
   $timeout,
-  $document
+  $document,
+  $rootScope
 ) {
   class stateConstructor {
     constructor(def = {}) {
@@ -66,7 +67,9 @@ export default function aataResources(
       unionWith
     },
     jqLite = angular.element;
-  const main = $document[0].querySelector('.main'),
+  const SCROLL_PAD = 500,
+    POSTS_PER_PAGE = 10,
+    main = $document[0].querySelector('.main'),
     lang = getLang(),
     base = lang.url,
     restUrl = base + '/wp-json/wp/v2',
@@ -74,7 +77,6 @@ export default function aataResources(
       posts: [],
       tags: []
     },
-    POSTS_PER_PAGE = 10,
     defaultResourceOptions = {
       get: { method: 'GET', cache: true },
       query: { method: 'GET', cache: true, isArray: true }
@@ -152,8 +154,7 @@ export default function aataResources(
     }),
     allUsersDef = reallyGetAll('users'),
     allTagsDef = reallyGetAll('tags'),
-    allCategoriesDef = reallyGetAll('categories'),
-    scrollPad = 300;
+    allCategoriesDef = reallyGetAll('categories');
   let unbindLoop = () => {},
     comingFromHash = false;
   jqLite(window).on('scroll', _.debounce(checkScrollPosition, 50));
@@ -535,6 +536,9 @@ export default function aataResources(
           if (s.replace === true) {
             action = 'replaceState';
           }
+          $rootScope.activeLink = s.url
+            .replace(/(https?:\/\/)/g, '')
+            .replace(/\/+$/g, '');
           history[action](s, '', s.url);
         });
       }
@@ -634,7 +638,7 @@ export default function aataResources(
                 val
               });
               setContent(state.s.toObject(), true);
-            } 
+            }
             if (val.length < 10) {
               state.set('lastPage', true);
             }
@@ -681,7 +685,7 @@ export default function aataResources(
   }
   function goTo(pos) {
     if (window.scrollTo != null) {
-      pos = pos > scrollPad ? pos - scrollPad : pos;
+      pos = pos > SCROLL_PAD ? pos - SCROLL_PAD : pos;
       window.scrollTo(0, pos);
       return true;
     } else return false;
@@ -722,7 +726,7 @@ export default function aataResources(
         saKnife.offset(main).top + main.offsetHeight - saKnife.winSize().height;
     }
     function scrollBind() {
-      if (window.scrollY + scrollPad >= mainEnd) {
+      if (window.scrollY + SCROLL_PAD >= mainEnd) {
         if (pastBottom === false) {
           pastBottom = true;
           state.set('pastBottom', pastBottom);

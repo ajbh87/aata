@@ -1,11 +1,11 @@
     <script type="application/json" id="section-titles">
         {
             "url": "<?php echo home_url(); ?>",
-            "archives": "<?php _e( 'Archives', 'html5blank' ); ?>",
-            "categories": "<?php _e( 'Categories for ', 'html5blank' ); ?>",
-            "posts": "<?php _e( 'Latest Posts', 'html5blank' ); ?>",
-            "tags": "<?php _e( 'Tag Archive: ', 'html5blank' ); ?>",
-            "categoriesIn": "<?php _e( 'Categorised in: ', 'html5blank' ); ?>"
+            "archives": "<?php _e( 'Archives', 'aata' ); ?>",
+            "categories": "<?php _e( 'Categories for ', 'aata' ); ?>",
+            "posts": "<?php _e( 'Latest Posts', 'aata' ); ?>",
+            "tags": "<?php _e( 'Tag Archive: ', 'aata' ); ?>",
+            "categoriesIn": "<?php _e( 'Categorised in: ', 'aata' ); ?>"
         }
     </script>
     <script type="text/ng-template" id="pages-template.html">

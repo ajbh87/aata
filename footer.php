@@ -1,5 +1,28 @@
         </div>
         <!-- /wrapper -->
+    <nav class="mobile">
+      <a href="<?php echo home_url(); ?>/contacto" 
+        aata-button class="mobile__link">
+        <svg class="icon icon--comment mobile__icon" aria-hidden="true">
+            <use xlink:href="#commentIcon" />
+        </svg>
+        <span class="mobile__text">Contacto</span>
+      </a>
+      <a href="tel:+1-787-200-6474" 
+        aata-button class="mobile__link">
+        <svg class="icon icon--phone mobile__icon" aria-hidden="true">
+            <use xlink:href="#phoneIcon" />
+        </svg>
+        <span class="mobile__text">787-200-6474</span>
+      </a>
+      <a href="mailto:consulta@tusabogadospr.com?subject=Consulta"
+        aata-button class="mobile__link">
+        <svg class="icon icon--mail mobile__icon" aria-hidden="true">
+            <use xlink:href="#emailIcon" />
+        </svg>
+        <span class="mobile__text">consulta@tusabogadospr.com</span>
+      </a>
+    </nav>
     <!-- footer -->
     <footer class="footer" role="contentinfo">
 
