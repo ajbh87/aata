@@ -88,7 +88,7 @@ function aata_header_scripts()
             wp_register_script('scripts', get_template_directory_uri() . '/js-bundles/scripts.js', array(), '1.0.2');
         } else {
             // Production
-            wp_register_script('scripts', get_template_directory_uri() . '/js-bundles/scripts.min.js.gz', array(), '1.0.2');
+            wp_register_script('scripts', get_template_directory_uri() . '/js-bundles/scripts.min.js', array(), '1.0.2');
         }
         wp_enqueue_script('scripts');
     }
